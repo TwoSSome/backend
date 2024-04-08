@@ -19,6 +19,7 @@ public class ServerApplication {
 		//hello world
 	}
 
+	//Querydsl 사용을 위한 JPAQueryFactory 빈 등록
 	@Bean
 	public JPAQueryFactory jpaQueryFactory(EntityManager em) {
 		return new JPAQueryFactory(em);

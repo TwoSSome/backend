@@ -20,6 +20,11 @@ public class S3Service {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
+    /**
+     *
+     * @param 업로드할 이미지
+     * @return 해당 파일의 S3 URL
+     */
     public String uploadFile(MultipartFile file) throws IOException {
         String originalFilename = file.getOriginalFilename();
 
