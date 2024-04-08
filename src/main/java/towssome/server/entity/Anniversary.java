@@ -14,7 +14,7 @@ public class Anniversary {
     String name;
     LocalDateTime date;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    User user;
+    @JoinColumn(name = "member_id")
+    Member member;
 
 }

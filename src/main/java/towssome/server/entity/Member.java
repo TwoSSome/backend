@@ -2,16 +2,14 @@ package towssome.server.entity;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
-
 @Entity
-public class User extends BaseEntity{
+public class Member extends BaseEntity{
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "member_id")
     Long id;
 
-    String userId;
+    String memberUsingId;
     String passwd;
     String nickName;
     int point;
