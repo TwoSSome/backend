@@ -8,10 +8,11 @@ import lombok.Getter;
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    Long category_id;
+    @Column(name = "category_id")
+    Long id;
     String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    User user;
+    @JoinColumn(name = "member_id")
+    Member member;
 }

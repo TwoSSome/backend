@@ -10,8 +10,8 @@ public class ViewLike {
     Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name= "user_id")
-    User user;
+    @JoinColumn(name= "member_id")
+    Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "review_id")

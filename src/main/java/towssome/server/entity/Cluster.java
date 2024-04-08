@@ -10,8 +10,8 @@ public class Cluster extends BaseEntity{
     Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
-    User user;
+    @JoinColumn(name = "member_id")
+    Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hashtag_id")

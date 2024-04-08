@@ -13,7 +13,7 @@ public class ReviewPost extends BaseEntity{
     int price;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
-    User user;
+    @JoinColumn(name = "member_id")
+    Member member;
 
 }

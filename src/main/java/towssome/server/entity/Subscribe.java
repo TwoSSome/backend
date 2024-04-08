@@ -10,10 +10,10 @@ public class Subscribe extends BaseEntity{
     Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    User user;
+    @JoinColumn(name = "member_id")
+    Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "following_id")
-    User following;
+    Member following;
 }

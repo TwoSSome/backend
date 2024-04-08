@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 public class Reply extends BaseEntity{
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "reply_id")
     Long id;
 
     String body;
@@ -15,7 +16,7 @@ public class Reply extends BaseEntity{
     CommunityPost quotation;
 
     @ManyToOne
-    @JoinColumn(name = "id")
-    User author;
+    @JoinColumn(name = "member_id")
+    Member author;
 
 }
