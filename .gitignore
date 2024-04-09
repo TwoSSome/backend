@@ -6,6 +6,7 @@ build/
 !**/src/test/**/build/
 application.properties
 TestInit.java
+src/test/
 
 ### STS ###
 .apt_generated

@@ -2,9 +2,11 @@ package towssome.server.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@NoArgsConstructor
 public class CommunityPost extends BaseEntity{
 
     @Id @GeneratedValue
@@ -21,5 +23,10 @@ public class CommunityPost extends BaseEntity{
     @JoinColumn(name = "review_id")
     ReviewPost quotation;
 
-
+    public CommunityPost(String title, String body, Member author, ReviewPost quotation) {
+        this.title = title;
+        Body = body;
+        this.author = author;
+        this.quotation = quotation;
+    }
 }
