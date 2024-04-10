@@ -20,8 +20,7 @@ public class ReviewPostService {
         ReviewPost reviewPost = new ReviewPost(
                 reviewPostDTO.body(),
                 reviewPostDTO.price(),
-                reviewPostDTO.member(),
-                reviewPostDTO.photoPath()
+                reviewPostDTO.member()
         );
         reviewPostRepository.save(reviewPost);
     }
@@ -31,8 +30,7 @@ public class ReviewPostService {
         return new ReviewPostDTO(
                 reviewPost.getBody(),
                 reviewPost.getPrice(),
-                reviewPost.getMember(),
-                reviewPost.getPhotoPath()
+                reviewPost.getMember()
         );
     }
 }

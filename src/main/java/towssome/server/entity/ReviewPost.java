@@ -20,12 +20,9 @@ public class ReviewPost extends BaseEntity{
     @JoinColumn(name = "member_id")
     Member member;
 
-    String photoPath;
-
-    public ReviewPost(String body, int price, Member member, String photoPath) {
+    public ReviewPost(String body, int price, Member member) {
         this.body = body;
         this.price = price;
         this.member = member;
-        this.photoPath = photoPath;
     }
 }
