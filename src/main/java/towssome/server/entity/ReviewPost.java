@@ -1,8 +1,12 @@
 package towssome.server.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
+@NoArgsConstructor
 public class ReviewPost extends BaseEntity{
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,4 +20,9 @@ public class ReviewPost extends BaseEntity{
     @JoinColumn(name = "member_id")
     Member member;
 
+    public ReviewPost(String body, int price, Member member) {
+        this.body = body;
+        this.price = price;
+        this.member = member;
+    }
 }
