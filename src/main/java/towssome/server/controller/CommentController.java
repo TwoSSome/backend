@@ -19,6 +19,6 @@ public class CommentController {
         Long memberId = 1L; // 세션 구현되면 삭제
         log.info("commentDTO = {}", commentDTO);
         commentService.createComment(memberId,reviewId,commentDTO);
-        return new ResponseEntity<>("Comment Complete", HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
