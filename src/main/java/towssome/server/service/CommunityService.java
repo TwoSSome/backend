@@ -39,4 +39,8 @@ public class CommunityService {
         );
     }
 
+    public void deletePost(CommunityPost post) {
+        communityPostRepository.delete(post);
+    }
+
 }

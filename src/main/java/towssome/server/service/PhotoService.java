@@ -124,10 +124,19 @@ public class PhotoService {
         }
     }
 
+    /**
+     * id로 photo 객체 반환
+     * @param photoId
+     * @return
+     */
     public Photo findPhoto(Long photoId) {
         return photoRepository.findById(photoId).orElseThrow(NotFoundPhotoException::new);
     }
 
+    /**
+     * id로 photo 객체 하나 삭제
+     * @param photoId
+     */
     public void deletePhoto(Long photoId) {
         Photo photo = photoRepository.findById(photoId).orElseThrow();
         deleteS3Image(photo.getS3Name());
