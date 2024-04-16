@@ -6,13 +6,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import towssome.server.dto.PhotoInPost;
 import towssome.server.dto.UploadPhoto;
 import towssome.server.entity.CommunityPost;
 import towssome.server.entity.Photo;
 import towssome.server.entity.ReviewPost;
 import towssome.server.enumrated.PhotoType;
+import towssome.server.exception.NotFoundPhotoException;
 import towssome.server.repository.PhotoRepository;
 
 import java.io.IOException;
@@ -90,13 +91,13 @@ public class PhotoService {
      * @param communityPost
      * @return 사진의 URL 리스트
      */
-    public List<String> getPhotoS3Path(CommunityPost communityPost) {
+    public List<PhotoInPost> getPhotoS3Path(CommunityPost communityPost) {
         List<Photo> photoList = photoRepository.findAllByCommunityPost(communityPost);
-        List<String> photoS3Path = new ArrayList<>();
+        ArrayList<PhotoInPost> photoInPosts = new ArrayList<>();
         for (Photo photo : photoList) {
-            photoS3Path.add(photo.getS3Path());
+            photoInPosts.add(new PhotoInPost(photo.getId(),photo.getS3Path()));
         }
-        return photoS3Path;
+        return photoInPosts;
     }
 
     /**
@@ -119,6 +120,10 @@ public class PhotoService {
             photoRepository.delete(photo);
             deleteS3Image(photo.getS3Name());
         }
+    }
+
+    public Photo findPhoto(Long photoId) {
+        return photoRepository.findById(photoId).orElseThrow(NotFoundPhotoException::new);
     }
 
     /**

@@ -15,7 +15,7 @@ import java.util.List;
 public class ReviewPostService {
     private final ReviewPostRepository reviewPostRepository;
 
-    public void createReview(ReviewPostDTO reviewPostDTO) { // »çÁø Ãß°¡ ÇÊ¿ä
+    public void createReview(ReviewPostDTO reviewPostDTO) { // ì‚¬ì§„ ì¶”ê°€ í•„ìš”
         ReviewPost reviewPost = new ReviewPost(
                 reviewPostDTO.body(),
                 reviewPostDTO.price(),
@@ -45,8 +45,8 @@ public class ReviewPostService {
      * Get review posts
      * @param id cursor id
      * @param page page
-     *            if cursor_id is null -> review_id·Î ³»¸²Â÷¼ø Á¤·Ä ÈÄ Å×ÀÌºí °¡Àå À§¿¡¼­ºÎÅÍ ÆäÀÌÁö return
-     *            else -> cursor_id º¸´Ù ÀÛÀº review_id¸¦ °¡Áø Ç×¸ñµéÀ» ³»¸²Â÷¼ø Á¤·Ä ÈÄ ÆäÀÌÁö return
+     *            if cursor_id is null -> review_idë¡œ ë‚´ë¦¼ì°¨ìˆœ ì •ë ¬ í›„ í…Œì´ë¸” ê°€ì¥ ìœ„ì—ì„œë¶€í„° í˜ì´ì§€ return
+     *            else -> cursor_id ë³´ë‹¤ ì‘ì€ review_idë¥¼ ê°€ì§„ í•­ëª©ë“¤ì„ ë‚´ë¦¼ì°¨ìˆœ ì •ë ¬ í›„ í˜ì´ì§€ return
      * @return review posts
      */
 
