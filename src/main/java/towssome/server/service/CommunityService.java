@@ -2,8 +2,10 @@ package towssome.server.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import towssome.server.dto.CommunityPostUpdateDto;
 import towssome.server.dto.CommunityPostUpdateReq;
 import towssome.server.entity.CommunityPost;
+import towssome.server.exception.NotFoundCommunityPostException;
 import towssome.server.repository.CommunityPostRepository;
 
 @Service
@@ -24,11 +26,17 @@ public class CommunityService {
     }
 
     public CommunityPost findPost(Long id) {
-        return communityPostRepository.findById(id).orElseThrow();
+        return communityPostRepository.findById(id).orElseThrow(() ->
+                new NotFoundCommunityPostException("해당 커뮤니티 글이 존재하지 않습니다"));
     }
 
-    public void updatePost(CommunityPostUpdateReq dto) {
-
+    public void updatePost(CommunityPostUpdateDto dto) {
+        CommunityPost post = findPost(dto.id());
+        post.update(
+                dto.title(),
+                dto.body(),
+                dto.quotation()
+        );
     }
 
 }

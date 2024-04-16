@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import towssome.server.dto.CommunityPostRes;
 import towssome.server.dto.CommunityPostSaveReq;
 import towssome.server.dto.CommunityPostUpdateReq;
@@ -45,9 +46,16 @@ public class CommunityController {
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<?> updatePost (@PathVariable Long id, @RequestBody CommunityPostUpdateReq req){
+    public ResponseEntity<?> updatePost (@PathVariable Long id, @RequestBody CommunityPostUpdateReq req) throws IOException {
+        List<Long> deletedPhotoIds = req.deletedPhotoId();
+        for (Long deletedPhotoId : deletedPhotoIds) {
+            photoService.deletePhoto(deletedPhotoId);
+        }
+        List<MultipartFile> multipartFiles = req.newPhotos();
+        CommunityPost post = communityService.findPost(id);
+        photoService.saveCommunityPhoto(multipartFiles, post);
 
-        return null;
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping("/post/{id}")

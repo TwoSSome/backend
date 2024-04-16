@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.dto.PhotoInPost;
 import towssome.server.dto.UploadPhoto;
@@ -24,6 +25,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class PhotoService {
 
     private final AmazonS3 amazonS3;
@@ -124,6 +126,12 @@ public class PhotoService {
 
     public Photo findPhoto(Long photoId) {
         return photoRepository.findById(photoId).orElseThrow(NotFoundPhotoException::new);
+    }
+
+    public void deletePhoto(Long photoId) {
+        Photo photo = photoRepository.findById(photoId).orElseThrow();
+        deleteS3Image(photo.getS3Name());
+        photoRepository.delete(photo);
     }
 
     /**
