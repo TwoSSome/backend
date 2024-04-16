@@ -15,6 +15,7 @@ import towssome.server.entity.ReviewPost;
 import towssome.server.service.PhotoService;
 import towssome.server.service.ReviewPostService;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -26,11 +27,11 @@ public class ReviewController {
     private final PhotoService photoService;
     private static final int PAGE_SIZE = 10;
 
-    @PostMapping("/create")
-    public ResponseEntity<?> createReview(@RequestBody ReviewPostReq review, @RequestParam("files") List<MultipartFile> file){ // additional implementation needed for session
+    @PostMapping(path = "/create", consumes = {"multipart/form-data"})
+    public ResponseEntity<?> createReview(@RequestPart("review") ReviewPostReq review, @RequestPart("files") List<MultipartFile> file) throws IOException { // additional implementation needed for session
         log.info("reviewPostDTO = {}", review);
         ReviewPost reviewPost = reviewPostService.createReview(review);
-        //photoService.saveReviewPhoto(file,reviewPost);
+        photoService.saveReviewPhoto(file,reviewPost);
         return new ResponseEntity<>("Review Create Complete", HttpStatus.OK);
     }
 
@@ -40,8 +41,8 @@ public class ReviewController {
         return new ResponseEntity<>(reviewRes, HttpStatus.OK);
     }
 
-    @GetMapping // EX) review?cursorId=10&size=10 -> id 10¹ø ¸®ºä±Û idº¸´Ù ÀÛÀº 10°³ÀÇ ¸®ºä±Û(id = 1~9)À» °¡Á®¿È
-    public CursorResult<ReviewPost> getReviews(Long cursorId, Integer size) { // get all review(size ¸¸Å­ÀÇ ¸®ºä±Û°ú ´ÙÀ½ ¸®ºä±ÛÀÇ Á¸Àç¿©ºÎ(boolean) Àü´Ş)
+    @GetMapping // EX) review?cursorId=10&size=10 -> id 10ë²ˆ ë¦¬ë·°ê¸€ idë³´ë‹¤ ì‘ì€ 10ê°œì˜ ë¦¬ë·°ê¸€(id = 1~9)ì„ ê°€ì ¸ì˜´
+    public CursorResult<ReviewPost> getReviews(Long cursorId, Integer size) { // get all review(size ë§Œí¼ì˜ ë¦¬ë·°ê¸€ê³¼ ë‹¤ìŒ ë¦¬ë·°ê¸€ì˜ ì¡´ì¬ì—¬ë¶€(boolean) ì „ë‹¬)
         if(size == null) size = PAGE_SIZE;
         return this.reviewPostService.getReviewPage(cursorId, PageRequest.of(0, size));
     }

@@ -5,6 +5,6 @@ import towssome.server.entity.Member;
 public record ReviewPostReq(
         String body,
         int price,
-        Member member
+        Long memberId
 ) {
 }

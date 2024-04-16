@@ -6,7 +6,11 @@ import org.springframework.stereotype.Service;
 import towssome.server.dto.CursorResult;
 import towssome.server.dto.ReviewPostReq;
 import towssome.server.dto.ReviewPostRes;
+import towssome.server.entity.Member;
+import towssome.server.entity.Photo;
 import towssome.server.entity.ReviewPost;
+import towssome.server.repository.MemberRepository;
+import towssome.server.repository.PhotoRepository;
 import towssome.server.repository.ReviewPostRepository;
 
 import java.util.List;
@@ -15,12 +19,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReviewPostService {
     private final ReviewPostRepository reviewPostRepository;
+    private final MemberRepository memberRepository;
+    private final PhotoRepository photoRepository;
 
-    public ReviewPost createReview(ReviewPostReq reviewReq) { // ªÁ¡¯ √ﬂ∞° « ø‰
+    public ReviewPost createReview(ReviewPostReq reviewReq) {
+        Member member = memberRepository.findById(reviewReq.memberId()).orElseThrow();
         ReviewPost reviewPost = new ReviewPost(
                 reviewReq.body(),
                 reviewReq.price(),
-                reviewReq.member()
+                member
         );
         reviewPostRepository.save(reviewPost);
         return reviewPost;
@@ -28,10 +35,12 @@ public class ReviewPostService {
 
     public ReviewPostRes getReview(Long reviewId) {
         ReviewPost reviewPost = reviewPostRepository.findById(reviewId).orElseThrow();
+        List<String> path = photoRepository.findS3PathByReviewPostId(reviewId);
         return new ReviewPostRes(
                 reviewPost.getBody(),
                 reviewPost.getPrice(),
-                reviewPost.getMember()
+                reviewPost.getMember(),
+                path
         );
     }
 
@@ -47,8 +56,8 @@ public class ReviewPostService {
      * Get review posts
      * @param id cursor id
      * @param page page
-     *            if cursor_id is null -> review_id∑Œ ≥ª∏≤¬˜º¯ ¡§∑ƒ »ƒ ≈◊¿Ã∫Ì ∞°¿Â ¿ßø°º≠∫Œ≈Õ ∆‰¿Ã¡ˆ return
-     *            else -> cursor_id ∫∏¥Ÿ ¿€¿∫ review_id∏¶ ∞°¡¯ «◊∏ÒµÈ¿ª ≥ª∏≤¬˜º¯ ¡§∑ƒ »ƒ ∆‰¿Ã¡ˆ return
+     *            if cursor_id is null -> review_idÎ°ú ÎÇ¥Î¶ºÏ∞®Ïàú Ï†ïÎ†¨ ÌõÑ ÌÖåÏù¥Î∏î Í∞ÄÏû• ÏúÑÏóêÏÑúÎ∂ÄÌÑ∞ ÌéòÏù¥ÏßÄ return
+     *            else -> cursor_id Î≥¥Îã§ ÏûëÏùÄ review_idÎ•º Í∞ÄÏßÑ Ìï≠Î™©Îì§ÏùÑ ÎÇ¥Î¶ºÏ∞®Ïàú Ï†ïÎ†¨ ÌõÑ ÌéòÏù¥ÏßÄ return
      * @return review posts
      */
 
