@@ -30,7 +30,7 @@ public class ReviewController {
     public ResponseEntity<?> createReview(@RequestBody ReviewPostReq review, @RequestParam("files") List<MultipartFile> file){ // additional implementation needed for session
         log.info("reviewPostDTO = {}", review);
         ReviewPost reviewPost = reviewPostService.createReview(review);
-        photoService.saveReviewPhoto(file,reviewPost);
+        //photoService.saveReviewPhoto(file,reviewPost);
         return new ResponseEntity<>("Review Create Complete", HttpStatus.OK);
     }
 
