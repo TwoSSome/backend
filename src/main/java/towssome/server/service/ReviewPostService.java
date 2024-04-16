@@ -4,7 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import towssome.server.dto.CursorResult;
-import towssome.server.dto.ReviewPostDTO;
+import towssome.server.dto.ReviewPostReq;
+import towssome.server.dto.ReviewPostRes;
 import towssome.server.entity.ReviewPost;
 import towssome.server.repository.ReviewPostRepository;
 
@@ -15,18 +16,19 @@ import java.util.List;
 public class ReviewPostService {
     private final ReviewPostRepository reviewPostRepository;
 
-    public void createReview(ReviewPostDTO reviewPostDTO) { // 사진 추가 필요
+    public ReviewPost createReview(ReviewPostReq reviewReq) { // 사진 추가 필요
         ReviewPost reviewPost = new ReviewPost(
-                reviewPostDTO.body(),
-                reviewPostDTO.price(),
-                reviewPostDTO.member()
+                reviewReq.body(),
+                reviewReq.price(),
+                reviewReq.member()
         );
         reviewPostRepository.save(reviewPost);
+        return reviewPost;
     }
 
-    public ReviewPostDTO getReview(Long reviewId) {
+    public ReviewPostRes getReview(Long reviewId) {
         ReviewPost reviewPost = reviewPostRepository.findById(reviewId).orElseThrow();
-        return new ReviewPostDTO(
+        return new ReviewPostRes(
                 reviewPost.getBody(),
                 reviewPost.getPrice(),
                 reviewPost.getMember()
