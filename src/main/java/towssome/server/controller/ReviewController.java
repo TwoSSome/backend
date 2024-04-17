@@ -32,8 +32,8 @@ public class ReviewController {
         return new ResponseEntity<>(reviewPostDTO, HttpStatus.OK);
     }
 
-    @GetMapping // EX) review?cursorId=10&size=10 -> id 10¹ø ¸®ºä±Û idº¸´Ù ÀÛÀº 10°³ÀÇ ¸®ºä±Û(id = 1~9)À» °¡Á®¿È
-    public CursorResult<ReviewPost> getReviews(Long cursorId, Integer size) { // get all review(size ¸¸Å­ÀÇ ¸®ºä±Û°ú ´ÙÀ½ ¸®ºä±ÛÀÇ Á¸Àç¿©ºÎ(boolean) Àü´Ş)
+    @GetMapping // EX) review?cursorId=10&size=10 -> id 10ë²ˆ ë¦¬ë·°ê¸€ idë³´ë‹¤ ì‘ì€ 10ê°œì˜ ë¦¬ë·°ê¸€(id = 1~9)ì„ ê°€ì ¸ì˜´
+    public CursorResult<ReviewPost> getReviews(Long cursorId, Integer size) { // get all review(size ë§Œí¼ì˜ ë¦¬ë·°ê¸€ê³¼ ë‹¤ìŒ ë¦¬ë·°ê¸€ì˜ ì¡´ì¬ì—¬ë¶€(boolean) ì „ë‹¬)
         if(size == null) size = PAGE_SIZE;
         return this.reviewPostService.getReviewPage(cursorId, PageRequest.of(0, size));
     }
