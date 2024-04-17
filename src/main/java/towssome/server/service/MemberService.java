@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import towssome.server.dto.JoinReq;
 import towssome.server.entity.Member;
 import towssome.server.exception.DuplicateIdException;
+import towssome.server.exception.NotFoundMemberException;
 import towssome.server.repository.MemberRepository;
 
 @Service
@@ -28,6 +29,11 @@ public class MemberService {
 
         memberRepository.save(member);
 
+    }
+
+    public Member findMember(Long memberId) {
+        return memberRepository.findById(memberId).orElseThrow(() ->
+                new NotFoundMemberException("해당 멤버가 없습니다"));
     }
 
 }
