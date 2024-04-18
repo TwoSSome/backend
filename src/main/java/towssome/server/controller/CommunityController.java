@@ -7,10 +7,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.dto.*;
 import towssome.server.entity.CommunityPost;
+import towssome.server.entity.Photo;
 import towssome.server.repository.ReviewPostRepository;
 import towssome.server.service.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -24,6 +26,7 @@ public class CommunityController {
     private final ReviewPostRepository reviewPostRepository; //나중에 ReviewService로 수정 필요
     private final MemberService memberService;
     private final PhotoService photoService;
+    private final VoteService voteService;
 
     /**
      * 커뮤니티글 생성
@@ -42,7 +45,24 @@ public class CommunityController {
                 )
         );
         CommunityPost post = communityService.findPost(createdPost);
+        //커뮤니티글의 사진 저장
         photoService.saveCommunityPhoto(req.files(),post);
+
+        //커뮤니티글의 투표 저장, 투표 내의 속성의 사진들도 저장
+        ArrayList<VoteAttributeDTO> voteAttributeDTOS = new ArrayList<>();
+        for (VoteAttributeReq vbr : req.voteSaveReq().voteAttributeReqs()) {
+            Photo photo = photoService.savePhoto(vbr.file());
+            VoteAttributeDTO voteAttributeDTO = new VoteAttributeDTO(
+                    vbr.title(),
+                    photo
+            );
+            voteAttributeDTOS.add(voteAttributeDTO);
+        }
+        voteService.createVote(new VoteSaveDTO(
+                req.voteSaveReq().title(),
+                post,
+                voteAttributeDTOS
+        ));
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -102,7 +122,8 @@ public class CommunityController {
                 post.getCreateDate(),
                 post.getLatsModifiedDate(),
                 photoS3Paths,
-                post.getQuotation().getId()
+                post.getQuotation().getId(),
+                null
         );
     }
 

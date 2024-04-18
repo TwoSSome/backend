@@ -11,21 +11,21 @@ public class CommunityPost extends BaseEntity{
 
     @Id @GeneratedValue
     @Column(name = "community_id")
-    Long id;
-    String title;
-    String body;
+    private Long id;
+    private String title;
+    private String body;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
-    Member author;
+    private Member author;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "review_id")
-    ReviewPost quotation;
+    private ReviewPost quotation;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vote_id")
-    Vote vote;
+    private Vote vote;
 
     public CommunityPost(String title, String body, Member author, ReviewPost quotation) {
         this.title = title;

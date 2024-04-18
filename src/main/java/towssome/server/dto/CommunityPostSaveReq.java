@@ -16,6 +16,7 @@ public record CommunityPostSaveReq(
         String title,
         String body,
         Long reviewPostId,
-        List<MultipartFile> files
+        List<MultipartFile> files,
+        VoteSaveReq voteSaveReq
 ) {
 }

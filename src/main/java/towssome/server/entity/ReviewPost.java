@@ -11,14 +11,14 @@ public class ReviewPost extends BaseEntity{
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "review_id")
-    Long id;
+    private Long id;
 
-    String body;
-    int price;
+    private String body;
+    private int price;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
-    Member member;
+    private Member member;
 
     public ReviewPost(String body, int price, Member member) {
         this.body = body;

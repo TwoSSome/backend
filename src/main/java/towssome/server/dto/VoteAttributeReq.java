@@ -1,12 +1,9 @@
 package towssome.server.dto;
 
-import towssome.server.entity.Member;
-
-import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 public record VoteAttributeReq(
         String title,
-        List<VoteMember> voteMembers,
-        String s3PhotoPath
+        MultipartFile file
 ) {
 }

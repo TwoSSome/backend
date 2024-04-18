@@ -7,16 +7,16 @@ public class ViewLike {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "viewlike_id")
-    Long id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name= "member_id")
-    Member member;
+    private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "review_id")
-    ReviewPost reviewPost;
+    private ReviewPost reviewPost;
 
-    Boolean viewFlag;
-    Boolean likeFlag;
+    private Boolean viewFlag;
+    private Boolean likeFlag;
 }

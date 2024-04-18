@@ -15,28 +15,32 @@ public class VoteAttribute {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "vote_attribute_id")
-    Long id;
+    private Long id;
 
-    String title;
+    private String title;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vote_id")
-    Vote vote;
+    private Vote vote;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "photo_id")
-    Photo photo;
+    private Photo photo;
 
     @OneToMany(mappedBy = "voteAttribute")
-    List<VoteAttributeMember> voteAttributeMembers = new ArrayList<>();
+    private List<VoteAttributeMember> voteAttributeMembers = new ArrayList<>();
 
     public VoteAttribute(String title, Vote vote, Photo photo) {
         this.title = title;
         this.vote = vote;
         this.photo = photo;
+        this.vote.getVoteAttributes().add(this);
+        this.photo.setVoteAttribute(this);
     }
 
-    public void addMember(VoteAttributeMember member ) {
-        voteAttributeMembers.add(member);
+    public void setPhoto(Photo photo) {
+        this.photo = photo;
+        photo.setVoteAttribute(this);
     }
+
 }

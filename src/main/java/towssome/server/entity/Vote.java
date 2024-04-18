@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -12,15 +16,20 @@ public class Vote {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "vote_id")
-    Long id;
+    private Long id;
 
-    String title;
+    private String title;
 
     @OneToOne(mappedBy = "vote")
-    CommunityPost communityPost;
+    private CommunityPost communityPost;
+
+    @OneToMany(mappedBy = "vote")
+    @Setter
+    private List<VoteAttribute> voteAttributes = new ArrayList<>();
 
     public Vote(String title, CommunityPost communityPost) {
         this.title = title;
         this.communityPost = communityPost;
     }
+
 }

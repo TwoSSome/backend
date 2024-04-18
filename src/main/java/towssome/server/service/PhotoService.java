@@ -13,6 +13,7 @@ import towssome.server.dto.UploadPhoto;
 import towssome.server.entity.CommunityPost;
 import towssome.server.entity.Photo;
 import towssome.server.entity.ReviewPost;
+import towssome.server.entity.VoteAttribute;
 import towssome.server.enumrated.PhotoType;
 import towssome.server.exception.NotFoundPhotoException;
 import towssome.server.repository.PhotoRepository;
@@ -74,6 +75,20 @@ public class PhotoService {
         }
     }
 
+    public Photo savePhoto(MultipartFile file) throws IOException {
+        UploadPhoto uploadPhoto = uploadPhoto(file);
+        Photo photo = new Photo(
+                uploadPhoto.originalFileName(),
+                uploadPhoto.saveFileName(),
+                uploadPhoto.s3path(),
+                PhotoType.VOTE,
+                null,
+                null
+        );
+        photoRepository.save(photo);
+        return photo;
+    }
+
     /**
      * 해당 리뷰포스트의 사진들의 URL을 반환하는 함수
      * @param reviewPost
@@ -125,7 +140,7 @@ public class PhotoService {
     }
 
     /**
-     * id로 photo 객체 반환
+     * id로 file 객체 반환
      * @param photoId
      * @return
      */
@@ -134,7 +149,7 @@ public class PhotoService {
     }
 
     /**
-     * id로 photo 객체 하나 삭제
+     * id로 file 객체 하나 삭제
      * @param photoId
      */
     public void deletePhoto(Long photoId) {

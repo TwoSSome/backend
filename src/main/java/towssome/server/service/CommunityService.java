@@ -8,6 +8,8 @@ import towssome.server.dto.CommunityPostUpdateDto;
 import towssome.server.entity.CommunityPost;
 import towssome.server.exception.NotFoundCommunityPostException;
 import towssome.server.repository.CommunityPostRepository;
+import towssome.server.repository.VoteAttributeMemberRepository;
+import towssome.server.repository.VoteRepository;
 
 @Service
 @RequiredArgsConstructor

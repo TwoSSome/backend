@@ -12,15 +12,15 @@ public class VoteAttributeMember {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "vote_attribute_user_id")
-    Long id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vote_attribute_id")
-    VoteAttribute voteAttribute;
+    private VoteAttribute voteAttribute;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
-    Member member;
+    private Member member;
 
     public VoteAttributeMember(VoteAttribute voteAttribute, Member member) {
         this.voteAttribute = voteAttribute;
