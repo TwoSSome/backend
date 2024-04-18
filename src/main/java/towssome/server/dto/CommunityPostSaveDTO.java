@@ -1,4 +1,4 @@
-package towssome.server.service;
+package towssome.server.dto;
 
 import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;

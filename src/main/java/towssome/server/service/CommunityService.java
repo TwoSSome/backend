@@ -2,8 +2,8 @@ package towssome.server.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import towssome.server.dto.CommunityPostSaveDTO;
 import towssome.server.dto.CommunityPostUpdateDto;
-import towssome.server.dto.CommunityPostUpdateReq;
 import towssome.server.entity.CommunityPost;
 import towssome.server.exception.NotFoundCommunityPostException;
 import towssome.server.repository.CommunityPostRepository;
