@@ -31,6 +31,9 @@ public class Photo {
     @JoinColumn(name = "community_id")
     CommunityPost communityPost;
 
+    @OneToOne(mappedBy = "photo")
+    VoteAttribute voteAttribute;
+
     public Photo(String originalName, String s3Name, String s3Path, PhotoType flag, ReviewPost reviewPost, CommunityPost communityPost) {
         this.originalName = originalName;
         this.s3Name = s3Name;

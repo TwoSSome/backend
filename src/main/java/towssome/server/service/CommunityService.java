@@ -2,6 +2,7 @@ package towssome.server.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import towssome.server.dto.CommunityPostSaveDTO;
 import towssome.server.dto.CommunityPostUpdateDto;
 import towssome.server.entity.CommunityPost;
@@ -30,6 +31,7 @@ public class CommunityService {
                 new NotFoundCommunityPostException("해당 커뮤니티 글이 존재하지 않습니다"));
     }
 
+    @Transactional
     public void updatePost(CommunityPostUpdateDto dto) {
         CommunityPost post = findPost(dto.id());
         post.update(

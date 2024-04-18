@@ -23,6 +23,10 @@ public class CommunityPost extends BaseEntity{
     @JoinColumn(name = "review_id")
     ReviewPost quotation;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vote_id")
+    Vote vote;
+
     public CommunityPost(String title, String body, Member author, ReviewPost quotation) {
         this.title = title;
         this.body = body;

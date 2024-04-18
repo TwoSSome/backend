@@ -19,6 +19,7 @@ public record CommunityPostRes(
     LocalDateTime createTime,
     LocalDateTime lastModifiedTime,
     List<PhotoInPost> photoPaths,
-    Long reviewPostId
+    Long reviewPostId,
+    VoteReq vote;
 ) {
 }
