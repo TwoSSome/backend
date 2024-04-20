@@ -1,13 +1,15 @@
 package towssome.server.dto;
 
 import org.springframework.web.multipart.MultipartFile;
+import towssome.server.entity.Photo;
 
 import java.util.List;
 
-public record ReviewPostReq(
+public record ReviewPostUpdateReq(
         String body,
         int price,
         Long memberId,
-        List<MultipartFile> photos
+        List<Long> willDeletePhoto,
+        List<MultipartFile> willAddPhoto
 ) {
 }

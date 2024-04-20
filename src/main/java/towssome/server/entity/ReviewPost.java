@@ -25,4 +25,9 @@ public class ReviewPost extends BaseEntity{
         this.price = price;
         this.member = member;
     }
+
+    public void update(String body, int price) {
+        this.body = body;
+        this.price = price;
+    }
 }
