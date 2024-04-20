@@ -1,7 +1,6 @@
 package towssome.server.dto;
 
 import org.springframework.web.multipart.MultipartFile;
-import towssome.server.entity.Photo;
 
 import java.util.List;
 

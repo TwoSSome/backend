@@ -1,7 +1,6 @@
 package towssome.server.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import towssome.server.dto.*;
@@ -9,7 +8,6 @@ import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
 import towssome.server.exception.NotFoundReviewPostException;
 import towssome.server.repository.MemberRepository;
-import towssome.server.repository.PhotoRepository;
 import towssome.server.repository.ReviewPostRepository;
 
 import java.util.List;
