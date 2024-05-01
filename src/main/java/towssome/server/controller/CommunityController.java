@@ -68,7 +68,7 @@ public class CommunityController {
     }
 
     /**
-     * 업데이트 할때 사용, 인용글이 바뀌었는지, 사진이 바뀌었는지 모두 확인해야함
+     * 업데이트 할때 사용, 인용글이 바뀌었는지, 사진이 바뀌었는지 모두 확인해야함, 투표는 수정 불가능이 좋음
      * @param id
      * @param CommunityPostUpdateReq
      * @return 200code or NotFoundCommunityPostException
@@ -115,6 +115,8 @@ public class CommunityController {
     @GetMapping("/post/{id}")
     public CommunityPostRes getPost(@PathVariable Long id){
         CommunityPost post = communityService.findPost(id);
+        VoteRes voteRes = voteService.getVote(post);
+
         List<PhotoInPost> photoS3Paths = photoService.getPhotoS3Path(post);
         return new CommunityPostRes(
                 post.getTitle(),
@@ -123,7 +125,7 @@ public class CommunityController {
                 post.getLatsModifiedDate(),
                 photoS3Paths,
                 post.getQuotation().getId(),
-                null
+                voteRes
         );
     }
 

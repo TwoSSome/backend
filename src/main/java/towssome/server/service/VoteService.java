@@ -39,20 +39,25 @@ public class VoteService {
     }
 
     public VoteRes getVote(CommunityPost communityPost) {
-        Vote vote = voteRepository.findByCommunityPost(communityPost).orElseThrow();
+        Vote vote = voteRepository.findByCommunityPost(communityPost).orElse(null);
+        if (vote == null) {
+            return null;
+        }
         List<VoteAttribute> voteAttributes = voteAttributeRepository.findAllByVote(vote);
-        ArrayList<VoteMember> voteMembers = new ArrayList<>();
+        ArrayList<VoteAttributeRes> voteAttributeRes = new ArrayList<>();
         for (VoteAttribute voteAttribute : voteAttributes) {
             List<VoteAttributeMember> list = voteAttributeMemberRepository.findAllByVoteAttribute(voteAttribute);
-
+            voteAttributeRes.add(new VoteAttributeRes(voteAttribute.getTitle(), getVoteMembers(list), voteAttribute.getPhoto().getS3Path()));
         }
+        return new VoteRes(vote.getTitle(),voteAttributeRes);
     }
 
-    private VoteMember getVoteMember(VoteAttributeMember voteAttributeMember) {
-        return new VoteMember(
-                voteAttributeMember.getMember().getId(),
-                voteAttributeMember.getMember().getNickName()
-        );
+    private List<VoteMember> getVoteMembers(List<VoteAttributeMember> voteAttributeMembers) {
+        List<VoteMember> voteMembers = new ArrayList<>();
+        for (VoteAttributeMember voteAttributeMember : voteAttributeMembers) {
+            voteMembers.add(new VoteMember(voteAttributeMember.getId(), voteAttributeMember.getMember().getNickName()));
+        }
+        return voteMembers;
     }
 
 
