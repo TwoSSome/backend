@@ -79,13 +79,13 @@ public class PhotoService {
      * @param reviewPost
      * @return 사진의 URL 리스트
      */
-    public List<String> getPhotoS3Path(ReviewPost reviewPost) { //객체와 id 중에 뭘 파라미터로 받지??
+    public List<PhotoInPost> getPhotoS3Path(ReviewPost reviewPost) { //객체와 id 중에 뭘 파라미터로 받지??
         List<Photo> photoList = photoRepository.findAllByReviewPost(reviewPost);
-        List<String> photoS3Path = new ArrayList<>();
+        List<PhotoInPost> photos = new ArrayList<>();
         for (Photo photo : photoList) {
-            photoS3Path.add(photo.getS3Path());
+            photos.add(new PhotoInPost(photo.getId(),photo.getS3Path()));
         }
-        return photoS3Path;
+        return photos;
     }
 
     /**
