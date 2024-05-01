@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import towssome.server.dto.*;
 import towssome.server.entity.CommunityPost;
 import towssome.server.entity.Photo;
+import towssome.server.entity.ReviewPost;
 import towssome.server.repository.ReviewPostRepository;
 import towssome.server.service.*;
 
@@ -116,6 +117,11 @@ public class CommunityController {
     public CommunityPostRes getPost(@PathVariable Long id){
         CommunityPost post = communityService.findPost(id);
         VoteRes voteRes = voteService.getVote(post);
+        ReviewPost quotation = post.getQuotation().orElse(null);
+        Long quotationId = null;
+        if (quotation != null) {
+            quotationId = quotation.getId();
+        }
 
         List<PhotoInPost> photoS3Paths = photoService.getPhotoS3Path(post);
         return new CommunityPostRes(
@@ -124,7 +130,7 @@ public class CommunityController {
                 post.getCreateDate(),
                 post.getLatsModifiedDate(),
                 photoS3Paths,
-                post.getQuotation().getId(),
+                quotationId,
                 voteRes
         );
     }

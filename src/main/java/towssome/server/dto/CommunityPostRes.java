@@ -1,5 +1,7 @@
 package towssome.server.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -13,13 +15,14 @@ import java.util.List;
  * @param reviewPostId 인용된 review의 id
  *                     -> 프론트에서는 id만 가지고 post 요청으로 따로 정보를 받아올 수 있을까?
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record CommunityPostRes(
-    String title,
-    String body,
-    LocalDateTime createTime,
-    LocalDateTime lastModifiedTime,
-    List<PhotoInPost> photoPaths,
-    Long reviewPostId,
-    VoteRes vote
+        String title,
+        String body,
+        LocalDateTime createTime,
+        LocalDateTime lastModifiedTime,
+        List<PhotoInPost> photoPaths,
+        Long reviewPostId,
+        VoteRes vote
 ) {
 }

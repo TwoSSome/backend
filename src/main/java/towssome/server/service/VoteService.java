@@ -22,9 +22,9 @@ public class VoteService {
 
     public Vote createVote(VoteSaveDTO dto) throws IOException {
         Vote vote = new Vote(
-                dto.title(),
-                dto.communityPost()
+                dto.title()
         );
+        vote.changeCommunityPost(dto.communityPost());
         voteRepository.save(vote);
         for (VoteAttributeDTO req : dto.voteAttributeReqs()) {
             voteAttributeRepository.save(
@@ -39,17 +39,42 @@ public class VoteService {
     }
 
     public VoteRes getVote(CommunityPost communityPost) {
-        Vote vote = voteRepository.findByCommunityPost(communityPost).orElse(null);
+        Vote vote = communityPost.getVote().orElse(null);
         if (vote == null) {
             return null;
         }
-        List<VoteAttribute> voteAttributes = voteAttributeRepository.findAllByVote(vote);
+        List<VoteAttribute> voteAttributes = vote.getVoteAttributes();
         ArrayList<VoteAttributeRes> voteAttributeRes = new ArrayList<>();
         for (VoteAttribute voteAttribute : voteAttributes) {
-            List<VoteAttributeMember> list = voteAttributeMemberRepository.findAllByVoteAttribute(voteAttribute);
-            voteAttributeRes.add(new VoteAttributeRes(voteAttribute.getTitle(), getVoteMembers(list), voteAttribute.getPhoto().getS3Path()));
+            List<VoteAttributeMember> voteAttributeMembers = voteAttribute.getVoteAttributeMembers();
+            voteAttributeRes.add(new VoteAttributeRes(
+                    voteAttribute.getTitle(),
+                    getVoteMembers(voteAttributeMembers),
+                    voteAttribute.getPhoto().getS3Path()));
         }
-        return new VoteRes(vote.getTitle(),voteAttributeRes);
+        return new VoteRes(vote.getTitle(), voteAttributeRes);
+    }
+
+    /**
+     * 요소에 투표
+     * @param member
+     * @param voteAttribute
+     */
+    public void doVote(Member member, VoteAttribute voteAttribute) {
+
+    }
+
+    /**
+     * 이미 투표되어있으면 취소
+     * @param member
+     * @param voteAttribute
+     */
+    public void cancelVote(Member member, VoteAttribute voteAttribute) {
+
+    }
+
+    public VoteAttribute getVoteAttribute(Long id) {
+        return voteAttributeRepository.findById(id).orElseThrow();
     }
 
     private List<VoteMember> getVoteMembers(List<VoteAttributeMember> voteAttributeMembers) {

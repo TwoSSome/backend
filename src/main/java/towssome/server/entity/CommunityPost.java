@@ -1,8 +1,13 @@
 package towssome.server.entity;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import towssome.server.dto.VoteRes;
+
+import java.util.Optional;
 
 @Entity
 @Getter
@@ -25,6 +30,7 @@ public class CommunityPost extends BaseEntity{
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vote_id")
+    @Setter
     private Vote vote;
 
     public CommunityPost(String title, String body, Member author, ReviewPost quotation) {
@@ -38,6 +44,15 @@ public class CommunityPost extends BaseEntity{
         this.title = title;
         this.body = body;
         this.quotation = quotation;
+    }
+
+    //NPE 문제 해결을 위한 Optional 사용
+    public Optional<ReviewPost> getQuotation() {
+        return Optional.ofNullable(quotation);
+    }
+
+    public Optional<Vote> getVote() {
+        return Optional.ofNullable(vote);
     }
 
 }

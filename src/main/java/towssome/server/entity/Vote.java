@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,9 +28,14 @@ public class Vote {
     @Setter
     private List<VoteAttribute> voteAttributes = new ArrayList<>();
 
-    public Vote(String title, CommunityPost communityPost) {
+    public Vote(String title) {
         this.title = title;
-        this.communityPost = communityPost;
     }
+
+    public void changeCommunityPost(CommunityPost communityPost) {
+        this.communityPost = communityPost;
+        communityPost.setVote(this);
+    }
+
 
 }
