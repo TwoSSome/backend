@@ -3,9 +3,11 @@ package towssome.server.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import towssome.server.dto.CursorResult;
-import towssome.server.dto.ReviewPostDTO;
+import towssome.server.dto.*;
+import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
+import towssome.server.exception.NotFoundReviewPostException;
+import towssome.server.repository.MemberRepository;
 import towssome.server.repository.ReviewPostRepository;
 
 import java.util.List;
@@ -14,19 +16,22 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReviewPostService {
     private final ReviewPostRepository reviewPostRepository;
+    private final MemberRepository memberRepository;
 
-    public void createReview(ReviewPostDTO reviewPostDTO) { // 사진 추가 필요
+    public ReviewPost createReview(ReviewPostReq reviewReq) {
+        Member member = memberRepository.findById(reviewReq.memberId()).orElseThrow();
         ReviewPost reviewPost = new ReviewPost(
-                reviewPostDTO.body(),
-                reviewPostDTO.price(),
-                reviewPostDTO.member()
+                reviewReq.body(),
+                reviewReq.price(),
+                member
         );
         reviewPostRepository.save(reviewPost);
+        return reviewPost;
     }
 
-    public ReviewPostDTO getReview(Long reviewId) {
-        ReviewPost reviewPost = reviewPostRepository.findById(reviewId).orElseThrow();
-        return new ReviewPostDTO(
+    public ReviewPost getReview(Long reviewId) {
+        ReviewPost reviewPost = reviewPostRepository.findById(reviewId).orElseThrow(() -> new NotFoundReviewPostException("해당 리뷰글이 존재하지 않습니다."));
+        return new ReviewPost(
                 reviewPost.getBody(),
                 reviewPost.getPrice(),
                 reviewPost.getMember()
@@ -59,5 +64,13 @@ public class ReviewPostService {
     private Boolean hasNext(Long id) {
         if (id == null) return false;
         return this.reviewPostRepository.existsByIdLessThan(id);
+    }
+
+    public void updateReview(ReviewPostUpdateDto dto) {
+        reviewPostRepository.updateReview(dto);
+    }
+
+    public void deleteReview(ReviewPost review) {
+        reviewPostRepository.delete(review);
     }
 }
