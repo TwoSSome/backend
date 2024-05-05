@@ -2,6 +2,7 @@ package towssome.server.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import towssome.server.dto.*;
 import towssome.server.entity.*;
 import towssome.server.repository.VoteAttributeMemberRepository;
@@ -50,27 +51,37 @@ public class VoteService {
             voteAttributeRes.add(new VoteAttributeRes(
                     voteAttribute.getTitle(),
                     getVoteMembers(voteAttributeMembers),
-                    voteAttribute.getPhoto().getS3Path()));
+                    voteAttribute.getPhoto().getS3Path(),
+                    voteAttribute.getCount()
+                    ));
         }
         return new VoteRes(vote.getTitle(), voteAttributeRes);
     }
 
     /**
-     * 요소에 투표
+     * 요소에 투표하면, 해당 멤버가 voteAttributeMember 가 되고, voteAttribute 의 카운트 1 증가
      * @param member
      * @param voteAttribute
      */
+    @Transactional
     public void doVote(Member member, VoteAttribute voteAttribute) {
-
+        VoteAttributeMember voteAttributeMember = new VoteAttributeMember(
+                voteAttribute,
+                member
+        );
+        voteAttribute.changeCount(1L);
+        voteAttributeMemberRepository.save(voteAttributeMember);
     }
 
     /**
-     * 이미 투표되어있으면 취소
-     * @param member
+     * 투표 취소, 해당 VoteAttributeMember 삭제 , voteAttribute 의 카운트 1 감소
      * @param voteAttribute
      */
-    public void cancelVote(Member member, VoteAttribute voteAttribute) {
-
+    @Transactional
+    public void cancelVote(Member member,VoteAttribute voteAttribute) {
+        VoteAttributeMember voteMember = voteAttributeMemberRepository.findByMember(member);
+        voteAttributeMemberRepository.delete(voteMember);
+        voteAttribute.changeCount(-1L);
     }
 
     public VoteAttribute getVoteAttribute(Long id) {

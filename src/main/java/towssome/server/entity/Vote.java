@@ -24,7 +24,7 @@ public class Vote {
     @OneToOne(mappedBy = "vote")
     private CommunityPost communityPost;
 
-    @OneToMany(mappedBy = "vote")
+    @OneToMany(mappedBy = "vote", orphanRemoval = true)
     @Setter
     private List<VoteAttribute> voteAttributes = new ArrayList<>();
 

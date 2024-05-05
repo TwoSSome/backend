@@ -19,6 +19,8 @@ public class VoteAttribute {
 
     private String title;
 
+    private Long count;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vote_id")
     private Vote vote;
@@ -27,7 +29,7 @@ public class VoteAttribute {
     @JoinColumn(name = "photo_id")
     private Photo photo;
 
-    @OneToMany(mappedBy = "voteAttribute")
+    @OneToMany(mappedBy = "voteAttribute", orphanRemoval = true)
     private List<VoteAttributeMember> voteAttributeMembers = new ArrayList<>();
 
     public VoteAttribute(String title, Vote vote, Photo photo) {
@@ -36,11 +38,16 @@ public class VoteAttribute {
         this.photo = photo;
         this.vote.getVoteAttributes().add(this);
         this.photo.setVoteAttribute(this);
+        this.count = 0L;
     }
 
     public void setPhoto(Photo photo) {
         this.photo = photo;
         photo.setVoteAttribute(this);
+    }
+
+    public void changeCount(Long count) {
+        this.count += count;
     }
 
 }

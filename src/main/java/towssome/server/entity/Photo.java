@@ -21,11 +21,11 @@ public class Photo {
     @Enumerated(value = EnumType.STRING)
     private PhotoType flag;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "review_id")
     private ReviewPost reviewPost;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "community_id")
     private CommunityPost communityPost;
 

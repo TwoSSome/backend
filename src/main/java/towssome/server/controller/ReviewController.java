@@ -35,13 +35,14 @@ public class ReviewController {
     @GetMapping("/{reviewId}")
     public ResponseEntity<ReviewPostRes> getReview(@PathVariable Long reviewId){ // get review by reviewId
         ReviewPost review = reviewPostService.getReview(reviewId);
+        log.info("review = {}",review.getId());
         List<PhotoInPost> photo = photoService.getPhotoS3Path(review);
         ReviewPostRes reviewRes = new ReviewPostRes(
                 review.getBody(),
                 review.getPrice(),
                 review.getCreateDate(),
                 review.getLatsModifiedDate(),
-                review.getMember(),
+                review.getMember().getId(),
                 photo
         );
         return new ResponseEntity<>(reviewRes, HttpStatus.OK);
