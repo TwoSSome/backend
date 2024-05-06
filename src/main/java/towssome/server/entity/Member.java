@@ -13,17 +13,20 @@ public class Member extends BaseEntity{
     @Column(name = "member_id")
     private Long id;
 
-    private String memberUsingId;
-    private String passwd;
+    private String username;
+    private String password;
     private String nickName;
     private int point;
     private String profilePhotoPath;
 
-    public Member(String memberUsingId, String passwd, String nickName, int point, String profilePhotoPath) {
-        this.memberUsingId = memberUsingId;
-        this.passwd = passwd;
+    private String role;
+
+    public Member(String username, String password, String nickName, int point, String profilePhotoPath, String role) {
+        this.username = username;
+        this.password = password;
         this.nickName = nickName;
         this.point = point;
         this.profilePhotoPath = profilePhotoPath;
+        this.role = role;
     }
 }

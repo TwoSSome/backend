@@ -2,6 +2,7 @@ package towssome.server.advice;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import towssome.server.dto.ErrorResult;
@@ -27,6 +28,12 @@ public class ExceptionAdvice {
     @ExceptionHandler
     public ResponseEntity<ErrorResult> notFoundMemberException(NotFoundMemberException e) {
         ErrorResult errorResult = new ErrorResult("NotFoundMemberException", e.getMessage());
+        return new ResponseEntity<>(errorResult, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResult> notFoundMemberException(UsernameNotFoundException e) {
+        ErrorResult errorResult = new ErrorResult("UsernameNotFoundException", e.getMessage());
         return new ResponseEntity<>(errorResult, HttpStatus.NOT_FOUND);
     }
 
