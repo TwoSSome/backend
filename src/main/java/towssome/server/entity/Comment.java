@@ -11,14 +11,15 @@ public class Comment extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "comment_id")
-    Long id;
-    String body;
+    private Long id;
+
+    private String body;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="member_id")
-    Member member;
+    private Member member;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "review_id")
-    ReviewPost reviewPost;
+    private ReviewPost reviewPost;
 
     public Comment(String body, Member member, ReviewPost reviewPost){
         this.body = body;

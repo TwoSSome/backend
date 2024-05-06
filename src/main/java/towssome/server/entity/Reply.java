@@ -7,16 +7,16 @@ public class Reply extends BaseEntity{
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "reply_id")
-    Long id;
+    private Long id;
 
-    String body;
+    private String body;
 
     @ManyToOne
     @JoinColumn(name = "community_id")
-    CommunityPost quotation;
+    private CommunityPost quotation;
 
     @ManyToOne
     @JoinColumn(name = "member_id")
-    Member author;
+    private Member author;
 
 }

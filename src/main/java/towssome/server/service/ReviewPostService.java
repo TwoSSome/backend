@@ -31,11 +31,7 @@ public class ReviewPostService {
 
     public ReviewPost getReview(Long reviewId) {
         ReviewPost reviewPost = reviewPostRepository.findById(reviewId).orElseThrow(() -> new NotFoundReviewPostException("해당 리뷰글이 존재하지 않습니다."));
-        return new ReviewPost(
-                reviewPost.getBody(),
-                reviewPost.getPrice(),
-                reviewPost.getMember()
-        );
+        return reviewPost;
     }
 
     public CursorResult<ReviewPost> getReviewPage(Long cursorId, Pageable page) {

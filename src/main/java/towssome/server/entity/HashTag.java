@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 public class HashTag {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "hashtag_id")
-    Long id;
-    String name;
-    Long count;
+    private Long id;
+    private String name;
+    private Long count;
 }

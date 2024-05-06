@@ -10,12 +10,11 @@ import java.util.List;
  * @param title
  * @param body
  * @param reviewPostId 인용된 review id 값, 없으면 null 필요
- * @param files 첨부된 사진들의 List, 없으면 null 필요
  */
 public record CommunityPostSaveReq(
         String title,
         String body,
         Long reviewPostId,
-        List<MultipartFile> files
+        VoteSaveReq voteSaveReq
 ) {
 }

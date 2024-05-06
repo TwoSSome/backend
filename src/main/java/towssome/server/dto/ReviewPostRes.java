@@ -10,7 +10,7 @@ public record ReviewPostRes(
         int price,
         LocalDateTime createTime,
         LocalDateTime lastModifiedTime,
-        Member member,
+        Long memberId,
         List<PhotoInPost> photos
 ) {
 }
