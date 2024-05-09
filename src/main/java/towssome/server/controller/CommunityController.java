@@ -119,7 +119,6 @@ public class CommunityController {
     @PostMapping("/delete/{id}")
     public ResponseEntity<?> deletePost(@PathVariable Long id){
         CommunityPost post = communityService.findPost(id);
-        photoService.deletePhotos(post);
         communityService.deletePost(post);
 
         return new ResponseEntity<>(HttpStatus.OK);
