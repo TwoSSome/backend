@@ -32,4 +32,8 @@ public class ViewLike {
     public void setLike() {
         this.likeFlag = true;
     }
+
+    public void setUnlike() {
+        this.likeFlag = false;
+    }
 }

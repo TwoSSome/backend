@@ -28,6 +28,7 @@ public class ViewlikeService {
         viewLikeRepository.save(viewLike);
     }
 
+    // 좋아요 기록 저장(최초 좋아요 시)
     public void like(ViewLikeReq req) {
         Member member = memberRepository.findById(req.memberId()).orElseThrow();
         ViewLike viewLike = viewLikeRepository.findByReviewPostIdAndMemberId(req.reviewId(), req.memberId());
@@ -42,6 +43,13 @@ public class ViewlikeService {
         else {
             viewLike.setLike();
         }
+        viewLikeRepository.save(viewLike);
+    }
+
+    // 좋아요 취소
+    public void unlike(ViewLikeReq req) {
+        ViewLike viewLike = viewLikeRepository.findByReviewPostIdAndMemberId(req.reviewId(), req.memberId());
+        viewLike.setUnlike();
         viewLikeRepository.save(viewLike);
     }
 }
