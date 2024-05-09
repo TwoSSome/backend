@@ -5,7 +5,6 @@ import towssome.server.entity.Member;
 
 public record CreateCategoryDTO(
         Member member,
-        String name,
-        Category masterCategory
+        String name
 ) {
 }
