@@ -1,9 +1,13 @@
 package towssome.server.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import towssome.server.entity.Subscribe;
 
-public interface SubscribeRepositoryCustom extends JpaRepository<Subscribe,Long> {
+import java.util.List;
+
+public interface SubscribeRepositoryCustom {
 
 
 

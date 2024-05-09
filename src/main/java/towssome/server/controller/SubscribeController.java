@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import towssome.server.dto.SubscribeRes;
+import towssome.server.dto.SubscribeSlice;
 import towssome.server.entity.Member;
 import towssome.server.entity.Subscribe;
 import towssome.server.service.MemberService;
@@ -42,7 +43,12 @@ public class SubscribeController {
 
     //페이징?
     @GetMapping()
-    public SubscribeRes getSubscribe(){
+    public SubscribeSlice getSubscribe(
+            @RequestParam int page,
+            @RequestParam int offset){
+
+        String name = SecurityContextHolder.getContext().getAuthentication().getName();
+
 
         return null;
     }

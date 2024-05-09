@@ -6,7 +6,7 @@ import towssome.server.entity.Subscribe;
 
 import java.util.List;
 
-public interface SubscribeRepository extends JpaRepository<Subscribe,Long> {
+public interface SubscribeRepository extends JpaRepository<Subscribe,Long>, SubscribeRepositoryCustom {
 
     List<Subscribe> findAllBySubscriber(Member member);
 
