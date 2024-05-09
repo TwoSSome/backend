@@ -48,7 +48,7 @@ public class CommunityController {
                         req.title(),
                         req.body(),
                         quotation,
-                        memberService.findMember(testMemberId)
+                        memberService.getMember(testMemberId)
                 )
         );
         CommunityPost post = communityService.findPost(createdPost);

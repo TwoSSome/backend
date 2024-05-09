@@ -17,6 +17,7 @@ import java.util.List;
 public class ReviewPostService {
     private final ReviewPostRepository reviewPostRepository;
     private final MemberRepository memberRepository;
+    private final PhotoService photoService;
 
     public ReviewPost createReview(ReviewPostReq reviewReq) {
         Member member = memberRepository.findById(reviewReq.memberId()).orElseThrow();
@@ -67,6 +68,7 @@ public class ReviewPostService {
     }
 
     public void deleteReview(ReviewPost review) {
+        photoService.deletePhotos(review);
         reviewPostRepository.delete(review);
     }
 }
