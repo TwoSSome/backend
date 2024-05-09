@@ -17,4 +17,9 @@ public class MemberService {
                 new NotFoundMemberException("해당 멤버가 없습니다"));
     }
 
+    public Member getMemberUsername(String username) {
+        return memberRepository.findByUsername(username).orElseThrow(() ->
+                new NotFoundMemberException("해당 멤버가 없습니다"));
+    }
+
 }
