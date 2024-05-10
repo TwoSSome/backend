@@ -77,7 +77,6 @@ public class ReviewController {
     @PostMapping("/delete/{reviewId}")
     public ResponseEntity<?> deleteReview(@PathVariable Long reviewId) { // delete review by reviewId
         ReviewPost review = reviewPostService.getReview(reviewId);
-        photoService.deletePhotos(review);
         reviewPostService.deleteReview(review);
         return new ResponseEntity<>(HttpStatus.OK);
     }
