@@ -5,10 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.dto.*;
 import towssome.server.entity.ReviewPost;
+import towssome.server.service.MemberService;
 import towssome.server.service.PhotoService;
 import towssome.server.service.ReviewPostService;
 
@@ -22,13 +24,15 @@ import java.util.List;
 public class ReviewController {
     private final ReviewPostService reviewPostService;
     private final PhotoService photoService;
+    private final MemberService memberService;
     private static final int PAGE_SIZE = 10;
 
     @PostMapping(path = "/create")
-    public ResponseEntity<?> createReview(@RequestBody ReviewPostReq req) throws IOException { // additional implementation needed for session
+    public ResponseEntity<?> createReview(@RequestPart(value = "body") ReviewPostReq req,
+                                          @RequestPart(value = "photos", required = false) List<MultipartFile> photos) throws IOException { // additional implementation needed for session
         log.info("reviewPostDTO = {}", req);
         ReviewPost reviewPost = reviewPostService.createReview(req);
-        photoService.saveReviewPhoto(req.photos(), reviewPost);
+        photoService.saveReviewPhoto(photos, reviewPost);
         return new ResponseEntity<>("Review Create Complete", HttpStatus.OK);
     }
 
@@ -50,14 +54,16 @@ public class ReviewController {
 
 
     @PostMapping("/update/{reviewId}")
-    public ResponseEntity<?> updateReview(@PathVariable Long reviewId, @RequestBody ReviewPostUpdateReq req) throws IOException { // update review by reviewId
+    public ResponseEntity<?> updateReview(@PathVariable Long reviewId,
+                                          @RequestBody ReviewPostUpdateReq req,
+                                          @RequestPart List<MultipartFile> addPhotos) throws IOException { // update review by reviewId
         List<Long> deletedPhotoIds = req.willDeletePhoto();
         for (Long deletedPhotoId : deletedPhotoIds) {
             photoService.deletePhoto(deletedPhotoId);
         }
-        List<MultipartFile> photo = req.willAddPhoto();
+
         ReviewPost post = reviewPostService.getReview(reviewId);
-        photoService.saveReviewPhoto(photo, post);
+        photoService.saveReviewPhoto(addPhotos, post);
         ReviewPostUpdateDto dto = new ReviewPostUpdateDto(
                 reviewId,
                 req.body(),
