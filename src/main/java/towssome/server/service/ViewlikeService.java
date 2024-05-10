@@ -23,10 +23,11 @@ public class ViewlikeService {
     private final ReviewPostRepository reviewPostRepository;
 
     /** 조회 기록 저장(최초 조회 시) */
-    public void viewProcess(ViewLikeReq req) {
+    public void viewProcess(ReviewPost review, Member member) {
+
         ViewLike viewLike = new ViewLike(
-                reviewPostRepository.findById(req.reviewId()).orElseThrow(),
-                memberRepository.findById(req.memberId()).orElseThrow(),
+                review,
+                member,
                 true,
                 false
         );
@@ -34,12 +35,11 @@ public class ViewlikeService {
     }
 
     /** 좋아요 처리 */
-    public void likeProcess(ViewLikeReq req) {
-        Member member = memberRepository.findById(req.memberId()).orElseThrow();
-        ViewLike viewLike = viewLikeRepository.findByReviewPostIdAndMemberId(req.reviewId(), req.memberId());
+    public void likeProcess(ReviewPost review, Member member) {
+        ViewLike viewLike = viewLikeRepository.findByReviewPostIdAndMemberId(review.getId(), member.getId());
         if (viewLike == null) {
             viewLike = new ViewLike(
-                    reviewPostRepository.findById(req.reviewId()).orElseThrow(),
+                    review,
                     member,
                     true,
                     true

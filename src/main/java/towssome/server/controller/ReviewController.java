@@ -13,6 +13,7 @@ import towssome.server.entity.ReviewPost;
 import towssome.server.service.MemberService;
 import towssome.server.service.PhotoService;
 import towssome.server.service.ReviewPostService;
+import towssome.server.service.ViewlikeService;
 
 import java.io.IOException;
 import java.util.List;
@@ -24,21 +25,26 @@ import java.util.List;
 public class ReviewController {
     private final ReviewPostService reviewPostService;
     private final PhotoService photoService;
-    private final MemberService memberService;
+    private final ViewlikeService viewlikeService;
     private static final int PAGE_SIZE = 10;
+    private final MemberService memberService;
 
     @PostMapping(path = "/create")
     public ResponseEntity<?> createReview(@RequestPart(value = "body") ReviewPostReq req,
                                           @RequestPart(value = "photos", required = false) List<MultipartFile> photos) throws IOException { // additional implementation needed for session
         log.info("reviewPostDTO = {}", req);
-        ReviewPost reviewPost = reviewPostService.createReview(req);
-        photoService.saveReviewPhoto(photos, reviewPost);
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info("username = {}", username);
+        reviewPostService.createReview(req, photos, username);
         return new ResponseEntity<>("Review Create Complete", HttpStatus.OK);
     }
 
+    /** 특정리뷰글 조회 */
     @GetMapping("/{reviewId}")
     public ResponseEntity<ReviewPostRes> getReview(@PathVariable Long reviewId){ // get review by reviewId
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
         ReviewPost review = reviewPostService.getReview(reviewId);
+        viewlikeService.viewProcess(review, memberService.getMember(username)); // 조회 기록 저장
         log.info("review = {}",review.getId());
         List<PhotoInPost> photo = photoService.getPhotoS3Path(review);
         ReviewPostRes reviewRes = new ReviewPostRes(
@@ -52,30 +58,24 @@ public class ReviewController {
         return new ResponseEntity<>(reviewRes, HttpStatus.OK);
     }
 
-
     @PostMapping("/update/{reviewId}")
     public ResponseEntity<?> updateReview(@PathVariable Long reviewId,
-                                          @RequestBody ReviewPostUpdateReq req,
-                                          @RequestPart List<MultipartFile> addPhotos) throws IOException { // update review by reviewId
-        List<Long> deletedPhotoIds = req.willDeletePhoto();
-        for (Long deletedPhotoId : deletedPhotoIds) {
-            photoService.deletePhoto(deletedPhotoId);
+                                          @RequestPart(value = "body") ReviewPostUpdateReq req,
+                                          @RequestPart(value = "photos") List<MultipartFile> addPhotos) throws IOException { // update review by reviewId
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        if(!reviewPostService.getReview(reviewId).getMember().getUsername().equals(username)){
+            return new ResponseEntity<>("You are not the author of this review", HttpStatus.FORBIDDEN);
         }
-
-        ReviewPost post = reviewPostService.getReview(reviewId);
-        photoService.saveReviewPhoto(addPhotos, post);
-        ReviewPostUpdateDto dto = new ReviewPostUpdateDto(
-                reviewId,
-                req.body(),
-                req.price()
-        );
-        reviewPostService.updateReview(dto);
-
-        return new ResponseEntity<>(HttpStatus.OK);
+        reviewPostService.updateReview(reviewId, req, addPhotos);
+        return new ResponseEntity<>("update complete", HttpStatus.OK);
     }
 
     @PostMapping("/delete/{reviewId}")
     public ResponseEntity<?> deleteReview(@PathVariable Long reviewId) { // delete review by reviewId
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        if(!reviewPostService.getReview(reviewId).getMember().getUsername().equals(username)){
+            return new ResponseEntity<>("You are not the author of this review", HttpStatus.FORBIDDEN);
+        }
         ReviewPost review = reviewPostService.getReview(reviewId);
         reviewPostService.deleteReview(review);
         return new ResponseEntity<>(HttpStatus.OK);
