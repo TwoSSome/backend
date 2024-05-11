@@ -46,7 +46,7 @@ public class ReviewController {
         ReviewPost review = reviewPostService.getReview(reviewId);
         log.info("review = {}",review.getId());
         List<PhotoInPost> photo = photoService.getPhotoS3Path(review);
-        ReviewPostRes reviewRes = null;
+        ReviewPostRes reviewRes;
 
         //비회원 조회
         if (name.equals("anonymousUser")) {
@@ -64,10 +64,7 @@ public class ReviewController {
         }else {
             //회원 조회
             Member member = memberService.getMember(name);
-            viewlikeService.viewProcess(new ViewLikeReq(
-                    reviewId,
-                    member.getId()
-            ));
+            viewlikeService.viewProcess(review, member);
             reviewRes = new ReviewPostRes(
                     review.getBody(),
                     review.getPrice(),
@@ -108,8 +105,8 @@ public class ReviewController {
     }
 
     @GetMapping // EX) review?cursorId=10&size=10 -> id 10번 리뷰글 id보다 작은 10개의 리뷰글(id = 1~9)을 가져옴
-    public CursorResult<ReviewPost> getReviews(Long cursorId, Integer size) { // get all review(size 만큼의 리뷰글과 다음 리뷰글의 존재여부(boolean) 전달)
+    public CursorResult<ReviewPostRes> getReviews(Long cursorId, Integer size) { // get all review(size 만큼의 리뷰글과 다음 리뷰글의 존재여부(boolean) 전달)
         if(size == null) size = PAGE_SIZE;
-        return this.reviewPostService.getReviewPage(cursorId, PageRequest.of(0, size));
+        return reviewPostService.getReviewPage(cursorId, PageRequest.of(0, size));
     }
 }

@@ -12,6 +12,7 @@ import towssome.server.exception.NotFoundReviewPostException;
 import towssome.server.repository.ReviewPostRepository;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -38,12 +39,26 @@ public class ReviewPostService {
     }
 
     /**무한스크롤 */
-    public CursorResult<ReviewPost> getReviewPage(Long cursorId, Pageable page) {
+    public CursorResult<ReviewPostRes> getReviewPage(Long cursorId, Pageable page) {
+        List<ReviewPostRes> reviewPostRes = new ArrayList<>();
         final List<ReviewPost> reviewPosts = getReviewPosts(cursorId, page);
+        for(ReviewPost review : reviewPosts) {
+            reviewPostRes.add(new ReviewPostRes(
+                    review.getBody(),
+                    review.getPrice(),
+                    review.getCreateDate(),
+                    review.getLatsModifiedDate(),
+                    review.getMember().getId(),
+                    photoService.getPhotoS3Path(review),
+                    false,
+                    false,
+                    false));
+        }
+
         final Long lastIdOfList = reviewPosts.isEmpty() ?
                 null : reviewPosts.get(reviewPosts.size() - 1).getId();
 
-        return new CursorResult<>(reviewPosts, hasNext(lastIdOfList));
+        return new CursorResult<>(reviewPostRes, hasNext(lastIdOfList));
     }
 
     public boolean isMyPost(Member member, ReviewPost reviewPost) {
