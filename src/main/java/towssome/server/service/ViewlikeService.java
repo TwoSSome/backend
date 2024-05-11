@@ -22,7 +22,6 @@ public class ViewlikeService {
     private final ViewLikeRepository viewLikeRepository;
     private final MemberRepository memberRepository;
     private final ReviewPostRepository reviewPostRepository;
-    private final CategoryRepository categoryRepository;
 
     /** 조회 기록 저장(최초 조회 시) */
     public void viewProcess(ViewLikeReq req) {

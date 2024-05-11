@@ -119,4 +119,5 @@ public class ReviewController {
         if(size == null) size = PAGE_SIZE;
         return this.reviewPostService.getReviewPage(cursorId, PageRequest.of(0, size));
     }
+
 }

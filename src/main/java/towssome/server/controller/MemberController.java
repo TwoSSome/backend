@@ -38,4 +38,12 @@ public class MemberController {
         return "auth ok";
     }
 
+    @GetMapping("/testAuth")
+    public String testAuth (){
+
+        Member jwtMember = memberAdvice.findJwtMember();
+        if (jwtMember == null) return "null member";
+        else return jwtMember.getNickName();
+    }
+
 }

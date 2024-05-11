@@ -1,7 +1,8 @@
 package towssome.server.dto;
 
-public record UpdateCategoryReq(
+public record CategoryRes_(
         Long categoryId,
-        String updateName
+        String categoryName
 ) {
+
 }
