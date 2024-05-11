@@ -13,7 +13,7 @@ public class MemberAdvice {
     private final MemberService memberService;
 
     public Member findJwtMember() {
-        return memberService.getMemberUsername(
+        return memberService.getMember(
                 SecurityContextHolder.getContext().getAuthentication().getName());
     }
 

@@ -2,10 +2,8 @@ package towssome.server.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import towssome.server.dto.SubscribeDTO;
-import towssome.server.dto.SubscribeRes;
-import towssome.server.dto.SubscribeSlice;
-import towssome.server.dto.SubscribeSliceDTO;
+import org.springframework.transaction.annotation.Transactional;
+import towssome.server.dto.*;
 import towssome.server.entity.Member;
 import towssome.server.entity.Subscribe;
 import towssome.server.repository.SubscribeRepository;
@@ -50,7 +48,8 @@ public class SubscribeService {
         return dtoList;
     }
 
-    public SubscribeSlice getSubscribeSlice(Member member, int offset, int limit) {
+    @Transactional
+    public CursorResult<SubscribeRes> getSubscribeSlice(Member member, int offset, int limit) {
         ArrayList<SubscribeRes> subscribeRes = new ArrayList<>();
         SubscribeSliceDTO subscribeSliceDTO = subscribeRepository.subscribeSlice(member, offset, limit);
         for (Subscribe subscribe : subscribeSliceDTO.subscribes()) {
@@ -63,7 +62,7 @@ public class SubscribeService {
             ));
         }
 
-        return new SubscribeSlice(
+        return new CursorResult<>(
                 subscribeRes,
                 subscribeSliceDTO.hasNext()
         );

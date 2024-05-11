@@ -5,8 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import towssome.server.advice.MemberAdvice;
-import towssome.server.dto.SubscribeSlice;
-import towssome.server.dto.SubscribeSliceDTO;
+import towssome.server.dto.CursorResult;
+import towssome.server.dto.SubscribeRes;
 import towssome.server.entity.Member;
 import towssome.server.entity.Subscribe;
 import towssome.server.service.MemberService;
@@ -25,7 +25,7 @@ public class SubscribeController {
     public ResponseEntity<?> addSubscribe(@RequestBody Long followingMember){
 
         Member subscriber = memberAdvice.findJwtMember();
-        Member following = memberService.findMember(followingMember);
+        Member following = memberService.getMember(followingMember);
 
         subscribeService.addSubscribe(subscriber, following);
 
@@ -41,9 +41,9 @@ public class SubscribeController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    //페이징?
+    //슬라이스
     @GetMapping()
-    public SubscribeSlice getSubscribe(
+    public CursorResult<SubscribeRes> getSubscribe(
             @RequestParam int page,
             @RequestParam int size){
 
