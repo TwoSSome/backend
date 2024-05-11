@@ -12,9 +12,19 @@ public class MemberAdvice {
 
     private final MemberService memberService;
 
+    /**
+     * 로그인한 멤버를 찾아주는 편의 메소드
+     * 비회원일 경우 null 반환
+     */
     public Member findJwtMember() {
-        return memberService.getMember(
-                SecurityContextHolder.getContext().getAuthentication().getName());
+
+        if (SecurityContextHolder.getContext().getAuthentication().getName().equals("anonymousUser")) {
+            return null;
+        }else {
+            return memberService.getMember(
+                    SecurityContextHolder.getContext().getAuthentication().getName());
+        }
+
     }
 
 
