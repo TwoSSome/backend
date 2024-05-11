@@ -6,6 +6,7 @@ import java.util.List;
 public record SubscribeRes(
 
         String profilePhotoPath,
+        String nickname,
         Long subscribeId,
         Long followingMemberId,
         LocalDateTime subscribeDate

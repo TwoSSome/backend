@@ -3,10 +3,10 @@ package towssome.server.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import towssome.server.dto.SubscribeRes;
+import towssome.server.advice.MemberAdvice;
 import towssome.server.dto.SubscribeSlice;
+import towssome.server.dto.SubscribeSliceDTO;
 import towssome.server.entity.Member;
 import towssome.server.entity.Subscribe;
 import towssome.server.service.MemberService;
@@ -19,12 +19,12 @@ public class SubscribeController {
 
     private final SubscribeService subscribeService;
     private final MemberService memberService;
+    private final MemberAdvice memberAdvice;
 
     @PostMapping("/add")
     public ResponseEntity<?> addSubscribe(@RequestBody Long followingMember){
 
-        String name = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member subscriber = memberService.getMemberUsername(name);
+        Member subscriber = memberAdvice.findJwtMember();
         Member following = memberService.findMember(followingMember);
 
         subscribeService.addSubscribe(subscriber, following);
@@ -45,12 +45,10 @@ public class SubscribeController {
     @GetMapping()
     public SubscribeSlice getSubscribe(
             @RequestParam int page,
-            @RequestParam int offset){
+            @RequestParam int size){
 
-        String name = SecurityContextHolder.getContext().getAuthentication().getName();
-
-
-        return null;
+        Member jwtMember = memberAdvice.findJwtMember();
+        return subscribeService.getSubscribeSlice(jwtMember, page, size);
     }
 
 }
