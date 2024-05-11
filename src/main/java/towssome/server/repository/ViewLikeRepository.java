@@ -4,6 +4,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
 import towssome.server.entity.ViewLike;
 
@@ -27,4 +28,7 @@ public interface ViewLikeRepository extends JpaRepository<ViewLike,Long> {
 
     @Query("select rp from ViewLike v join v.reviewPost rp where v.member.id = :memberId and v.reviewPost.id < :cursorId and v.viewFlag = true order by v.id desc")
     List<ReviewPost> findByMemberIdLessThanOrderByIdDesc(Long cursorId, Long memberId, Pageable page);
+
+    ViewLike findByReviewPostAndMember(ReviewPost reviewPost, Member member);
+
 }

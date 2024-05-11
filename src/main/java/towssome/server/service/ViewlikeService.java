@@ -4,21 +4,23 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import towssome.server.dto.CursorResult;
+import towssome.server.entity.BookMark;
 import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
 import towssome.server.entity.ViewLike;
-import towssome.server.repository.MemberRepository;
-import towssome.server.repository.ReviewPostRepository;
-import towssome.server.repository.ViewLikeRepository;
+import towssome.server.repository.*;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ViewlikeService {
+
+    private final BookMarkRepository bookMarkRepository;
     private final ViewLikeRepository viewLikeRepository;
     private final MemberRepository memberRepository;
     private final ReviewPostRepository reviewPostRepository;
+    private final CategoryRepository categoryRepository;
 
     /** 조회 기록 저장(최초 조회 시) */
     public void viewProcess(ReviewPost review, Member member) {
@@ -50,6 +52,18 @@ public class ViewlikeService {
             }
         }
         viewLikeRepository.save(viewLike);
+    }
+
+    //좋아요 여부
+    public boolean isLikedPost(Member member, ReviewPost reviewPost) {
+        ViewLike viewLike = viewLikeRepository.findByReviewPostAndMember(reviewPost, member);
+        return viewLike.getLikeFlag();
+    }
+
+    //북마크 여부
+    public boolean isBookmarkedPost(Member member, ReviewPost reviewPost) {
+        List<BookMark> list = bookMarkRepository.findAllBookmarkByMember(member);
+        return list.contains(reviewPost);
     }
 
     /** ----------------- 조회 기록 및 좋아요 조회 ----------------- */

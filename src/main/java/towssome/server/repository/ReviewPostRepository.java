@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import towssome.server.dto.ReviewPostUpdateDto;
+import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
 
 import java.util.List;
@@ -21,4 +22,7 @@ public interface ReviewPostRepository extends JpaRepository<ReviewPost,Long> {
     List<ReviewPost> findByIdLessThanOrderByIdDesc(Long id, Pageable page);
 
     Boolean existsByIdLessThan(Long id);
+
+    List<ReviewPost> findAllByMember(Member member);
+
 }
