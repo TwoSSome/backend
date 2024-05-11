@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import towssome.server.dto.CursorResult;
-import towssome.server.dto.ViewLikeReq;
 import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
 import towssome.server.entity.ViewLike;
