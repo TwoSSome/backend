@@ -7,7 +7,6 @@ import java.util.List;
 public record ReviewPostReq(
         String body,
         int price,
-        Long memberId,
-        List<MultipartFile> photos
+        Long memberId
 ) {
 }

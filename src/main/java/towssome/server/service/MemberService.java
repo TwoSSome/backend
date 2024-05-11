@@ -12,12 +12,12 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
-    public Member findMember(Long memberId) {
+    public Member getMember(Long memberId) {
         return memberRepository.findById(memberId).orElseThrow(() ->
                 new NotFoundMemberException("해당 멤버가 없습니다"));
     }
 
-    public Member getMemberUsername(String username) {
+    public Member getMember(String username) {
         return memberRepository.findByUsername(username).orElseThrow(() ->
                 new NotFoundMemberException("해당 멤버가 없습니다"));
     }

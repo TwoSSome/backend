@@ -48,7 +48,7 @@ public class CommunityController {
                         req.title(),
                         req.body(),
                         quotation,
-                        memberService.findMember(testMemberId)
+                        memberService.getMember(testMemberId)
                 )
         );
         CommunityPost post = communityService.findPost(createdPost);
@@ -119,7 +119,6 @@ public class CommunityController {
     @PostMapping("/delete/{id}")
     public ResponseEntity<?> deletePost(@PathVariable Long id){
         CommunityPost post = communityService.findPost(id);
-        photoService.deletePhotos(post);
         communityService.deletePost(post);
 
         return new ResponseEntity<>(HttpStatus.OK);

@@ -16,6 +16,7 @@ import towssome.server.repository.VoteRepository;
 public class CommunityService {
 
     private final CommunityPostRepository communityPostRepository;
+    private final PhotoService photoService;
 
     public Long create(CommunityPostSaveDTO dto) {
         CommunityPost communityPost = new CommunityPost(
@@ -44,6 +45,7 @@ public class CommunityService {
     }
 
     public void deletePost(CommunityPost post) {
+        photoService.deletePhotos(post);
         communityPostRepository.delete(post);
     }
 

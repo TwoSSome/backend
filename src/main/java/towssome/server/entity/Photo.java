@@ -2,6 +2,8 @@ package towssome.server.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import towssome.server.enumrated.PhotoType;
 
 @Entity
