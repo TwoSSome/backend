@@ -12,7 +12,6 @@ import towssome.server.repository.MemberRepository;
 import towssome.server.repository.ReviewPostRepository;
 import towssome.server.repository.ViewLikeRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service

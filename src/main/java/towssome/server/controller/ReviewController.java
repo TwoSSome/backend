@@ -17,6 +17,7 @@ import towssome.server.service.ViewlikeService;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,7 +35,6 @@ public class ReviewController {
                                           @RequestPart(value = "photos", required = false) List<MultipartFile> photos) throws IOException { // additional implementation needed for session
         log.info("reviewPostDTO = {}", req);
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        log.info("username = {}", username);
         reviewPostService.createReview(req, photos, username);
         return new ResponseEntity<>("Review Create Complete", HttpStatus.OK);
     }
@@ -44,8 +44,8 @@ public class ReviewController {
     public ResponseEntity<ReviewPostRes> getReview(@PathVariable Long reviewId){ // get review by reviewId
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         ReviewPost review = reviewPostService.getReview(reviewId);
-        viewlikeService.viewProcess(review, memberService.getMember(username)); // 조회 기록 저장
-        log.info("review = {}",review.getId());
+        if(!Objects.equals(username, "anonymousUser")) // 로그인한 사용자일 경우 조회 기록 저장
+            viewlikeService.viewProcess(review, memberService.getMember(username)); // 조회 기록 저장
         List<PhotoInPost> photo = photoService.getPhotoS3Path(review);
         ReviewPostRes reviewRes = new ReviewPostRes(
                 review.getBody(),
