@@ -13,7 +13,6 @@ import towssome.server.repository.ReviewPostRepository;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -30,9 +29,7 @@ public class ReviewPostService {
                 member
         );
         reviewPostRepository.save(reviewPost);
-        // 사진이 있을 경우 사진 저장
-        if (!Objects.requireNonNull(photos.get(0).getOriginalFilename()).isEmpty())
-            photoService.saveReviewPhoto(photos, reviewPost);
+        photoService.saveReviewPhoto(photos, reviewPost);
     }
 
     public ReviewPost getReview(Long reviewId) {
@@ -84,8 +81,7 @@ public class ReviewPostService {
         }
 
         ReviewPost reviewPost = getReview(reviewId);
-        if (!Objects.requireNonNull(addPhotos.get(0).getOriginalFilename()).isEmpty())
-            photoService.saveReviewPhoto(addPhotos, reviewPost);
+        photoService.saveReviewPhoto(addPhotos, reviewPost);
         ReviewPostUpdateDto dto = new ReviewPostUpdateDto(
                 reviewId,
                 req.body(),
