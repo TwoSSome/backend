@@ -11,6 +11,9 @@ public record ReviewPostRes(
         LocalDateTime createTime,
         LocalDateTime lastModifiedTime,
         Long memberId,
-        List<PhotoInPost> photos
+        List<PhotoInPost> photos,
+        boolean isMyPost,
+        boolean isLikedPost,
+        boolean isLikePost
 ) {
 }

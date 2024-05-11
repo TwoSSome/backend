@@ -6,8 +6,9 @@ import towssome.server.entity.Category;
 
 import java.util.List;
 
-public interface BookMarkRepository extends JpaRepository<BookMark,Long> {
+public interface BookMarkRepository extends JpaRepository<BookMark,Long>, BookMarkRepositoryCustom {
 
     List<BookMark> findAllByCategory(Category category);
+
 
 }

@@ -43,6 +43,10 @@ public class ReviewPostService {
         return new CursorResult<>(reviewPosts, hasNext(lastIdOfList));
     }
 
+    public boolean isMyPost(Member member, ReviewPost reviewPost) {
+        return reviewPostRepository.findAllByMember(member).contains(reviewPost);
+    }
+
     /**
      * Get review posts
      * @param id cursor id

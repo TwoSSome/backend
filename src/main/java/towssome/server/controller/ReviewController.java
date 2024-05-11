@@ -9,12 +9,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.dto.*;
+import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
 import towssome.server.service.MemberService;
 import towssome.server.service.PhotoService;
 import towssome.server.service.ReviewPostService;
+import towssome.server.service.ViewlikeService;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -25,6 +28,7 @@ public class ReviewController {
     private final ReviewPostService reviewPostService;
     private final PhotoService photoService;
     private final MemberService memberService;
+    private final ViewlikeService viewlikeService;
     private static final int PAGE_SIZE = 10;
 
     @PostMapping(path = "/create")
@@ -38,17 +42,46 @@ public class ReviewController {
 
     @GetMapping("/{reviewId}")
     public ResponseEntity<ReviewPostRes> getReview(@PathVariable Long reviewId){ // get review by reviewId
+        String name = SecurityContextHolder.getContext().getAuthentication().getName();
+
         ReviewPost review = reviewPostService.getReview(reviewId);
         log.info("review = {}",review.getId());
         List<PhotoInPost> photo = photoService.getPhotoS3Path(review);
-        ReviewPostRes reviewRes = new ReviewPostRes(
-                review.getBody(),
-                review.getPrice(),
-                review.getCreateDate(),
-                review.getLatsModifiedDate(),
-                review.getMember().getId(),
-                photo
-        );
+        ReviewPostRes reviewRes = null;
+
+        //비회원 조회
+        if (name.equals("anonymousUser")) {
+            reviewRes = new ReviewPostRes(
+                    review.getBody(),
+                    review.getPrice(),
+                    review.getCreateDate(),
+                    review.getLatsModifiedDate(),
+                    review.getMember().getId(),
+                    photo,
+                    false,
+                    false,
+                    false
+                    );
+        }else {
+            //회원 조회
+            Member member = memberService.getMember(name);
+            viewlikeService.viewProcess(new ViewLikeReq(
+                    reviewId,
+                    member.getId()
+            ));
+            reviewRes = new ReviewPostRes(
+                    review.getBody(),
+                    review.getPrice(),
+                    review.getCreateDate(),
+                    review.getLatsModifiedDate(),
+                    review.getMember().getId(),
+                    photo,
+                    reviewPostService.isMyPost(member, review),
+                    viewlikeService.isLikedPost(member, review),
+                    viewlikeService.isBookmarkedPost(member, review)
+            );
+        }
+
         return new ResponseEntity<>(reviewRes, HttpStatus.OK);
     }
 
