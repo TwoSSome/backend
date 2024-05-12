@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.dto.PhotoInPost;
 import towssome.server.dto.UploadPhoto;
@@ -41,6 +40,9 @@ public class PhotoService {
      * @param reviewPost
      */
     public void saveReviewPhoto(List<MultipartFile> files, ReviewPost reviewPost) throws IOException {
+        if (files.isEmpty()) {
+            return;
+        }
         List<UploadPhoto> uploadPhotos = uploadPhotoList(files);
         for (UploadPhoto uploadPhoto : uploadPhotos) {
             Photo photo = new Photo(
@@ -61,7 +63,7 @@ public class PhotoService {
      * @param communityPost
      */
     public void saveCommunityPhoto(List<MultipartFile> files, CommunityPost communityPost) throws IOException {
-        if (files == null) {
+        if (files.isEmpty()) {
             return;
         }
         List<UploadPhoto> uploadPhotos = uploadPhotoList(files);
@@ -78,7 +80,35 @@ public class PhotoService {
         }
     }
 
-    public Photo savePhoto(MultipartFile file) throws IOException {
+    /**
+     * 프로필 사진을 저장하는 함수
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    public Photo saveProfilePhoto(MultipartFile file) throws IOException {
+        if(file.isEmpty()){
+            return null;
+        }
+        UploadPhoto uploadPhoto = uploadPhoto(file);
+        Photo photo = new Photo(
+                uploadPhoto.originalFileName(),
+                uploadPhoto.saveFileName(),
+                uploadPhoto.s3path(),
+                PhotoType.PROFILE,
+                null,
+                null
+        );
+        return photoRepository.save(photo);
+    }
+
+    /**
+     * 투표에 사용되는 사진을 저장하는 함수
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    public Photo saveVotePhoto(MultipartFile file) throws IOException {
         UploadPhoto uploadPhoto = uploadPhoto(file);
         Photo photo = new Photo(
                 uploadPhoto.originalFileName(),
