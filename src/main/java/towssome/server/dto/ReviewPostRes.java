@@ -1,7 +1,5 @@
 package towssome.server.dto;
 
-import towssome.server.entity.Member;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -14,6 +12,6 @@ public record ReviewPostRes(
         List<PhotoInPost> photos,
         boolean isMyPost,
         boolean isLikedPost,
-        boolean isLikePost
+        boolean isBookmarked
 ) {
 }
