@@ -4,10 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import towssome.server.advice.MemberAdvice;
 import towssome.server.entity.Member;
 import towssome.server.jwt.JoinDTO;
@@ -24,8 +22,8 @@ public class MemberController {
     private final MemberAdvice memberAdvice;
 
     @PostMapping("/member/join")
-    public ResponseEntity<String> joinMember(@RequestBody JoinDTO req) {
-        joinService.joinProcess(req);
+    public ResponseEntity<String> joinMember(@RequestPart JoinDTO req, @RequestPart(required = false) MultipartFile profileImage) {
+        joinService.joinProcess(req,profileImage);
         return new ResponseEntity<String>("Join Complete",HttpStatus.OK);
     }
 
@@ -36,6 +34,14 @@ public class MemberController {
         Member member = memberAdvice.findJwtMember();
         log.info("username = {}",member.getUsername());
         return "auth ok";
+    }
+
+    @GetMapping("/testAuth")
+    public String testAuth (){
+
+        Member jwtMember = memberAdvice.findJwtMember();
+        if (jwtMember == null) return "null member";
+        else return jwtMember.getNickName();
     }
 
 }

@@ -17,16 +17,27 @@ public class Member extends BaseEntity{
     private String password;
     private String nickName;
     private int point;
-    private String profilePhotoPath;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "photo_id")
+    private Photo profilePhoto;
 
     private String role;
 
-    public Member(String username, String password, String nickName, int point, String profilePhotoPath, String role) {
+    public Member(String username, String password, String nickName, int point, Photo profilePhoto, String role) {
         this.username = username;
         this.password = password;
         this.nickName = nickName;
         this.point = point;
-        this.profilePhotoPath = profilePhotoPath;
+        this.profilePhoto = profilePhoto;
         this.role = role;
+    }
+
+    public void changeProfilePhoto(Photo photo){
+        this.profilePhoto = photo;
+    }
+
+    public void changeProfile(String nickName) {
+        this.nickName = nickName;
     }
 }

@@ -72,7 +72,7 @@ public class SecurityConfig {
                         .requestMatchers("/login", "/", "/join","/logout").permitAll() //모든 요청 인가
                         .requestMatchers("/admin").hasRole("ADMIN") //role 이 ROLE_ADMIN 인 경우만 인가
                         .requestMatchers("/reissue").permitAll()
-                        .requestMatchers("/auth").authenticated() //인증 필요
+                        .requestMatchers("/auth","/subscribe/*").authenticated() //인증 필요
                         .anyRequest().permitAll()); //나머지 모든 요청에 대해서 인가
 
         //LoginFilter 이전에 등록

@@ -54,7 +54,7 @@ public class SubscribeService {
         SubscribeSliceDTO subscribeSliceDTO = subscribeRepository.subscribeSlice(member, offset, limit);
         for (Subscribe subscribe : subscribeSliceDTO.subscribes()) {
             subscribeRes.add(new SubscribeRes(
-                    subscribe.getFollowed().getProfilePhotoPath(),
+                    subscribe.getFollowed().getProfilePhoto().getS3Path(),
                     subscribe.getFollowed().getNickName(),
                     subscribe.getId(),
                     subscribe.getFollowed().getId(),

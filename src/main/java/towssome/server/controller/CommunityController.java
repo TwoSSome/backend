@@ -9,7 +9,6 @@ import towssome.server.dto.*;
 import towssome.server.entity.CommunityPost;
 import towssome.server.entity.Photo;
 import towssome.server.entity.ReviewPost;
-import towssome.server.repository.ReviewPostRepository;
 import towssome.server.service.*;
 
 import java.io.IOException;
@@ -59,7 +58,7 @@ public class CommunityController {
         if (req.voteSaveReq() != null) { // 투표가 없는 커뮤니티글이 있을수도 있으니까 null 체크
             ArrayList<VoteAttributeDTO> voteAttributeDTOS = new ArrayList<>();
             for (VoteAttributeReq vbr : req.voteSaveReq().voteAttributeReqs()) {
-                Photo photo = photoService.savePhoto(vbr.file());
+                Photo photo = photoService.saveVotePhoto(vbr.file());
                 VoteAttributeDTO voteAttributeDTO = new VoteAttributeDTO(
                         vbr.title(),
                         photo

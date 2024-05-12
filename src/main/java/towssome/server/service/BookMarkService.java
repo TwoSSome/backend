@@ -1,6 +1,9 @@
 package towssome.server.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import towssome.server.dto.CategoryRes;
@@ -46,6 +49,17 @@ public class BookMarkService {
     public Category getCategory(Long id) {
         return categoryRepository.findById(id).orElseThrow(() ->
                 new NotFoundCategoryException("해당 카테고리가 없습니다!!"));
+    }
+
+    /**
+     * 카테고리의 북마크 슬라이스 찾기 (페이징) / 최신순
+     * @param category
+     * @param page
+     * @param size
+     * @return
+     */
+    public Slice<BookMark> getCategoryBookMarks(Category category, int page, int size) {
+        return bookMarkRepository.findAllByCategory(category, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createDate")));
     }
 
     /**

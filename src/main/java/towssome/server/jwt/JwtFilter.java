@@ -73,7 +73,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 "temp_passwd",
                 "temp_nickname",
                 0,
-                "temp_path",
+                null,
                 role
         );
         CustomUserDetails customUserDetails = new CustomUserDetails(userEntity);
