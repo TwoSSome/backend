@@ -1,10 +1,12 @@
 package towssome.server.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import towssome.server.advice.MemberAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.CommunityPost;
 import towssome.server.entity.Photo;
@@ -20,13 +22,45 @@ import java.util.List;
 @RequestMapping("/community")
 public class CommunityController {
 
-    private final Long testMemberId = 1L;
-
     private final CommunityService communityService;
     private final ReviewPostService reviewPostService;
     private final MemberService memberService;
     private final PhotoService photoService;
     private final VoteService voteService;
+    private final MemberAdvice memberAdvice;
+    private static final int DEFAULT_SIZE = 10;
+
+    /**
+     * 커뮤니티글 리스트 조회 (검색 가능)
+     * @param title
+     * @param nickname
+     * @param page >= 1
+     * @return
+     */
+    @GetMapping
+    public PageResult<CommunityListRes> getCommunityList(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String nickname,
+            @RequestParam int page){
+        Page<CommunityPost> result = communityService.getSearchCommunity(
+                new CommunitySearchCondition(title,nickname), page-1, DEFAULT_SIZE);
+        ArrayList<CommunityListRes> communityListRes = new ArrayList<>();
+        for (CommunityPost communityPost : result.getContent()) {
+            communityListRes.add(new CommunityListRes(
+                    communityPost.getTitle(),
+                    communityPost.getBody(),
+                    communityPost.getId()
+            ));
+        }
+
+        return new PageResult<>(
+                communityListRes, // content
+                result.getTotalElements(), // 총 게시글 수
+                result.getTotalPages(), // 총 페이지
+                result.getNumber()+1, // 현재 페이지 (1부터 시작)
+                DEFAULT_SIZE // 페이지당 게시글 수
+        );
+    }
 
     /**
      * 커뮤니티글 생성
@@ -47,7 +81,7 @@ public class CommunityController {
                         req.title(),
                         req.body(),
                         quotation,
-                        memberService.getMember(testMemberId)
+                        memberAdvice.findJwtMember()
                 )
         );
         CommunityPost post = communityService.findPost(createdPost);
