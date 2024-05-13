@@ -1,10 +1,14 @@
 package towssome.server.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import towssome.server.dto.CommunityPostSaveDTO;
 import towssome.server.dto.CommunityPostUpdateDto;
+import towssome.server.dto.CommunitySearchCondition;
 import towssome.server.entity.CommunityPost;
 import towssome.server.exception.NotFoundCommunityPostException;
 import towssome.server.repository.CommunityPostRepository;
@@ -47,6 +51,11 @@ public class CommunityService {
     public void deletePost(CommunityPost post) {
         photoService.deletePhotos(post);
         communityPostRepository.delete(post);
+    }
+
+    public Page<CommunityPost> getSearchCommunity(CommunitySearchCondition cond, int page, int size) {
+        return communityPostRepository.pagingCommunityPostSearch(
+                cond, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC,"createDate")));
     }
 
 }

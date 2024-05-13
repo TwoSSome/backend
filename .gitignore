@@ -7,6 +7,7 @@ build/
 application.properties
 TestInit.java
 src/test/
+src/test/java/towssome/server/ServerApplicationTests.java
 
 ### STS ###
 .apt_generated

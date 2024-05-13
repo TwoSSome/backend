@@ -15,7 +15,6 @@ import java.util.List;
  * @param reviewPostId 인용된 review의 id
  *                     -> 프론트에서는 id만 가지고 post 요청으로 따로 정보를 받아올 수 있을까?
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public record CommunityPostRes(
         String title,
         String body,
