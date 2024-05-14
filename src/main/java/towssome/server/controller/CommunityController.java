@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import towssome.server.advice.MemberAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.CommunityPost;
+import towssome.server.entity.Member;
 import towssome.server.entity.Photo;
 import towssome.server.entity.ReviewPost;
 import towssome.server.service.*;
@@ -24,7 +25,6 @@ public class CommunityController {
 
     private final CommunityService communityService;
     private final ReviewPostService reviewPostService;
-    private final MemberService memberService;
     private final PhotoService photoService;
     private final VoteService voteService;
     private final MemberAdvice memberAdvice;
@@ -69,7 +69,9 @@ public class CommunityController {
      * @RequestPart 멀티파트파일과 json 을 동시에 받으려면 사용해야함
      */
     @PostMapping("/create")
-    public ResponseEntity<?> createPost(@RequestPart CommunityPostSaveReq req, @RequestPart(required = false) List<MultipartFile> files) throws IOException {
+    public ResponseEntity<?> createPost(
+            @RequestPart CommunityPostSaveReq req,
+            @RequestPart(required = false) List<MultipartFile> files) throws IOException {
 
         ReviewPost quotation = null;
         if (req.reviewPostId() != null) {
@@ -81,7 +83,8 @@ public class CommunityController {
                         req.title(),
                         req.body(),
                         quotation,
-                        memberAdvice.findJwtMember()
+                        memberAdvice.findJwtMember(),
+                        req.isAnonymous()
                 )
         );
         CommunityPost post = communityService.findPost(createdPost);
@@ -164,6 +167,7 @@ public class CommunityController {
      */
     @GetMapping("/post/{id}")
     public CommunityPostRes getPost(@PathVariable Long id){
+        Member jwtMember = memberAdvice.findJwtMember();
         CommunityPost post = communityService.findPost(id);
         VoteRes voteRes = voteService.getVoteRes(post);
         ReviewPost quotation = post.getQuotation().orElse(null);
@@ -180,7 +184,9 @@ public class CommunityController {
                 post.getLatsModifiedDate(),
                 photoS3Paths,
                 quotationId,
-                voteRes
+                voteRes,
+                post.isAnonymous(),
+                jwtMember != null && jwtMember.equals(post.getAuthor())
         );
     }
 

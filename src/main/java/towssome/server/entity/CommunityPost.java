@@ -19,6 +19,7 @@ public class CommunityPost extends BaseEntity{
     private Long id;
     private String title;
     private String body;
+    private boolean isAnonymous;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
@@ -31,9 +32,10 @@ public class CommunityPost extends BaseEntity{
     @OneToOne(mappedBy = "communityPost", orphanRemoval = true)
     private Vote vote;
 
-    public CommunityPost(String title, String body, Member author, ReviewPost quotation) {
+    public CommunityPost(String title, String body, boolean isAnonymous, Member author, ReviewPost quotation) {
         this.title = title;
         this.body = body;
+        this.isAnonymous = isAnonymous;
         this.author = author;
         this.quotation = quotation;
     }

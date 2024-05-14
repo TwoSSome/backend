@@ -14,6 +14,7 @@ import java.util.List;
 public record CommunityPostSaveReq(
         String title,
         String body,
+        boolean isAnonymous,
         Long reviewPostId,
         VoteSaveReq voteSaveReq
 ) {
