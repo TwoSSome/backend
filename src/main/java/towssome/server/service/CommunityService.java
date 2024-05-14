@@ -1,26 +1,31 @@
 package towssome.server.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import towssome.server.dto.CommunityPostSaveDTO;
-import towssome.server.dto.CommunityPostUpdateDto;
-import towssome.server.dto.CommunitySearchCondition;
+import towssome.server.dto.*;
 import towssome.server.entity.CommunityPost;
+import towssome.server.entity.Photo;
+import towssome.server.entity.Vote;
+import towssome.server.entity.VoteAttribute;
 import towssome.server.exception.NotFoundCommunityPostException;
 import towssome.server.repository.CommunityPostRepository;
-import towssome.server.repository.VoteAttributeMemberRepository;
-import towssome.server.repository.VoteRepository;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CommunityService {
 
     private final CommunityPostRepository communityPostRepository;
     private final PhotoService photoService;
+    private final VoteService voteService;
 
     public Long create(CommunityPostSaveDTO dto) {
         CommunityPost communityPost = new CommunityPost(
@@ -48,10 +53,22 @@ public class CommunityService {
         );
     }
 
+    @Transactional
     public void deletePost(CommunityPost post) {
+        ArrayList<Photo> deletePhotoList = new ArrayList<>();
+        Vote vote = voteService.getVote(post);
+        if (vote != null) {
+            List<VoteAttribute> voteAttributes = vote.getVoteAttributes();
+            for (VoteAttribute voteAttribute : voteAttributes) {
+                if (voteAttribute.getPhoto() != null)
+                    deletePhotoList.add(voteAttribute.getPhoto());
+            }
+        }
         photoService.deletePhotos(post);
         communityPostRepository.delete(post);
+        photoService.deletePhotos(deletePhotoList);
     }
+
 
     public Page<CommunityPost> getSearchCommunity(CommunitySearchCondition cond, int page, int size) {
         return communityPostRepository.pagingCommunityPostSearch(

@@ -1,17 +1,16 @@
 package towssome.server.repository;
 
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
-import org.springframework.util.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
 import towssome.server.dto.CommunitySearchCondition;
 import towssome.server.entity.CommunityPost;
-import towssome.server.entity.QCommunityPost;
 
 import java.util.List;
 
@@ -19,6 +18,7 @@ import static org.springframework.util.StringUtils.*;
 import static towssome.server.entity.QCommunityPost.*;
 
 @RequiredArgsConstructor
+@Slf4j
 public class CommunityPostRepositoryImpl implements CommunityPostRepositoryCustom{
 
     private final JPAQueryFactory queryFactory;
@@ -28,8 +28,9 @@ public class CommunityPostRepositoryImpl implements CommunityPostRepositoryCusto
         List<CommunityPost> result = queryFactory
                 .selectFrom(communityPost)
                 .where(
-                        titleEq(cond.title()),
-                        nicknameEq(cond.nickname()))
+                        titleAndBodyContains(cond.keyword()),
+                        nicknameEq(cond.nickname())
+                )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -38,7 +39,7 @@ public class CommunityPostRepositoryImpl implements CommunityPostRepositoryCusto
                 .select(communityPost.count())
                 .from(communityPost)
                 .where(
-                        titleEq(cond.title()),
+                        titleAndBodyContains(cond.keyword()),
                         nicknameEq(cond.nickname()))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize());
@@ -50,10 +51,9 @@ public class CommunityPostRepositoryImpl implements CommunityPostRepositoryCusto
         return hasText(nickname) ? communityPost.author.nickName.like("%"+nickname+"%") : null;
     }
 
-    private BooleanExpression titleEq(String title) {
-        return hasText(title) ? communityPost.title.like("%"+title+"%") : null;
+    private BooleanExpression titleAndBodyContains(String keyword) {
+        return hasText(keyword) ? communityPost.title.like("%"+keyword+"%").or(communityPost.body.like("%"+keyword+"%")) : null;
     }
-
 
 
 }

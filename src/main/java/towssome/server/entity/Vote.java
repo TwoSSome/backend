@@ -21,21 +21,16 @@ public class Vote {
 
     private String title;
 
-    @OneToOne(mappedBy = "vote")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "community_id")
     private CommunityPost communityPost;
 
     @OneToMany(mappedBy = "vote", orphanRemoval = true)
     @Setter
     private List<VoteAttribute> voteAttributes = new ArrayList<>();
 
-    public Vote(String title) {
+    public Vote(String title, CommunityPost communityPost) {
         this.title = title;
-    }
-
-    public void changeCommunityPost(CommunityPost communityPost) {
         this.communityPost = communityPost;
-        communityPost.setVote(this);
     }
-
-
 }
