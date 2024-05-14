@@ -28,9 +28,7 @@ public class CommunityPost extends BaseEntity{
     @JoinColumn(name = "review_id")
     private ReviewPost quotation;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "vote_id")
-    @Setter
+    @OneToOne(mappedBy = "communityPost", orphanRemoval = true)
     private Vote vote;
 
     public CommunityPost(String title, String body, Member author, ReviewPost quotation) {

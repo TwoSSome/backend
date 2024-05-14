@@ -31,7 +31,7 @@ public class CommunityController {
     private static final int DEFAULT_SIZE = 10;
 
     /**
-     * 커뮤니티글 리스트 조회 (검색 가능)
+     * 커뮤니티글 리스트 조회 (검색 가능) -> 둘중 하나만 사용하는 것이 좋음
      * @param title
      * @param nickname
      * @param page >= 1
@@ -165,7 +165,7 @@ public class CommunityController {
     @GetMapping("/post/{id}")
     public CommunityPostRes getPost(@PathVariable Long id){
         CommunityPost post = communityService.findPost(id);
-        VoteRes voteRes = voteService.getVote(post);
+        VoteRes voteRes = voteService.getVoteRes(post);
         ReviewPost quotation = post.getQuotation().orElse(null);
         Long quotationId = null;
         if (quotation != null) {

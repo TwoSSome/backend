@@ -23,9 +23,9 @@ public class VoteService {
 
     public Vote createVote(VoteSaveDTO dto) throws IOException {
         Vote vote = new Vote(
-                dto.title()
+                dto.title(),
+                dto.communityPost()
         );
-        vote.changeCommunityPost(dto.communityPost());
         voteRepository.save(vote);
         for (VoteAttributeDTO req : dto.voteAttributeReqs()) {
             voteAttributeRepository.save(
@@ -39,7 +39,7 @@ public class VoteService {
         return vote;
     }
 
-    public VoteRes getVote(CommunityPost communityPost) {
+    public VoteRes getVoteRes(CommunityPost communityPost) {
         Vote vote = communityPost.getVote().orElse(null);
         if (vote == null) {
             return null;
@@ -82,6 +82,14 @@ public class VoteService {
         VoteAttributeMember voteMember = voteAttributeMemberRepository.findByMember(member);
         voteAttributeMemberRepository.delete(voteMember);
         voteAttribute.changeCount(-1L);
+    }
+
+    public Vote getVote(CommunityPost communityPost) {
+        return voteRepository.findByCommunityPost(communityPost).orElse(null);
+    }
+
+    public void deleteAttribute(VoteAttribute voteAttribute) {
+        voteAttributeRepository.delete(voteAttribute);
     }
 
     public VoteAttribute getVoteAttribute(Long id) {

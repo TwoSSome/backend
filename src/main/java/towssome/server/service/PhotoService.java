@@ -9,10 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.dto.PhotoInPost;
 import towssome.server.dto.UploadPhoto;
-import towssome.server.entity.CommunityPost;
-import towssome.server.entity.Photo;
-import towssome.server.entity.ReviewPost;
-import towssome.server.entity.VoteAttribute;
+import towssome.server.entity.*;
 import towssome.server.enumrated.PhotoType;
 import towssome.server.exception.NotFoundPhotoException;
 import towssome.server.repository.PhotoRepository;
@@ -40,7 +37,7 @@ public class PhotoService {
      * @param reviewPost
      */
     public void saveReviewPhoto(List<MultipartFile> files, ReviewPost reviewPost) throws IOException {
-        if (files.isEmpty()) {
+        if (files == null) {
             return;
         }
         List<UploadPhoto> uploadPhotos = uploadPhotoList(files);
@@ -63,7 +60,7 @@ public class PhotoService {
      * @param communityPost
      */
     public void saveCommunityPhoto(List<MultipartFile> files, CommunityPost communityPost) throws IOException {
-        if (files.isEmpty()) {
+        if (files == null) {
             return;
         }
         List<UploadPhoto> uploadPhotos = uploadPhotoList(files);
@@ -87,7 +84,7 @@ public class PhotoService {
      * @throws IOException
      */
     public Photo saveProfilePhoto(MultipartFile file) throws IOException {
-        if(file.isEmpty()){
+        if(file == null){
             return null;
         }
         UploadPhoto uploadPhoto = uploadPhoto(file);
@@ -167,6 +164,14 @@ public class PhotoService {
     //오버로딩된 함수
     public void deletePhotos(CommunityPost communityPost) {
         List<Photo> photoList = photoRepository.findAllByCommunityPost(communityPost);
+        for (Photo photo : photoList) {
+            photoRepository.delete(photo);
+            deleteS3Image(photo.getS3Name());
+        }
+    }
+
+    //오버로딩된 함수
+    public void deletePhotos(List<Photo> photoList) {
         for (Photo photo : photoList) {
             photoRepository.delete(photo);
             deleteS3Image(photo.getS3Name());
