@@ -31,7 +31,7 @@ public class ReviewPostService {
                 reviewReq.price(),
                 member
         );
-        reviewPostRepository.save(reviewPost).getId();
+        reviewPostRepository.save(reviewPost);
         hashtagService.createHashtag(reviewPost, reviewPost.getBody());
         photoService.saveReviewPhoto(photos, reviewPost);
     }
