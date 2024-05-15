@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import towssome.server.entity.ReviewPost;
 import towssome.server.repository.HashtagClassificationRepository;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -20,5 +22,13 @@ public class HashtagClassificationService {
     public Page<ReviewPost> getReviewPostByHashtag(String keyword, String sort, int page, int size){
         Pageable pageable = PageRequest.of(page,size);
         return hashtagClassificationRepository.findReviewsByHashtagOrderBySort(keyword,sort, pageable);
+    }
+
+    public List<String> getHashtags(Long reviewId) {
+        return hashtagClassificationRepository.findHashtagsByReviewId(reviewId);
+    }
+
+    public Object getAllHashtags() {
+        return hashtagClassificationRepository.findAll();
     }
 }

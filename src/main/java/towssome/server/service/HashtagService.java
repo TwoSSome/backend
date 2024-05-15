@@ -11,7 +11,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import towssome.server.entity.HashTag;
 import towssome.server.entity.HashtagClassification;
@@ -32,40 +31,24 @@ public class HashtagService {
     @Autowired
     private RestTemplate restTemplate;
     private final HashTagRepository hashTagRepository;
-
-    public void createHashtag(ReviewPost reviewPost, String body) {
-        String url = "http://localhost:5000/makeHashtag";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));  // 문자열 전송을 위한 컨텐트 타입
-
     private final HashTagRepository hashtagRepository;
     private final HashtagClassificationRepository hashtagClassificationRepository;
-        HttpEntity<String> entity = new HttpEntity<>(body, headers);
-        ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+
 
     /**
      * koBert 를 통해 추출한 문자열을 인자로 받습니다. 해당 문자열이 해시태그로 저장되어 있으면 1증가
      * 없으면 해시태그를 count 를 1로 설정하고 새로 생성합니다
-     * @param list
      * @param reviewPost
      */
-    public void createHashtag(List<String> list, ReviewPost reviewPost){
-        ArrayList<HashTag> forReviewPostHashtag = new ArrayList<>();
-        for (String s : list) {
-            if(!hashtagRepository.existsByName(s)){
-                HashTag save = hashtagRepository.save(new HashTag(
-                        s,
-                        1L
-                ));
-                forReviewPostHashtag.add(save);
-            }else {
-                HashTag find = hashtagRepository.findByName(s);
-                find.setCount(find.getCount()+1);
-                forReviewPostHashtag.add(find);
-            }
-        }
+    public void createHashtag(ReviewPost reviewPost) {
+        String url = "http://localhost:5000/makeHashtag";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));  // 문자열 전송을 위한 컨텐트 타입
+        HttpEntity<String> entity = new HttpEntity<>(reviewPost.getBody(), headers);
+        ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+
         System.out.println("Response from Python: " + response.getBody());
-        String jsonResponse =  decodeUnicode(response.getBody());
+        String jsonResponse = decodeUnicode(response.getBody());
 
         // JSON 문자열을 JSONObject로 변환
         JSONObject jsonObject = new JSONObject(jsonResponse);
@@ -74,21 +57,34 @@ public class HashtagService {
         JSONArray hashtagsArray = jsonObject.getJSONArray("hashtags");
 
         // JSONArray를 Java의 List<String>으로 변환
-        List<String> hashtagsList = new ArrayList<>();
+        List<String> list = new ArrayList<>();
         for (int i = 0; i < hashtagsArray.length(); i++) {
-            hashtagsList.add(hashtagsArray.getString(i));
+            list.add(hashtagsArray.getString(i));
         }
-        for(String hashtag : hashtagsList) {
-            HashTag hashTag = new HashTag(reviewPost, hashtag);
-            hashTagRepository.save(hashTag);
+
+        ArrayList<HashTag> forReviewPostHashtag = new ArrayList<>();
+        for (String s : list) {
+            if (!hashtagRepository.existsByName(s)) {
+                HashTag save = hashtagRepository.save(new HashTag(
+                        s,
+                        1L
+                ));
+                forReviewPostHashtag.add(save);
+            } else {
+                HashTag find = hashtagRepository.findByName(s);
+                find.setCount(find.getCount() + 1);
+                forReviewPostHashtag.add(find);
+            }
         }
-    }
 
         for (HashTag hashTag : forReviewPostHashtag) {
             hashtagClassificationRepository.save(new HashtagClassification(
                     hashTag,
                     reviewPost
             ));
+        }
+    }
+
     public String decodeUnicode(String escapedStr) {
         Pattern pattern = Pattern.compile("\\\\u([0-9A-Fa-f]{4})");
         Matcher matcher = pattern.matcher(escapedStr);
@@ -132,4 +128,10 @@ public class HashtagService {
         return result;
     }
 
+    public void deleteHashtag(Long reviewId, Long hashtagId){
+        HashtagClassification byReviewPostAndHashTag = hashtagClassificationRepository.findByReviewPostIdAndHashTagId(reviewId, hashtagId);
+        HashTag hashTag = byReviewPostAndHashTag.getHashTag();
+        hashTag.setCount(hashTag.getCount()-1);
+        hashtagClassificationRepository.delete(byReviewPostAndHashTag);
+    }
 }

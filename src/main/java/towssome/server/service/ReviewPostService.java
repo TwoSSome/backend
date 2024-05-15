@@ -22,6 +22,7 @@ public class ReviewPostService {
     private final MemberService memberService;
     private final PhotoService photoService;
     private final HashtagService hashtagService;
+    private final HashtagClassificationService hashtagClassificationService;
 
 
     public void createReview(ReviewPostReq reviewReq, List<MultipartFile> photos, String username) throws IOException {
@@ -32,7 +33,7 @@ public class ReviewPostService {
                 member
         );
         reviewPostRepository.save(reviewPost);
-        hashtagService.createHashtag(reviewPost, reviewPost.getBody());
+        hashtagService.createHashtag(reviewPost);
         photoService.saveReviewPhoto(photos, reviewPost);
     }
 
@@ -56,7 +57,8 @@ public class ReviewPostService {
                     false,
                     false,
                     false,
-                    hashtagService.getHashtags(review.getId())));
+                    hashtagClassificationService.getHashtags(review.getId()))
+            );
         }
 
         final Long lastIdOfList = reviewPosts.isEmpty() ?
@@ -92,7 +94,7 @@ public class ReviewPostService {
     @Transactional
     public void deleteReview(ReviewPost review) {
         photoService.deletePhotos(review);
-        hashtagService.deleteAllHashtags(review.getId());
+        hashtagService.deleteHashtagByReviewPost(review);
         reviewPostRepository.delete(review);
     }
 
@@ -129,7 +131,8 @@ public class ReviewPostService {
                     true,
                     false,
                     false,
-                    hashtagService.getHashtags(review.getId())));
+                    hashtagClassificationService.getHashtags(review.getId()))
+            );
         }
 
         final Long lastIdOfList = reviewPosts.isEmpty() ?
@@ -142,35 +145,5 @@ public class ReviewPostService {
         return cursorId == null ?
                 reviewPostRepository.findMyPostAllByMemberId(memberId, page) :
                 reviewPostRepository.findByMemberIdLessThanOrderByIdDesc(memberId, cursorId, page);
-    }
-
-    /**검색으로 얻은 포스트*/
-    public CursorResult<ReviewPostRes> getSearchReviewPage(String keyword, Long cursorId, Pageable page) {
-        List<ReviewPostRes> reviewPostRes = new ArrayList<>();
-        final List<ReviewPost> reviewPosts = getSearchReviewPosts(keyword, cursorId, page);
-        for(ReviewPost review : reviewPosts) {
-            reviewPostRes.add(new ReviewPostRes(
-                    review.getBody(),
-                    review.getPrice(),
-                    review.getCreateDate(),
-                    review.getLatsModifiedDate(),
-                    review.getMember().getId(),
-                    photoService.getPhotoS3Path(review),
-                    false,
-                    false,
-                    false,
-                    hashtagService.getHashtags(review.getId())));
-        }
-
-        final Long lastIdOfList = reviewPosts.isEmpty() ?
-                null : reviewPosts.get(reviewPosts.size() - 1).getId();
-
-        return new CursorResult<>(reviewPostRes, hasNext(lastIdOfList));
-    }
-
-    private List<ReviewPost> getSearchReviewPosts(String keyword, Long cursorId, Pageable page) {
-        return cursorId == null ?
-                reviewPostRepository.findByKeywordContainingOrderByIdDesc(keyword, page) :
-                reviewPostRepository.findByKeywordContainingAndIdLessThanOrderByIdDesc(keyword, cursorId, page);
     }
 }

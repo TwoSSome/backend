@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.dto.*;
+import towssome.server.entity.HashtagClassification;
 import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
 import towssome.server.service.*;
@@ -28,7 +29,6 @@ public class ReviewController {
     private final MemberService memberService;
     private final ViewlikeService viewlikeService;
     private static final int PAGE_SIZE = 10;
-    private final HashtagService hashtagService;
     private final HashtagClassificationService hashtagClassificationService;
 
     @PostMapping(path = "/create")
@@ -61,7 +61,7 @@ public class ReviewController {
                     false,
                     false,
                     false,
-                    hashtagService.getHashtags(reviewId)
+                    hashtagClassificationService.getHashtags(reviewId)
                     );
         }else {
             //회원 조회
@@ -77,7 +77,7 @@ public class ReviewController {
                     reviewPostService.isMyPost(member, review),
                     viewlikeService.isLikedPost(member, review),
                     viewlikeService.isBookmarkedPost(member, review),
-                    hashtagService.getHashtags(reviewId)
+                    hashtagClassificationService.getHashtags(reviewId)
             );
         }
 
@@ -122,7 +122,7 @@ public class ReviewController {
     }
 
     @GetMapping("/search") // 해시태그 검색
-    public PageResult<ReviewPostRes> keywordSearch(@RequestParam(value="keyword") String keyword,@RequestParam String sort, @RequestParam int page){
+    public PageResult<ReviewPostRes> keywordSearch(@RequestPart(value="keyword") String keyword,@RequestParam String sort, @RequestParam int page){
         Page<ReviewPost> result = hashtagClassificationService.getReviewPostByHashtag(keyword, sort, page-1, PAGE_SIZE);
         ArrayList<ReviewPostRes> reviewPostListRes = new ArrayList<>();
         for(ReviewPost reviewPost: result.getContent()){
@@ -135,7 +135,8 @@ public class ReviewController {
                     photoService.getPhotoS3Path(reviewPost),
                     false,
                     false,
-                    false
+                    false,
+                    hashtagClassificationService.getHashtags(reviewPost.getId())
             ));
         }
         return new PageResult<>(

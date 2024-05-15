@@ -23,7 +23,7 @@ public class ViewlikeService {
     private final ReviewPostRepository reviewPostRepository;
     private final PhotoService photoService;
     private final ReviewPostService reviewPostService;
-    private final HashtagService hashtagService;
+    private final HashtagClassificationService hashtagClassificationService;
 
     /** 조회 기록 저장(최초 조회 시) */
     public void viewProcess(ReviewPost review, Member member) {
@@ -96,7 +96,8 @@ public class ViewlikeService {
                     reviewPostService.isMyPost(member, review),
                     isLikedPost(member, review),
                     isBookmarkedPost(member, review),
-                    hashtagService.getHashtags(review.getId())));
+                    hashtagClassificationService.getHashtags(review.getId()))
+            );
         }
         final Long lastIdOfList = reviewPosts.isEmpty() ?
                 null : reviewPosts.get(reviewPosts.size() - 1).getId();

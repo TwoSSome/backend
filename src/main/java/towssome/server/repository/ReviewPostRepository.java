@@ -30,10 +30,4 @@ public interface ReviewPostRepository extends JpaRepository<ReviewPost,Long> {
 
     @Query("select r from ReviewPost r where r.member.id = :memberId and r.id < :cursorId order by r.id desc")
     List<ReviewPost> findByMemberIdLessThanOrderByIdDesc(@Param("memberId") Long memberId, @Param("cursorId") Long cursorId, Pageable page);
-
-    @Query("SELECT r FROM HashTag h INNER JOIN h.reviewPost r WHERE h.name LIKE CONCAT('%', :keyword, '%') ORDER BY r.id DESC")
-    List<ReviewPost> findByKeywordContainingOrderByIdDesc(@Param("keyword") String keyword, Pageable page);
-
-    @Query("SELECT r FROM HashTag h INNER JOIN h.reviewPost r WHERE h.name LIKE CONCAT('%', :keyword, '%') AND r.id < :cursorId ORDER BY r.id DESC")
-    List<ReviewPost> findByKeywordContainingAndIdLessThanOrderByIdDesc(@Param("keyword") String keyword, Long cursorId, Pageable page);
 }

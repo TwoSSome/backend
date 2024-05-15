@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import towssome.server.dto.HashtagDeleteReq;
+import towssome.server.service.HashtagClassificationService;
 import towssome.server.service.HashtagService;
 
 @RestController
@@ -12,6 +13,7 @@ import towssome.server.service.HashtagService;
 @RequestMapping("/hashtag")
 public class HashtagController {
     private final HashtagService hashtagService;
+    private final HashtagClassificationService hashtagClassificationService;
 
     @PostMapping("/delete")
     public ResponseEntity<?> deleteHashtag(@RequestPart(value = "req") HashtagDeleteReq req) {
@@ -21,6 +23,11 @@ public class HashtagController {
 
     @GetMapping("/{reviewId}")
     public ResponseEntity<?> getHashtags(@PathVariable Long reviewId) {
-        return new ResponseEntity<>(hashtagService.getHashtags(reviewId), HttpStatus.OK);
+        return new ResponseEntity<>(hashtagClassificationService.getHashtags(reviewId), HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getAllHashtags() {
+        return new ResponseEntity<>(hashtagClassificationService.getAllHashtags(), HttpStatus.OK);
     }
 }
