@@ -21,7 +21,7 @@ public class HashtagService {
 
     /**
      * koBert 를 통해 추출한 문자열을 인자로 받습니다. 해당 문자열이 해시태그로 저장되어 있으면 1증가
-     * 없으면 해시태그를 새로 생성합니다
+     * 없으면 해시태그를 count 를 1로 설정하고 새로 생성합니다
      * @param list
      * @param reviewPost
      */
