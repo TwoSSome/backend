@@ -1,26 +1,26 @@
 package towssome.server.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@NoArgsConstructor
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class HashTag {
+
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "hashtag_id")
     private Long id;
     private String name;
+    @Setter
     private Long count;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "review_id")
-    private ReviewPost reviewPost;
-
-    public HashTag(ReviewPost reviewPost, String hashtag) {
-        this.reviewPost = reviewPost;
-        this.name = hashtag;
-        this.count = 1L; // 임시
+    public HashTag(String name, Long count) {
+        this.name = name;
+        this.count = count;
     }
+
 }

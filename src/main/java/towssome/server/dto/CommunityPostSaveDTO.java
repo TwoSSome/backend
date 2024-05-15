@@ -7,6 +7,7 @@ public record CommunityPostSaveDTO(
         String title,
         String body,
         ReviewPost reviewPost,
-        Member member
+        Member member,
+        boolean isAnonymous
 ) {
 }

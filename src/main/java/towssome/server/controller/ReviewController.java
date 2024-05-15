@@ -2,6 +2,7 @@ package towssome.server.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import towssome.server.entity.ReviewPost;
 import towssome.server.service.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -27,6 +29,7 @@ public class ReviewController {
     private final ViewlikeService viewlikeService;
     private static final int PAGE_SIZE = 10;
     private final HashtagService hashtagService;
+    private final HashtagClassificationService hashtagClassificationService;
 
     @PostMapping(path = "/create")
     public ResponseEntity<?> createReview(@RequestPart(value = "body") ReviewPostReq req,
@@ -118,13 +121,30 @@ public class ReviewController {
         return reviewPostService.getMyReviewPage(member, cursorId, PageRequest.of(0, size));
     }
 
-    /**해시태그 검색 -> 한개로만 검색 가능*/
-    @GetMapping("/search/{hashtag}")
-    public CursorResult<ReviewPostRes> searchReviews(@PathVariable String hashtag, Long cursorId, Integer size) { // get all review(size 만큼의 리뷰글과 다음 리뷰글의 존재여부(boolean) 전달)
-        if(size == null) size = PAGE_SIZE;
-        return reviewPostService.getSearchReviewPage(hashtag, cursorId, PageRequest.of(0, size));
+    @GetMapping("/search") // 해시태그 검색
+    public PageResult<ReviewPostRes> keywordSearch(@RequestParam(value="keyword") String keyword,@RequestParam String sort, @RequestParam int page){
+        Page<ReviewPost> result = hashtagClassificationService.getReviewPostByHashtag(keyword, sort, page-1, PAGE_SIZE);
+        ArrayList<ReviewPostRes> reviewPostListRes = new ArrayList<>();
+        for(ReviewPost reviewPost: result.getContent()){
+            reviewPostListRes.add(new ReviewPostRes(
+                    reviewPost.getBody(),
+                    reviewPost.getPrice(),
+                    reviewPost.getCreateDate(),
+                    reviewPost.getLatsModifiedDate(),
+                    reviewPost.getMember().getId(),
+                    photoService.getPhotoS3Path(reviewPost),
+                    false,
+                    false,
+                    false
+            ));
+        }
+        return new PageResult<>(
+                reviewPostListRes,
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.getNumber()+1,
+                PAGE_SIZE
+        );
     }
-
-    /**여러 해시태그 동시 검색 */
 
 }

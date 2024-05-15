@@ -31,6 +31,7 @@ public class CommunityService {
         CommunityPost communityPost = new CommunityPost(
                 dto.title(),
                 dto.body(),
+                dto.isAnonymous(),
                 dto.member(),
                 dto.reviewPost()
         );

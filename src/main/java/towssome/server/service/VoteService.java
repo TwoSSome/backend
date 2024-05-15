@@ -21,7 +21,7 @@ public class VoteService {
     private final VoteAttributeRepository voteAttributeRepository;
     private final VoteAttributeMemberRepository voteAttributeMemberRepository;
 
-    public Vote createVote(VoteSaveDTO dto) throws IOException {
+    public Vote createVote(VoteSaveDTO dto) {
         Vote vote = new Vote(
                 dto.title(),
                 dto.communityPost()
