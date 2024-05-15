@@ -69,9 +69,10 @@ public class CommunityController {
      * @RequestPart 멀티파트파일과 json 을 동시에 받으려면 사용해야함
      */
     @PostMapping("/create")
-    public ResponseEntity<?> createPost(
+    public ResponseEntity<CreatedPostRes> createPost(
             @RequestPart CommunityPostSaveReq req,
-            @RequestPart(required = false) List<MultipartFile> files) throws IOException {
+            @RequestPart(required = false) List<MultipartFile> bodyPhoto,
+            @RequestPart(required = false) List<MultipartFile> votePhoto) throws IOException {
 
         ReviewPost quotation = null;
         if (req.reviewPostId() != null) {
@@ -89,18 +90,20 @@ public class CommunityController {
         );
         CommunityPost post = communityService.findPost(createdPost);
         //커뮤니티글의 사진 저장
-        photoService.saveCommunityPhoto(files,post);
+        photoService.saveCommunityPhoto(bodyPhoto,post);
 
         //커뮤니티글의 투표 저장, 투표 내의 속성의 사진들도 저장
         if (req.voteSaveReq() != null) { // 투표가 없는 커뮤니티글이 있을수도 있으니까 null 체크
             ArrayList<VoteAttributeDTO> voteAttributeDTOS = new ArrayList<>();
-            for (VoteAttributeReq vbr : req.voteSaveReq().voteAttributeReqs()) {
-                Photo photo = photoService.saveVotePhoto(vbr.file());
-                VoteAttributeDTO voteAttributeDTO = new VoteAttributeDTO(
-                        vbr.title(),
+            List<VoteAttributeReq> voteAttributeReqs = req.voteSaveReq().voteAttributeReqs();
+            for(int i = 0; i< voteAttributeReqs.size(); i++){
+                Photo photo;
+                if(votePhoto.get(i) != null) photo = photoService.saveVotePhoto(votePhoto.get(i));
+                else photo = null;
+                voteAttributeDTOS.add(new VoteAttributeDTO(
+                        voteAttributeReqs.get(i).title(),
                         photo
-                );
-                voteAttributeDTOS.add(voteAttributeDTO);
+                ));
             }
             voteService.createVote(new VoteSaveDTO(
                     req.voteSaveReq().title(),
@@ -109,8 +112,7 @@ public class CommunityController {
             ));
         }
 
-
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(new CreatedPostRes(createdPost), HttpStatus.OK);
     }
 
     /**
