@@ -6,6 +6,9 @@ import towssome.server.entity.ReviewPost;
 
 import java.util.List;
 
-public interface HashtagClassificationRepository extends JpaRepository<HashtagClassification,Long>,HashtagClassificationRepositoryCustom {
+public interface HashtagClassificationRepository extends JpaRepository<HashtagClassification,Long>,HashtagClassificationRepositoryCustom{
+
     List<HashtagClassification> findAllByReviewPost(ReviewPost reviewPost);
+
+
 }
