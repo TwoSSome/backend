@@ -12,7 +12,6 @@ import towssome.server.service.HashtagService;
 @RequestMapping("/hashtag")
 public class HashtagController {
     private final HashtagService hashtagService;
-    private static final int PAGE_SIZE = 10;
 
     @PostMapping("/delete")
     public ResponseEntity<?> deleteHashtag(@RequestPart(value = "req") HashtagDeleteReq req) {
