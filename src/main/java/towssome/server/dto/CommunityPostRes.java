@@ -22,6 +22,8 @@ public record CommunityPostRes(
         LocalDateTime lastModifiedTime,
         List<PhotoInPost> photoPaths,
         Long reviewPostId,
-        VoteRes vote
+        VoteRes vote,
+        boolean isAnonymous,
+        boolean isMyPost
 ) {
 }
