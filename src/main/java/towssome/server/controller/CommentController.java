@@ -11,7 +11,6 @@ import towssome.server.dto.CommentReq;
 import towssome.server.dto.CommentListRes;
 import towssome.server.dto.CommentUpdateReq;
 import towssome.server.entity.Comment;
-import towssome.server.repository.CommentRepository;
 import towssome.server.service.CommentService;
 
 import java.io.IOException;
@@ -26,7 +25,7 @@ public class CommentController {
     private static final int DEFAULT_SIZE = 30;
 
     @PostMapping("/{reviewId}/create")
-    public ResponseEntity<?> createComment(@PathVariable Long reviewId, @RequestBody CommentReq req) throws IOException{ // 세션 추가 되야 함
+    public ResponseEntity<?> createComment(@PathVariable Long reviewId, @RequestBody CommentReq req) throws IOException{
         log.info("commentDTO = {}", req);
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         commentService.createComment(req, username);
