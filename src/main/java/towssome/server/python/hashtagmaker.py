@@ -22,7 +22,7 @@ except:
     from konlpy.tag import Okt
 
 try:
-    from flask import Flask
+    from flask import Flask, jsonify, request
 except:
     subprocess.check_call([sys.executable,'-m', 'pip', 'install', '--upgrade', 'flask'])
     from flask import Flask
@@ -32,10 +32,6 @@ from collections import Counter
 import re
 
 app = Flask(__name__)
-
-@app.route('/')
-def hello():
-    return "Hello World!"
 
 def remove_stop_words(text, stop_words): # 불용어 제거
     okt.normalize(text)
@@ -63,7 +59,6 @@ def noun_extractor(text, phrase): # 의미있는 명사 추출
 
 def updateFrequency(keywords, word_counts, existing_words):
     for word, count in word_counts.items():
-        print(word, count)
         if count >= 2:  # 빈도수가 2 초과
             if word not in existing_words:  # 기존 리스트에 없는 경우
                 keywords.append([word,count * 0.2])  # 새 단어를 추가하고 초기 가중치를 0.2로 설정
@@ -75,11 +70,10 @@ def updateFrequency(keywords, word_counts, existing_words):
                     keywords[index][1] += count * 0.2  # 빈도수가 2인 경우 가중치 0.2 증가
     return keywords
 
-
+@app.route('/makeHashtag', methods=['POST'])
 def main():
-    text="""발렌타인데이를 맞이하여 이번에는 특별한 선물을 준비하기로 했습니다. 여자친구가 좋아하는 페레로 로쉐 초콜릿으로 하트 모양을 만들어 보기로 한 것이죠. 시중에서 파는 선물 세트가 아닌, 직접 손으로 만든 선물을 주고 싶었습니다. 먼저, 다양한 크기의 페레로 로쉐를 구입했습니다. 그리고 빨간색과 금색의 리본으로 각 초콜릿을 하나하나 정성스럽게 포장했습니다. 이 모든 초콜릿들을 큼직한 하트 모양으로 배열하고, 맨 위에는 작은 카드를 끼워 넣어 사랑의 메시지를 적었습니다.
-    드디어 발렌타인데이, 여자친구에게 이 선물을 건넸습니다. 초콜릿 하트를 본 순간 그녀의 눈이 빛났습니다. 그녀가 초콜릿 하나하나를 꺼내 볼 때마다, 리본을 풀며 웃는 모습이 너무 사랑스러웠습니다. 이렇게 예쁜 선물은 처음 받아본다며 기뻐하던 여자친구의 표정은 잊을 수 없습니다. 저녁에는 두 사람만의 조용한 식당에서 식사를 했습니다. 그녀는 계속해서 초콜릿 하트 이야기를 하며 얼마나 감동받았는지를 이야기해 주었습니다. 페레로 로쉐의 달콤함과 함께, 그날의 기억은 더욱 달콤하게 남았습니다. 이렇게 조금의 아이디어와 많은 사랑으로 준비한 선물이 그녀에게 큰 기쁨을 줄 수 있었던 것 같아 정말 뿌듯했습니다. 이번 발렌타인데이는 정말 특별한 추억으로 남을 것 같습니다. 다음에도 이런 특별한 선물을 준비해서 사랑하는 사람에게 더 많은 행복을 선사하고 싶습니다."""
-
+    text = request.data.decode()  # JSON 데이터를 받습니다.
+    print("Received data:", text)
     # 형태소 분석
     pos_tagged = okt.pos(text)
 
@@ -111,8 +105,7 @@ def main():
     # 상위 5개 항목 선택
     top_five_keywords = [keyword[0] for keyword in sorted_keywords[:5]]
     print(top_five_keywords)
-
-
+    return jsonify({"hashtags": top_five_keywords})
 
 model = BertModel.from_pretrained('skt/kobert-base-v1')
 kw_model = KeyBERT(model)
@@ -183,4 +176,4 @@ stopwords = [
 ]
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True, port=5000)

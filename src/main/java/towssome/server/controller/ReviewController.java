@@ -11,10 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import towssome.server.dto.*;
 import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
-import towssome.server.service.MemberService;
-import towssome.server.service.PhotoService;
-import towssome.server.service.ReviewPostService;
-import towssome.server.service.ViewlikeService;
+import towssome.server.service.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,6 +26,7 @@ public class ReviewController {
     private final MemberService memberService;
     private final ViewlikeService viewlikeService;
     private static final int PAGE_SIZE = 10;
+    private final HashtagService hashtagService;
 
     @PostMapping(path = "/create")
     public ResponseEntity<?> createReview(@RequestPart(value = "body") ReviewPostReq req,
@@ -59,7 +57,8 @@ public class ReviewController {
                     photo,
                     false,
                     false,
-                    false
+                    false,
+                    hashtagService.getHashtags(reviewId)
                     );
         }else {
             //회원 조회
@@ -74,7 +73,8 @@ public class ReviewController {
                     photo,
                     reviewPostService.isMyPost(member, review),
                     viewlikeService.isLikedPost(member, review),
-                    viewlikeService.isBookmarkedPost(member, review)
+                    viewlikeService.isBookmarkedPost(member, review),
+                    hashtagService.getHashtags(reviewId)
             );
         }
 
@@ -109,5 +109,22 @@ public class ReviewController {
         if(size == null) size = PAGE_SIZE;
         return reviewPostService.getReviewPage(cursorId, PageRequest.of(0, size));
     }
+
+    @GetMapping("/my")
+    public CursorResult<ReviewPostRes> getMyReviews(Long cursorId, Integer size) { // get all review(size 만큼의 리뷰글과 다음 리뷰글의 존재여부(boolean) 전달)
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberService.getMember(username);
+        if(size == null) size = PAGE_SIZE;
+        return reviewPostService.getMyReviewPage(member, cursorId, PageRequest.of(0, size));
+    }
+
+    /**해시태그 검색 -> 한개로만 검색 가능*/
+    @GetMapping("/search/{hashtag}")
+    public CursorResult<ReviewPostRes> searchReviews(@PathVariable String hashtag, Long cursorId, Integer size) { // get all review(size 만큼의 리뷰글과 다음 리뷰글의 존재여부(boolean) 전달)
+        if(size == null) size = PAGE_SIZE;
+        return reviewPostService.getSearchReviewPage(hashtag, cursorId, PageRequest.of(0, size));
+    }
+
+    /**여러 해시태그 동시 검색 */
 
 }

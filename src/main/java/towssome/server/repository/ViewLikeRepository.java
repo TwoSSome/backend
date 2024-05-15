@@ -27,7 +27,7 @@ public interface ViewLikeRepository extends JpaRepository<ViewLike,Long> {
     List<ReviewPost> findAllByMemberIdOrderByIdDesc(@Param("memberId") Long memberId, Pageable page);
 
     @Query("select rp from ViewLike v join v.reviewPost rp where v.member.id = :memberId and v.reviewPost.id < :cursorId and v.viewFlag = true order by v.id desc")
-    List<ReviewPost> findByMemberIdLessThanOrderByIdDesc(Long cursorId, Long memberId, Pageable page);
+    List<ReviewPost> findByMemberIdLessThanOrderByIdDesc(@Param("cursorId") Long cursorId, @Param("memberId") Long memberId, Pageable page);
 
     ViewLike findByReviewPostAndMember(ReviewPost reviewPost, Member member);
 
