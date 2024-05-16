@@ -11,10 +11,14 @@ import towssome.server.dto.CommentReq;
 import towssome.server.dto.CommentListRes;
 import towssome.server.dto.CommentUpdateReq;
 import towssome.server.entity.Comment;
+import towssome.server.entity.CommentLike;
+import towssome.server.entity.Member;
+import towssome.server.service.CommentLikeService;
 import towssome.server.service.CommentService;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,6 +27,7 @@ import java.util.ArrayList;
 public class CommentController {
     private final CommentService commentService;
     private static final int DEFAULT_SIZE = 30;
+    private final CommentLikeService commentLikeService;
 
     @PostMapping("/{reviewId}/create")
     public ResponseEntity<?> createComment(@PathVariable Long reviewId, @RequestBody CommentReq req) throws IOException{
@@ -49,15 +54,15 @@ public class CommentController {
         if(!commentService.getComment(commentId).getMember().getUsername().equals(username)){
             return new ResponseEntity<>("You are not the author of this comment", HttpStatus.FORBIDDEN);
         }
-        Comment comment = commentService.findComment(commentId);
+        Comment comment = commentService.getComment(commentId);
         log.info(String.valueOf(comment));
         commentService.deleteComment(comment);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping("/{reviewId}/comments")
-    public PageResult<CommentListRes> getCommentList(@PathVariable Long reviewId, @RequestParam String sort, @RequestParam int page, @RequestParam int size){
-        Page<Comment> commentList = commentService.getComments(sort, reviewId, page, size);
+    public PageResult<CommentListRes> getCommentList(@PathVariable Long reviewId, @RequestParam String sort, @RequestParam int page){
+        Page<Comment> commentList = commentService.getComments(sort, reviewId, page-1, DEFAULT_SIZE);
         ArrayList<CommentListRes> commentListRes = new ArrayList<>();
         for(Comment comment: commentList.getContent()){
             commentListRes.add(new CommentListRes(
@@ -76,5 +81,18 @@ public class CommentController {
                 commentList.getNumber()+1,
                 DEFAULT_SIZE
         );
+    }
+
+    @GetMapping("/review/{reviewId}/like/{commentId}")
+    public Long getLikes(@PathVariable Long reviewId, @PathVariable Long commentId){
+        List<CommentLike> likes = commentLikeService.getLikes(commentId);
+        return (long)likes.size(); // 좋아요 수 반환
+    }
+
+    @GetMapping("/review/{reviewId}/likeChange/{commentId}")
+    public Long changeLike(@PathVariable Long reviewId, @PathVariable Long commentId){
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        List<CommentLike> likes = commentLikeService.changeLike(commentId,username);
+        return (long)likes.size(); // 변경 후 좋아요 수 반환
     }
 }
