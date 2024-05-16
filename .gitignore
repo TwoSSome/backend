@@ -8,6 +8,7 @@ application.properties
 TestInit.java
 src/test/
 src/test/java/towssome/server/ServerApplicationTests.java
+build.gradle
 
 ### STS ###
 .apt_generated
