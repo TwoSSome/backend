@@ -20,10 +20,10 @@ public class ViewlikeService {
 
     private final BookMarkRepository bookMarkRepository;
     private final ViewLikeRepository viewLikeRepository;
-    private final MemberRepository memberRepository;
     private final ReviewPostRepository reviewPostRepository;
     private final PhotoService photoService;
     private final ReviewPostService reviewPostService;
+    private final HashtagClassificationService hashtagClassificationService;
 
     /** 조회 기록 저장(최초 조회 시) */
     public void viewProcess(ReviewPost review, Member member) {
@@ -37,7 +37,7 @@ public class ViewlikeService {
         viewLikeRepository.save(viewLike);
     }
 
-    /** 좋아요/좋아요 취소 */
+    /** 좋아요 or 좋아요 취소 */
     public void likeProcess(ReviewPost review, Member member) {
         ViewLike viewLike = viewLikeRepository.findByReviewPostIdAndMemberId(review.getId(), member.getId());
         if (viewLike == null) {
@@ -69,14 +69,14 @@ public class ViewlikeService {
         return list.contains(reviewPost);
     }
 
-    /** ----------------- 좋아요 조회 ----------------- */
+    /** ----------------- 자신의 좋아요 기록 조회 ----------------- */
     public CursorResult<ReviewPostRes> getLike(Member member, Long cursorId, Pageable page) {
         List<ReviewPostRes> reviewPostRes = new ArrayList<>();
         final List<ReviewPost> reviewPosts = getLikePosts(member.getId(), cursorId, page);
         return getReviewPostResCursorResult(member, reviewPostRes, reviewPosts);
     }
 
-    /** ----------------- 최근 조회 기록 조회 ----------------- */
+    /** ----------------- 자신의 최근 조회 기록 조회 ----------------- */
     public CursorResult<ReviewPostRes> getRecentView(Member member, Long cursorId, Pageable page) {
         List<ReviewPostRes> reviewPostRes = new ArrayList<>();
         final List<ReviewPost> reviewPosts = getRecentViewPosts(member.getId(), cursorId, page);
@@ -95,20 +95,14 @@ public class ViewlikeService {
                     photoService.getPhotoS3Path(review),
                     reviewPostService.isMyPost(member, review),
                     isLikedPost(member, review),
-                    isBookmarkedPost(member, review)));
+                    isBookmarkedPost(member, review),
+                    hashtagClassificationService.getHashtags(review.getId()))
+            );
         }
         final Long lastIdOfList = reviewPosts.isEmpty() ?
                 null : reviewPosts.get(reviewPosts.size() - 1).getId();
 
         return new CursorResult<>(reviewPostRes, hasNext(lastIdOfList));
-    }
-
-    public CursorResult<ReviewPost> getRecentView(Long memberId, Long cursorId, Pageable page) {
-        final List<ReviewPost> reviewPosts = getRecentViewPosts(memberId, cursorId, page);
-        final Long lastIdOfList = reviewPosts.isEmpty() ?
-                null : reviewPosts.get(reviewPosts.size() - 1).getId();
-
-        return new CursorResult<>(reviewPosts, hasNext(lastIdOfList));
     }
 
     /**cursorId보다 작은페이지(다음페이지)에서 좋아요 누른 리뷰글만 불러옴*/

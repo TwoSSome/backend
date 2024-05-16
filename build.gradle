@@ -47,7 +47,8 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
 	//security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
-
+	//json
+	implementation 'org.json:json:20210307'
 }
 
 test {
