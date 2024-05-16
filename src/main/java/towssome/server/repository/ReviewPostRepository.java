@@ -25,4 +25,9 @@ public interface ReviewPostRepository extends JpaRepository<ReviewPost,Long> {
 
     List<ReviewPost> findAllByMember(Member member);
 
+    @Query("select r from ReviewPost r where r.member.id = :memberId order by r.id desc")
+    List<ReviewPost> findMyPostAllByMemberId(@Param("memberId") Long memberId, Pageable page);
+
+    @Query("select r from ReviewPost r where r.member.id = :memberId and r.id < :cursorId order by r.id desc")
+    List<ReviewPost> findByMemberIdLessThanOrderByIdDesc(@Param("memberId") Long memberId, @Param("cursorId") Long cursorId, Pageable page);
 }

@@ -12,6 +12,7 @@ public record ReviewPostRes(
         List<PhotoInPost> photos,
         boolean isMyPost,
         boolean isLikedPost,
-        boolean isBookmarked
+        boolean isBookmarked,
+        List<String> hashTags
 ) {
 }

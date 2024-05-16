@@ -21,6 +21,9 @@ public class ReviewPostService {
     private final ReviewPostRepository reviewPostRepository;
     private final MemberService memberService;
     private final PhotoService photoService;
+    private final HashtagService hashtagService;
+    private final HashtagClassificationService hashtagClassificationService;
+
 
     public void createReview(ReviewPostReq reviewReq, List<MultipartFile> photos, String username) throws IOException {
         Member member = memberService.getMember(username);
@@ -30,6 +33,7 @@ public class ReviewPostService {
                 member
         );
         reviewPostRepository.save(reviewPost);
+        hashtagService.createHashtag(reviewPost);
         photoService.saveReviewPhoto(photos, reviewPost);
     }
 
@@ -52,7 +56,9 @@ public class ReviewPostService {
                     photoService.getPhotoS3Path(review),
                     false,
                     false,
-                    false));
+                    false,
+                    hashtagClassificationService.getHashtags(review.getId()))
+            );
         }
 
         final Long lastIdOfList = reviewPosts.isEmpty() ?
@@ -88,6 +94,7 @@ public class ReviewPostService {
     @Transactional
     public void deleteReview(ReviewPost review) {
         photoService.deletePhotos(review);
+        hashtagService.deleteHashtagByReviewPost(review);
         reviewPostRepository.delete(review);
     }
 
@@ -107,5 +114,36 @@ public class ReviewPostService {
                 req.price()
         );
         reviewPostRepository.updateReview(dto);
+    }
+
+    /**Get My Posts*/
+    public CursorResult<ReviewPostRes> getMyReviewPage(Member member, Long cursorId, Pageable page) {
+        List<ReviewPostRes> reviewPostRes = new ArrayList<>();
+        final List<ReviewPost> reviewPosts = getMyReviewPosts(member.getId(), cursorId, page);
+        for(ReviewPost review : reviewPosts) {
+            reviewPostRes.add(new ReviewPostRes(
+                    review.getBody(),
+                    review.getPrice(),
+                    review.getCreateDate(),
+                    review.getLatsModifiedDate(),
+                    member.getId(),
+                    photoService.getPhotoS3Path(review),
+                    true,
+                    false,
+                    false,
+                    hashtagClassificationService.getHashtags(review.getId()))
+            );
+        }
+
+        final Long lastIdOfList = reviewPosts.isEmpty() ?
+                null : reviewPosts.get(reviewPosts.size() - 1).getId();
+
+        return new CursorResult<>(reviewPostRes, hasNext(lastIdOfList));
+    }
+
+    private List<ReviewPost> getMyReviewPosts(Long memberId, Long cursorId, Pageable page) {
+        return cursorId == null ?
+                reviewPostRepository.findMyPostAllByMemberId(memberId, page) :
+                reviewPostRepository.findByMemberIdLessThanOrderByIdDesc(memberId, cursorId, page);
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.dto.*;
+import towssome.server.entity.HashtagClassification;
 import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
 import towssome.server.service.*;
@@ -59,7 +60,8 @@ public class ReviewController {
                     photo,
                     false,
                     false,
-                    false
+                    false,
+                    hashtagClassificationService.getHashtags(reviewId)
                     );
         }else {
             //회원 조회
@@ -74,7 +76,8 @@ public class ReviewController {
                     photo,
                     reviewPostService.isMyPost(member, review),
                     viewlikeService.isLikedPost(member, review),
-                    viewlikeService.isBookmarkedPost(member, review)
+                    viewlikeService.isBookmarkedPost(member, review),
+                    hashtagClassificationService.getHashtags(reviewId)
             );
         }
 
@@ -110,8 +113,16 @@ public class ReviewController {
         return reviewPostService.getReviewPage(cursorId, PageRequest.of(0, size));
     }
 
+    @GetMapping("/my")
+    public CursorResult<ReviewPostRes> getMyReviews(Long cursorId, Integer size) { // get all review(size 만큼의 리뷰글과 다음 리뷰글의 존재여부(boolean) 전달)
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberService.getMember(username);
+        if(size == null) size = PAGE_SIZE;
+        return reviewPostService.getMyReviewPage(member, cursorId, PageRequest.of(0, size));
+    }
+
     @GetMapping("/search") // 해시태그 검색
-    public PageResult<ReviewPostRes> keywordSearch(@RequestParam(value="keyword") String keyword,@RequestParam String sort, @RequestParam int page){
+    public PageResult<ReviewPostRes> keywordSearch(@RequestPart(value="keyword") String keyword,@RequestParam String sort, @RequestParam int page){
         Page<ReviewPost> result = hashtagClassificationService.getReviewPostByHashtag(keyword, sort, page-1, PAGE_SIZE);
         ArrayList<ReviewPostRes> reviewPostListRes = new ArrayList<>();
         for(ReviewPost reviewPost: result.getContent()){
@@ -124,7 +135,8 @@ public class ReviewController {
                     photoService.getPhotoS3Path(reviewPost),
                     false,
                     false,
-                    false
+                    false,
+                    hashtagClassificationService.getHashtags(reviewPost.getId())
             ));
         }
         return new PageResult<>(
