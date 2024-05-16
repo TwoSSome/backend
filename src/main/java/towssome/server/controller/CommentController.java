@@ -22,7 +22,7 @@ import java.util.ArrayList;
 @RequestMapping("/review")
 public class CommentController {
     private final CommentService commentService;
-    private static final int DEFAULT_SIZE = 30;
+    private static final int DEFAULT_SIZE = 20;
 
     @PostMapping("/{reviewId}/create")
     public ResponseEntity<?> createComment(@PathVariable Long reviewId, @RequestBody CommentReq req) throws IOException{
@@ -56,8 +56,8 @@ public class CommentController {
     }
 
     @GetMapping("/{reviewId}/comments")
-    public PageResult<CommentListRes> getCommentList(@PathVariable Long reviewId, @RequestParam String sort, @RequestParam int page, @RequestParam int size){
-        Page<Comment> commentList = commentService.getComments(sort, reviewId, page, size);
+    public PageResult<CommentListRes> getCommentList(@PathVariable Long reviewId, @RequestParam String sort, @RequestParam int page){
+        Page<Comment> commentList = commentService.getComments(sort, reviewId, page-1, DEFAULT_SIZE);
         ArrayList<CommentListRes> commentListRes = new ArrayList<>();
         for(Comment comment: commentList.getContent()){
             commentListRes.add(new CommentListRes(
