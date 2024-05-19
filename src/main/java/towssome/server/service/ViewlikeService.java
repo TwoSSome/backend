@@ -102,7 +102,7 @@ public class ViewlikeService {
         final Long lastIdOfList = reviewPosts.isEmpty() ?
                 null : reviewPosts.get(reviewPosts.size() - 1).getId();
 
-        return new CursorResult<>(reviewPostRes, hasNext(lastIdOfList));
+        return new CursorResult<>(reviewPostRes, null,hasNext(lastIdOfList));
     }
 
     /**cursorId보다 작은페이지(다음페이지)에서 좋아요 누른 리뷰글만 불러옴*/

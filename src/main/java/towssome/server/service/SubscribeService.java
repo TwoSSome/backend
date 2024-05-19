@@ -64,6 +64,7 @@ public class SubscribeService {
 
         return new CursorResult<>(
                 subscribeRes,
+                null,
                 subscribeSliceDTO.hasNext()
         );
     }

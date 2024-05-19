@@ -10,7 +10,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.dto.*;
-import towssome.server.entity.HashtagClassification;
 import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
 import towssome.server.service.*;
@@ -28,7 +27,7 @@ public class ReviewController {
     private final PhotoService photoService;
     private final MemberService memberService;
     private final ViewlikeService viewlikeService;
-    private static final int PAGE_SIZE = 10;
+    private static final int PAGE_SIZE = 2;
     private final HashtagClassificationService hashtagClassificationService;
 
     @PostMapping(path = "/create")
@@ -108,9 +107,11 @@ public class ReviewController {
     }
 
     @GetMapping // EX) review?cursorId=10&size=10 -> id 10번 리뷰글 id보다 작은 10개의 리뷰글(id = 1~9)을 가져옴
-    public CursorResult<ReviewPostRes> getReviews(Long cursorId, Integer size) { // get all review(size 만큼의 리뷰글과 다음 리뷰글의 존재여부(boolean) 전달)
+    public CursorResult<ReviewPostRes> getReviews(@RequestParam(value = "cursorId", required = false) Long cursorId,
+                                                  @RequestParam(value = "size", required = false) Integer size,
+                                                  @RequestParam(value = "recommend", required = false) Boolean recommend) { // get all review(size 만큼의 리뷰글과 다음 리뷰글의 존재여부(boolean) 전달)
         if(size == null) size = PAGE_SIZE;
-        return reviewPostService.getReviewPage(cursorId, PageRequest.of(0, size));
+        return reviewPostService.getRecentReviewPage(cursorId, PageRequest.of(0, size), recommend);
     }
 
     @GetMapping("/my")
