@@ -1,5 +1,6 @@
 import sys
 import subprocess
+subprocess.check_call([sys.executable,'-m', 'pip', 'install', '--upgrade', 'pip'])
 try:
     # 없는 모듈 import시 에러 발생
     from keybert import KeyBERT

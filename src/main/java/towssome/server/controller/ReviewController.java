@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import towssome.server.advice.MemberAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
@@ -25,7 +26,7 @@ import java.util.List;
 public class ReviewController {
     private final ReviewPostService reviewPostService;
     private final PhotoService photoService;
-    private final MemberService memberService;
+    private final MemberAdvice memberAdvice;
     private final ViewlikeService viewlikeService;
     private static final int PAGE_SIZE = 2;
     private final HashtagClassificationService hashtagClassificationService;
@@ -42,14 +43,14 @@ public class ReviewController {
     /** 특정리뷰글 조회 */
     @GetMapping("/{reviewId}")
     public ResponseEntity<ReviewPostRes> getReview(@PathVariable Long reviewId){ // get review by reviewId
-        String name = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberAdvice.findJwtMember();
         ReviewPost review = reviewPostService.getReview(reviewId);
         log.info("review = {}",review.getId());
         List<PhotoInPost> photo = photoService.getPhotoS3Path(review);
         ReviewPostRes reviewRes;
 
         //비회원 조회
-        if (name.equals("anonymousUser")) {
+        if (member == null) {
             reviewRes = new ReviewPostRes(
                     review.getBody(),
                     review.getPrice(),
@@ -64,7 +65,6 @@ public class ReviewController {
                     );
         }else {
             //회원 조회
-            Member member = memberService.getMember(name);
             viewlikeService.viewProcess(review, member);
             reviewRes = new ReviewPostRes(
                     review.getBody(),
@@ -83,22 +83,24 @@ public class ReviewController {
         return new ResponseEntity<>(reviewRes, HttpStatus.OK);
     }
 
+    /** 리뷰글 수정 */
     @PostMapping("/update/{reviewId}")
     public ResponseEntity<?> updateReview(@PathVariable Long reviewId,
                                           @RequestPart(value = "body") ReviewPostUpdateReq req,
                                           @RequestPart(value = "photos") List<MultipartFile> addPhotos) throws IOException { // update review by reviewId
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        if(!reviewPostService.getReview(reviewId).getMember().getUsername().equals(username)){
+        Member member = memberAdvice.findJwtMember();
+        if(!(reviewPostService.getReview(reviewId).getMember() == member)){
             return new ResponseEntity<>("You are not the author of this review", HttpStatus.FORBIDDEN);
         }
         reviewPostService.updateReview(reviewId, req, addPhotos);
         return new ResponseEntity<>("update complete", HttpStatus.OK);
     }
 
+    /** 리뷰글 삭제 */
     @PostMapping("/delete/{reviewId}")
     public ResponseEntity<?> deleteReview(@PathVariable Long reviewId) { // delete review by reviewId
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        if(!reviewPostService.getReview(reviewId).getMember().getUsername().equals(username)){
+        Member member = memberAdvice.findJwtMember();
+        if(!(reviewPostService.getReview(reviewId).getMember() == member)){
             return new ResponseEntity<>("You are not the author of this review", HttpStatus.FORBIDDEN);
         }
         ReviewPost review = reviewPostService.getReview(reviewId);
@@ -106,23 +108,34 @@ public class ReviewController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping // EX) review?cursorId=10&size=10 -> id 10번 리뷰글 id보다 작은 10개의 리뷰글(id = 1~9)을 가져옴
+    /** 리뷰글 목록 조회
+     * @param cursorId (cursorId보다 작은 리뷰글들을 가져옴)
+     * @param size (가져올 리뷰글의 개수)
+     * @param sort (정렬 기준) null(defualt)이거나 desc이면 최신순, asc이면 오래된순
+     * @param recommend (추천)
+     * @return
+     */
+    @GetMapping
     public CursorResult<ReviewPostRes> getReviews(@RequestParam(value = "cursorId", required = false) Long cursorId,
                                                   @RequestParam(value = "size", required = false) Integer size,
-                                                  @RequestParam(value = "recommend", required = false) Boolean recommend) { // get all review(size 만큼의 리뷰글과 다음 리뷰글의 존재여부(boolean) 전달)
+                                                  @RequestParam(value = "sort", required = false) String sort,
+                                                  @RequestParam(value = "recommend", required = false) Boolean recommend) {
         if(size == null) size = PAGE_SIZE;
-        return reviewPostService.getRecentReviewPage(cursorId, PageRequest.of(0, size), recommend);
+        return reviewPostService.getRecentReviewPage(cursorId, sort, recommend, PageRequest.of(0, size));
     }
 
+    /** 내가 쓴 리뷰글 목록 조회 */
     @GetMapping("/my")
-    public CursorResult<ReviewPostRes> getMyReviews(Long cursorId, Integer size) { // get all review(size 만큼의 리뷰글과 다음 리뷰글의 존재여부(boolean) 전달)
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member member = memberService.getMember(username);
+    public CursorResult<ReviewPostRes> getMyReviews(@RequestParam(value = "cursorId", required = false) Long cursorId,
+                                                    @RequestParam(value = "size", required = false) Integer size,
+                                                    @RequestParam(value = "sort", required = false) String sort) {
+        Member member = memberAdvice.findJwtMember();
         if(size == null) size = PAGE_SIZE;
-        return reviewPostService.getMyReviewPage(member, cursorId, PageRequest.of(0, size));
+        return reviewPostService.getMyReviewPage(member, cursorId, sort, PageRequest.of(0, size));
     }
 
-    @GetMapping("/search") // 해시태그 검색
+    /** 해시태그 검색 */
+    @GetMapping("/search")
     public PageResult<ReviewPostRes> keywordSearch(@RequestPart(value="keyword") String keyword,@RequestParam String sort, @RequestParam int page){
         Page<ReviewPost> result = hashtagClassificationService.getReviewPostByHashtag(keyword, sort, page-1, PAGE_SIZE);
         ArrayList<ReviewPostRes> reviewPostListRes = new ArrayList<>();

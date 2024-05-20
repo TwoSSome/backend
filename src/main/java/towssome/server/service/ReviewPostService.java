@@ -76,9 +76,9 @@ public class ReviewPostService {
     }
 
     /**무한스크롤 */
-    public CursorResult<ReviewPostRes> getRecentReviewPage(Long cursorId, Pageable page, Boolean recommend) {
+    public CursorResult<ReviewPostRes> getRecentReviewPage(Long cursorId, String sort, Boolean recommend, Pageable page) {
         List<ReviewPostRes> reviewPostRes = new ArrayList<>();
-        final Page<ReviewPost> reviewPosts = getReviewPosts(cursorId, page);
+        final Page<ReviewPost> reviewPosts = getReviewPosts(cursorId, sort, page);
         for(ReviewPost review : reviewPosts) {
             reviewPostRes.add(new ReviewPostRes(
                     review.getBody(),
@@ -108,16 +108,16 @@ public class ReviewPostService {
      * @return review posts
      */
 
-    private Page<ReviewPost> getReviewPosts(Long cursorId, Pageable page) {
+    private Page<ReviewPost> getReviewPosts(Long cursorId, String sort, Pageable page) {
         return cursorId == null ?
-                reviewPostRepositoryCustom.findAllByOrderByReviewIdDesc(page) : // cursor_id가 null이면 가장 최신의 리뷰글부터 페이지를 가져옴 -> 최초 요청
-                reviewPostRepositoryCustom.findByCursorIdLessThanOrderByReviewIdDesc(cursorId, page); // cursor_id가 null이 아니면 cursor_id보다 작은 리뷰글부터 페이지를 가져옴
+                reviewPostRepositoryCustom.findAllByOrderByReviewIdDesc(page, sort) : // cursor_id가 null이면 가장 최신의 리뷰글부터 페이지를 가져옴 -> 최초 요청
+                reviewPostRepositoryCustom.findByCursorIdLessThanOrderByReviewIdDesc(cursorId, sort, page); // cursor_id가 null이 아니면 cursor_id보다 작은 리뷰글부터 페이지를 가져옴
     }
 
     /**Get My Posts*/
-    public CursorResult<ReviewPostRes> getMyReviewPage(Member member, Long cursorId, Pageable page) {
+    public CursorResult<ReviewPostRes> getMyReviewPage(Member member, Long cursorId, String sort, Pageable page) {
         List<ReviewPostRes> reviewPostRes = new ArrayList<>();
-        final Page<ReviewPost> reviewPosts = getMyReviewPosts(member.getId(), cursorId, page);
+        final Page<ReviewPost> reviewPosts = getMyReviewPosts(member.getId(), cursorId, sort, page);
         for(ReviewPost review : reviewPosts) {
             reviewPostRes.add(new ReviewPostRes(
                     review.getBody(),
@@ -133,15 +133,15 @@ public class ReviewPostService {
             );
         }
 
-        final Long lastIdOfList = reviewPosts.isEmpty() ?
-                null : reviewPosts.get(reviewPosts.size() - 1).getId();
+        cursorId = reviewPosts.isEmpty() ?
+                null : reviewPosts.getContent().get(reviewPosts.getContent().size() - 1).getId();
 
-        return new CursorResult<>(reviewPostRes, null,hasNext(lastIdOfList));
+        return new CursorResult<>(reviewPostRes, cursorId, reviewPosts.hasNext());
     }
 
-    private Page<ReviewPost> getMyReviewPosts(Long memberId, Long cursorId, Pageable page) {
+    private Page<ReviewPost> getMyReviewPosts(Long memberId, Long cursorId, String sort, Pageable page) {
         return cursorId == null ?
-                reviewPostRepository.findMyPostAllByMemberId(memberId, page) :
-                reviewPostRepository.findByMemberIdLessThanOrderByIdDesc(memberId, cursorId, page);
+                reviewPostRepositoryCustom.findMyPostAllByMemberId(memberId, sort, page) :
+                reviewPostRepositoryCustom.findByMemberIdLessThanOrderByIdDesc(memberId, cursorId, sort, page);
     }
 }
