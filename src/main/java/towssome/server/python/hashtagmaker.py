@@ -33,6 +33,10 @@ import re
 
 app = Flask(__name__)
 
+@app.route('/')
+def test():
+    return "test ok"
+
 def remove_stop_words(text, stop_words): # 불용어 제거
     okt.normalize(text)
     pattern = r'\b(' + '|'.join(stop_words) + r')\b'

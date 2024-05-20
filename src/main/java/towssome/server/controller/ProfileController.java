@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.advice.MemberAdvice;
+import towssome.server.dto.CreateMateRes;
+import towssome.server.dto.CreateVirtualRes;
 import towssome.server.dto.ProfileRes;
 import towssome.server.dto.UpdateProfileReq;
 import towssome.server.entity.Member;
@@ -35,6 +37,15 @@ public class ProfileController {
                 jwtMember.getProfilePhoto() == null ? null : jwtMember.getProfilePhoto().getS3Path(),
                 null
         );
+    }
+
+    @PostMapping("/createVirtual")
+    public ResponseEntity<?> createVirtual(@RequestBody CreateVirtualRes res){
+
+        Member jwtMember = memberAdvice.findJwtMember();
+        memberService.createVirtual(res.hashtagList(),jwtMember);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/updateProfileImage")
