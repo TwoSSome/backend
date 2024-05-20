@@ -75,10 +75,10 @@ public class ReviewPostService {
         return reviewPostRepository.findAllByMember(member).contains(reviewPost);
     }
 
-    /**무한스크롤 */
-    public CursorResult<ReviewPostRes> getRecentReviewPage(Long cursorId, String sort, Boolean recommend, Pageable page) {
+    /**최근 리뷰글 or 추천 리뷰글 */
+    public CursorResult<ReviewPostRes> getRecentReviewPage(Long cursorId, Boolean recommend, Pageable page) {
         List<ReviewPostRes> reviewPostRes = new ArrayList<>();
-        final Page<ReviewPost> reviewPosts = getReviewPosts(cursorId, sort, page);
+        final Page<ReviewPost> reviewPosts = getRecentReviewPosts(cursorId, recommend, page);
         for(ReviewPost review : reviewPosts) {
             reviewPostRes.add(new ReviewPostRes(
                     review.getBody(),
@@ -108,10 +108,10 @@ public class ReviewPostService {
      * @return review posts
      */
 
-    private Page<ReviewPost> getReviewPosts(Long cursorId, String sort, Pageable page) {
+    private Page<ReviewPost> getRecentReviewPosts(Long cursorId, Boolean recommend, Pageable page) {
         return cursorId == null ?
-                reviewPostRepositoryCustom.findAllByOrderByReviewIdDesc(page, sort) : // cursor_id가 null이면 가장 최신의 리뷰글부터 페이지를 가져옴 -> 최초 요청
-                reviewPostRepositoryCustom.findByCursorIdLessThanOrderByReviewIdDesc(cursorId, sort, page); // cursor_id가 null이 아니면 cursor_id보다 작은 리뷰글부터 페이지를 가져옴
+                reviewPostRepositoryCustom.findFirstPageByOrderByReviewIdDesc(recommend, page) : // cursor_id가 null이면 가장 최신의 리뷰글부터 페이지를 가져옴 -> 최초 요청
+                reviewPostRepositoryCustom.findByCursorIdLessThanOrderByReviewIdDesc(cursorId, recommend, page); // cursor_id가 null이 아니면 cursor_id보다 작은 리뷰글부터 페이지를 가져옴
     }
 
     /**Get My Posts*/
@@ -141,7 +141,7 @@ public class ReviewPostService {
 
     private Page<ReviewPost> getMyReviewPosts(Long memberId, Long cursorId, String sort, Pageable page) {
         return cursorId == null ?
-                reviewPostRepositoryCustom.findMyPostAllByMemberId(memberId, sort, page) :
+                reviewPostRepositoryCustom.findMyPostFirstPageByMemberId(memberId, sort, page) :
                 reviewPostRepositoryCustom.findByMemberIdLessThanOrderByIdDesc(memberId, cursorId, sort, page);
     }
 }

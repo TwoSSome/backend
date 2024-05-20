@@ -1,6 +1,7 @@
 package towssome.server.repository;
 
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +21,10 @@ public class ReviewPostRepositoryImpl implements ReviewPostRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<ReviewPost> findAllByOrderByReviewIdDesc(Pageable page, String sort) {
+    public Page<ReviewPost> findFirstPageByOrderByReviewIdDesc(Boolean recommend, Pageable page) {
         List<ReviewPost> reviewPosts = queryFactory
                 .selectFrom(reviewPost)
-                .orderBy(orderSpecifier(sort))
+                .orderBy(reviewPost.id.desc())
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
                 .fetch();
@@ -38,11 +39,11 @@ public class ReviewPostRepositoryImpl implements ReviewPostRepositoryCustom {
     }
 
     @Override
-    public Page<ReviewPost> findByCursorIdLessThanOrderByReviewIdDesc(Long cursorId, String sort,Pageable page) {
+    public Page<ReviewPost> findByCursorIdLessThanOrderByReviewIdDesc(Long cursorId, Boolean recommend, Pageable page) {
         List<ReviewPost> reviewPosts = queryFactory
                 .selectFrom(reviewPost)
+                .orderBy(reviewPost.id.desc())
                 .where(reviewPost.id.lt(cursorId))
-                .orderBy(orderSpecifier(sort))
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
                 .fetch();
@@ -58,11 +59,12 @@ public class ReviewPostRepositoryImpl implements ReviewPostRepositoryCustom {
     }
 
     @Override
-    public Page<ReviewPost> findMyPostAllByMemberId(Long memberId, String sort, Pageable page) {
-        List<ReviewPost> reviewPosts = queryFactory
+    public Page<ReviewPost> findMyPostFirstPageByMemberId(Long memberId, String sort, Pageable page) {
+        List<ReviewPost> reviewPosts;
+        reviewPosts = queryFactory
                 .selectFrom(reviewPost)
                 .where(reviewPost.member.id.eq(memberId))
-                .orderBy(reviewPost.id.desc())
+                .orderBy(getOrderSpecifier(sort))
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
                 .fetch();
@@ -79,30 +81,31 @@ public class ReviewPostRepositoryImpl implements ReviewPostRepositoryCustom {
 
     @Override
     public Page<ReviewPost> findByMemberIdLessThanOrderByIdDesc(Long memberId, Long cursorId, String sort, Pageable page) {
-        List<ReviewPost> reviewPosts = queryFactory
+        List<ReviewPost> reviewPosts;
+        JPAQuery<Long> count;
+        reviewPosts = queryFactory
                 .selectFrom(reviewPost)
-                .where(reviewPost.member.id.eq(memberId).and(reviewPost.id.lt(cursorId)))
-                .orderBy(orderSpecifier(sort))
+                .where(reviewPost.member.id.eq(memberId).and(getLTGT(sort, cursorId)))
+                .orderBy(getOrderSpecifier(sort))
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
                 .fetch();
 
-        JPAQuery<Long> count = queryFactory
+        count = queryFactory
                 .select(reviewPost.count())
-                .from(reviewPost)
-                .where(reviewPost.member.id.eq(memberId).and(reviewPost.id.lt(cursorId)))
+                .where(reviewPost.member.id.eq(memberId).and(getLTGT(sort, cursorId)))
+                .orderBy(getOrderSpecifier(sort))
                 .offset(page.getOffset())
                 .limit(page.getPageSize());
 
         return PageableExecutionUtils.getPage(reviewPosts, page, count::fetchOne);
     }
 
-    private OrderSpecifier<Long> orderSpecifier(String sort){
-        if(Objects.equals(sort, "asc")){
-            return reviewPost.id.asc();
-        }
-        else{
-            return reviewPost.id.desc();
-        }
+    private OrderSpecifier<Long> getOrderSpecifier(String sort) {
+        return Objects.equals(sort, "asc") ? reviewPost.id.asc() : reviewPost.id.desc();
+    }
+
+    private BooleanExpression getLTGT(String sort, Long cursorId){
+        return Objects.equals(sort, "asc") ? reviewPost.id.gt(cursorId) : reviewPost.id.lt(cursorId);
     }
 }
