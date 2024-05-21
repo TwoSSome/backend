@@ -17,11 +17,11 @@ public class Mating extends BaseEntity{
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "offer_member_id")
     private Member offerMember;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "obtain_member_id")
     private Member obtainMember;
 
     @Enumerated(value = EnumType.STRING)

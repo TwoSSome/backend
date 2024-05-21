@@ -67,7 +67,5 @@ public class MemberService {
         member.changeProfile(nickName);
     }
 
-    public void createMate(Member member1, Member member2) {
 
-    }
 }

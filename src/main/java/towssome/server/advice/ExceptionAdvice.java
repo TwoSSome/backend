@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import towssome.server.dto.ErrorResult;
 import towssome.server.exception.DuplicateIdException;
+import towssome.server.exception.NotFoundMatingException;
 import towssome.server.exception.NotFoundMemberException;
 import towssome.server.exception.NotFoundReviewPostException;
 
@@ -34,6 +35,12 @@ public class ExceptionAdvice {
     @ExceptionHandler
     public ResponseEntity<ErrorResult> notFoundMemberException(UsernameNotFoundException e) {
         ErrorResult errorResult = new ErrorResult("UsernameNotFoundException", e.getMessage());
+        return new ResponseEntity<>(errorResult, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResult> notFoundMateException(NotFoundMatingException e) {
+        ErrorResult errorResult = new ErrorResult("NotFoundMatingException", e.getMessage());
         return new ResponseEntity<>(errorResult, HttpStatus.NOT_FOUND);
     }
 
