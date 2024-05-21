@@ -6,10 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.entity.*;
 import towssome.server.exception.NotFoundMemberException;
-import towssome.server.repository.HashTagRepository;
-import towssome.server.repository.MatingRepository;
-import towssome.server.repository.MemberRepository;
-import towssome.server.repository.VirtualMateHashtagRepository;
+import towssome.server.repository.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,7 +20,7 @@ public class MemberService {
     private final PhotoService photoService;
     private final VirtualMateHashtagRepository virtualMateHashtagRepository;
     private final HashTagRepository hashTagRepository;
-    private final MatingRepository matingRepository;
+    private final ProfileTagRepository profileTagRepository;
 
     public Member getMember(Long memberId) {
         return memberRepository.findById(memberId).orElseThrow(() ->
@@ -35,6 +32,11 @@ public class MemberService {
                 new NotFoundMemberException("해당 멤버가 없습니다"));
     }
 
+    /**
+     * 가상 연인 프로필 태그 생성
+     * @param hashtags
+     * @param member
+     */
     public void createVirtual(List<Long> hashtags, Member member) {
         for (Long id : hashtags) {
             HashTag hashTag = hashTagRepository.findById(id).orElseThrow();
@@ -43,6 +45,21 @@ public class MemberService {
                     hashTag
             ));
         }
+    }
+
+    /**
+     * 가상 연인 프로필 태그 가져오기
+     * @param member
+     * @return
+     */
+    @Transactional
+    public List<HashTag> getVirtualTag(Member member) {
+        List<VirtualMateHashtag> list = virtualMateHashtagRepository.findAllByMember(member);
+        ArrayList<HashTag> hashTags = new ArrayList<>();
+        for (VirtualMateHashtag v : list) {
+            hashTags.add(v.getHashTag());
+        }
+        return hashTags;
     }
 
     @Transactional
@@ -65,6 +82,23 @@ public class MemberService {
     @Transactional
     public void changeProfile(Member member, String nickName) {
         member.changeProfile(nickName);
+    }
+
+    /**
+     * 해당 멤버의 프로필 태그 리턴
+     * @param member
+     * @return
+     */
+    @Transactional
+    public List<HashTag> getProfileTag(Member member) {
+        ArrayList<HashTag> result = new ArrayList<>();
+
+        List<ProfileTag> list = profileTagRepository.findAllByMember(member);
+        for (ProfileTag profileTag : list) {
+            result.add(profileTag.getHashTag());
+        }
+
+        return result;
     }
 
 

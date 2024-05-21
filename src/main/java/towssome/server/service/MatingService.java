@@ -75,8 +75,9 @@ public class MatingService {
     @Transactional
     public List<HashTag> findMateHashTags(Member member) {
         Mating mating = matingRepository.
-                findByObtainMemberOrOfferMemberAndStatus(member, member, MatingStatus.MATING)
+                findByObtainMemberOrOfferMember(member, member)
                 .orElseThrow(() -> new NotFoundMatingException("메이트가 없습니다"));
+        if(mating.getStatus() == MatingStatus.OFFER) return null;
         ArrayList<HashTag> result = new ArrayList<>();
 
         if (mating.getObtainMember().equals(member)) {

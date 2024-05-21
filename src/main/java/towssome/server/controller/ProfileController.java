@@ -6,10 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.advice.MemberAdvice;
-import towssome.server.dto.CreateMateRes;
-import towssome.server.dto.CreateVirtualRes;
-import towssome.server.dto.ProfileRes;
-import towssome.server.dto.UpdateProfileReq;
+import towssome.server.dto.*;
+import towssome.server.entity.HashTag;
 import towssome.server.entity.Member;
 import towssome.server.entity.Photo;
 import towssome.server.service.BookMarkService;
@@ -18,6 +16,8 @@ import towssome.server.service.PhotoService;
 import towssome.server.service.ViewlikeService;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,10 +32,19 @@ public class ProfileController {
     public ProfileRes getMyProfile(){
         Member jwtMember = memberAdvice.findJwtMember();
 
+        List<HashTag> list = memberService.getProfileTag(jwtMember);
+        ArrayList<HashtagRes> res = new ArrayList<>();
+        for (HashTag hashTag : list) {
+            res.add(new HashtagRes(
+                    hashTag.getId(),
+                    hashTag.getName()
+            ));
+        }
+
         return new ProfileRes(
                 jwtMember.getNickName(),
                 jwtMember.getProfilePhoto() == null ? null : jwtMember.getProfilePhoto().getS3Path(),
-                null
+                res
         );
     }
 
@@ -66,7 +75,20 @@ public class ProfileController {
     @GetMapping("/{id}")
     public ProfileRes getProfile(@PathVariable Long id){
 
-        return null;
+        Member member = memberService.getMember(id);
+        List<HashTag> list = memberService.getProfileTag(member);
+        ArrayList<HashtagRes> res = new ArrayList<>();
+        for (HashTag hashTag : list) {
+            res.add(new HashtagRes(
+                    hashTag.getId(),
+                    hashTag.getName()
+            ));
+        }
+
+        return new ProfileRes(
+                member.getNickName(),
+                member.getProfilePhoto().getS3Path(),
+                res);
     }
 
 

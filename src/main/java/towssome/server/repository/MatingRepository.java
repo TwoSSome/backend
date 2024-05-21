@@ -12,8 +12,6 @@ public interface MatingRepository extends JpaRepository<Mating,Long> {
 
     Optional<Mating> findByObtainMember(Member member);
 
-    Optional<Mating> findByObtainMemberOrOfferMemberAndStatus(Member member1, Member member2, MatingStatus status);
-
     Optional<Mating> findByObtainMemberOrOfferMember(Member member1, Member member2);
 
     boolean existsByOfferMember(Member member);

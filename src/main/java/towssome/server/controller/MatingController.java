@@ -1,6 +1,7 @@
 package towssome.server.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import towssome.server.advice.MemberAdvice;
@@ -37,7 +38,23 @@ public class MatingController {
         Member jwtMember = memberAdvice.findJwtMember();
         matingService.createOffer(jwtMember, memberService.getMember(memberId));
 
-        return null;
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/accept")
+    public ResponseEntity<?> acceptOffer(@RequestBody Long matingId){
+
+        matingService.acceptOffer(matingService.findById(matingId));
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/reject")
+    public ResponseEntity<?> rejectOffer(@RequestBody Long matingId){
+
+        matingService.rejectOffer(matingService.findById(matingId));
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 

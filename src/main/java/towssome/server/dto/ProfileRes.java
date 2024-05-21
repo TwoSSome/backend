@@ -7,6 +7,6 @@ import java.util.List;
 public record ProfileRes(
         String nickName,
         String profileImagePath,
-        List<String> hashTagList
+        List<HashtagRes> profileTagList
 ) {
 }
