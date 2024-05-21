@@ -9,6 +9,8 @@ TestInit.java
 src/test/
 src/test/java/towssome/server/ServerApplicationTests.java
 build.gradle
+기능_추가.md
+버그_수정.md
 
 ### STS ###
 .apt_generated
