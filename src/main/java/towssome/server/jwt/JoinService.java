@@ -4,15 +4,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import towssome.server.entity.Category;
-import towssome.server.entity.Member;
-import towssome.server.entity.Photo;
+import towssome.server.entity.*;
 import towssome.server.exception.DuplicateIdException;
 import towssome.server.repository.CategoryRepository;
+import towssome.server.repository.HashTagRepository;
 import towssome.server.repository.MemberRepository;
+import towssome.server.repository.ProfileTagRepository;
+import towssome.server.service.HashtagService;
 import towssome.server.service.PhotoService;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +24,8 @@ public class JoinService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final CategoryRepository categoryRepository;
     private final PhotoService photoService;
+    private final HashTagRepository hashTagRepository;
+    private final ProfileTagRepository profileTagRepository;
 
     public Member joinProcess(JoinDTO joinDTO, MultipartFile multipartFile)  {
 
@@ -44,6 +48,7 @@ public class JoinService {
         }
 
 
+
         Member member = new Member(
                 username,
                 bCryptPasswordEncoder.encode(password),
@@ -61,6 +66,19 @@ public class JoinService {
                 member
         );
         categoryRepository.save(category);
+
+        //프로필태그 생성
+        ArrayList<HashTag> hashTags = new ArrayList<>();
+        for (Long profileTagId : joinDTO.profileTagIds()) {
+            hashTags.add(hashTagRepository.findById(profileTagId).orElseThrow());
+        }
+
+        for (HashTag hashTag : hashTags) {
+            profileTagRepository.save(new ProfileTag(
+                    member,
+                    hashTag
+            ));
+        }
 
         return member;
     }

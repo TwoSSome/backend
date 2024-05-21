@@ -73,7 +73,9 @@ public class SecurityConfig {
                         .requestMatchers("/admin").hasRole("ADMIN") //role 이 ROLE_ADMIN 인 경우만 인가
                         .requestMatchers("/reissue").permitAll()
                         .requestMatchers("/auth","/subscribe/*",
-                                "/community/create","/community/delete/*","/community/update/*").authenticated() //인증 필요
+                                "/community/create","/community/delete/*","/community/update/*",
+                                "/profile/*","/mating/*","/hashtag/virtual","/bookmark/*",
+                                "/category/*").authenticated() //인증 필요
                         .anyRequest().permitAll()); //나머지 모든 요청에 대해서 인가
 
         //LoginFilter 이전에 등록

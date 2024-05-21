@@ -22,7 +22,10 @@ public class MemberController {
     private final MemberAdvice memberAdvice;
 
     @PostMapping("/member/join")
-    public ResponseEntity<String> joinMember(@RequestPart JoinDTO req, @RequestPart(required = false) MultipartFile profileImage) {
+    public ResponseEntity<String> joinMember(
+            @RequestPart JoinDTO req,
+            @RequestPart(required = false)
+            MultipartFile profileImage) {
         joinService.joinProcess(req,profileImage);
         return new ResponseEntity<String>("Join Complete",HttpStatus.OK);
     }

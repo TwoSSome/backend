@@ -23,6 +23,7 @@ public class SubscribeRepositoryImpl implements SubscribeRepositoryCustom{
                 .where(subscribe.subscriber.eq(member))
                 .offset(offset)
                 .limit(limit+1)
+                .orderBy(subscribe.createDate.desc())
                 .fetch();
 
         boolean hasNext = false;

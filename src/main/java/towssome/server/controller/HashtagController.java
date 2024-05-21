@@ -4,9 +4,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import towssome.server.advice.MemberAdvice;
 import towssome.server.dto.HashtagDeleteReq;
+import towssome.server.dto.HashtagRes;
+import towssome.server.entity.HashTag;
+import towssome.server.entity.Member;
 import towssome.server.service.HashtagClassificationService;
 import towssome.server.service.HashtagService;
+import towssome.server.service.MemberService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -14,6 +22,8 @@ import towssome.server.service.HashtagService;
 public class HashtagController {
     private final HashtagService hashtagService;
     private final HashtagClassificationService hashtagClassificationService;
+    private final MemberAdvice memberAdvice;
+    private final MemberService memberService;
 
     @PostMapping("/delete")
     public ResponseEntity<?> deleteHashtag(@RequestPart(value = "req") HashtagDeleteReq req) {
@@ -29,5 +39,22 @@ public class HashtagController {
     @GetMapping
     public ResponseEntity<?> getAllHashtags() {
         return new ResponseEntity<>(hashtagClassificationService.getAllHashtags(), HttpStatus.OK);
+    }
+
+    @GetMapping("/virtual")
+    public List<HashtagRes> virtualHashtag(){
+
+        Member jwtMember = memberAdvice.findJwtMember();
+        List<HashTag> virtualTag = memberService.getVirtualTag(jwtMember);
+
+        ArrayList<HashtagRes> hashtagRes = new ArrayList<>();
+        for (HashTag hashTag : virtualTag) {
+            hashtagRes.add(new HashtagRes(
+                    hashTag.getId(),
+                    hashTag.getName()
+            ));
+        }
+
+        return hashtagRes;
     }
 }
