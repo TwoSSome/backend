@@ -83,7 +83,7 @@ public class BookMarkController {
             ));
         }
         return new CursorResult<>(
-                bookmarkReqs,
+                bookmarkReqs, null,
                 bookMarkService.getCategoryBookMarks(bookMarkService.getCategory(id), page, size).hasNext()
         );
     }
