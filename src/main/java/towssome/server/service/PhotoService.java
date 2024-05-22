@@ -106,6 +106,9 @@ public class PhotoService {
      * @throws IOException
      */
     public Photo saveVotePhoto(MultipartFile file) throws IOException {
+        if (file == null) {
+            return null;
+        }
         UploadPhoto uploadPhoto = uploadPhoto(file);
         Photo photo = new Photo(
                 uploadPhoto.originalFileName(),
