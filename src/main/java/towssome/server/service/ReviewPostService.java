@@ -20,6 +20,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ReviewPostService {
+
     private final ReviewPostRepository reviewPostRepository;
     private final MemberService memberService;
     private final PhotoService photoService;
@@ -28,11 +29,16 @@ public class ReviewPostService {
     private final ReviewPostRepositoryCustom reviewPostRepositoryCustom;
 
 
-    public void createReview(ReviewPostReq reviewReq, List<MultipartFile> photos, String username) throws IOException {
-        Member member = memberService.getMember(username);
+    public void createReview(
+            ReviewPostReq reviewReq,
+            List<MultipartFile> photos,
+            Member member) throws IOException {
         ReviewPost reviewPost = new ReviewPost(
                 reviewReq.body(),
                 reviewReq.price(),
+                reviewReq.reviewType(),
+                reviewReq.whereBuy(),
+                reviewReq.startPoint(),
                 member
         );
         reviewPostRepository.save(reviewPost);
@@ -84,13 +90,16 @@ public class ReviewPostService {
                     review.getBody(),
                     review.getPrice(),
                     review.getCreateDate(),
-                    review.getLatsModifiedDate(),
+                    review.getLastModifiedDate(),
                     review.getMember().getId(),
                     photoService.getPhotoS3Path(review),
                     false,
                     false,
                     false,
-                    hashtagClassificationService.getHashtags(review.getId()))
+                    hashtagClassificationService.getHashtags(review.getId()),
+                    review.getReviewType(),
+                    review.getStarPoint(),
+                    review.getWhereBuy())
             );
         }
         cursorId = reviewPosts.isEmpty() ?
@@ -123,13 +132,16 @@ public class ReviewPostService {
                     review.getBody(),
                     review.getPrice(),
                     review.getCreateDate(),
-                    review.getLatsModifiedDate(),
+                    review.getLastModifiedDate(),
                     member.getId(),
                     photoService.getPhotoS3Path(review),
                     true,
                     false,
                     false,
-                    hashtagClassificationService.getHashtags(review.getId()))
+                    hashtagClassificationService.getHashtags(review.getId()),
+                    review.getReviewType(),
+                    review.getStarPoint(),
+                    review.getWhereBuy())
             );
         }
 

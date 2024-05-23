@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.advice.MemberAdvice;
@@ -24,6 +23,7 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/review")
 public class ReviewController {
+
     private final ReviewPostService reviewPostService;
     private final PhotoService photoService;
     private final MemberAdvice memberAdvice;
@@ -35,8 +35,9 @@ public class ReviewController {
     public ResponseEntity<?> createReview(@RequestPart(value = "body") ReviewPostReq req,
                                           @RequestPart(value = "photos", required = false) List<MultipartFile> photos) throws IOException { // additional implementation needed for session
         log.info("reviewPostDTO = {}", req);
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        reviewPostService.createReview(req, photos, username);
+
+        Member jwtMember = memberAdvice.findJwtMember();
+        reviewPostService.createReview(req, photos, jwtMember);
         return new ResponseEntity<>("Review Create Complete", HttpStatus.OK);
     }
 
@@ -55,13 +56,16 @@ public class ReviewController {
                     review.getBody(),
                     review.getPrice(),
                     review.getCreateDate(),
-                    review.getLatsModifiedDate(),
+                    review.getLastModifiedDate(),
                     review.getMember().getId(),
                     photo,
                     false,
                     false,
                     false,
-                    hashtagClassificationService.getHashtags(reviewId)
+                    hashtagClassificationService.getHashtags(reviewId),
+                    review.getReviewType(),
+                    review.getStarPoint(),
+                    review.getWhereBuy()
                     );
         }else {
             //회원 조회
@@ -70,13 +74,16 @@ public class ReviewController {
                     review.getBody(),
                     review.getPrice(),
                     review.getCreateDate(),
-                    review.getLatsModifiedDate(),
+                    review.getLastModifiedDate(),
                     review.getMember().getId(),
                     photo,
                     reviewPostService.isMyPost(member, review),
                     viewlikeService.isLikedPost(member, review),
                     viewlikeService.isBookmarkedPost(member, review),
-                    hashtagClassificationService.getHashtags(reviewId)
+                    hashtagClassificationService.getHashtags(reviewId),
+                    review.getReviewType(),
+                    review.getStarPoint(),
+                    review.getWhereBuy()
             );
         }
 
@@ -145,13 +152,16 @@ public class ReviewController {
                     reviewPost.getBody(),
                     reviewPost.getPrice(),
                     reviewPost.getCreateDate(),
-                    reviewPost.getLatsModifiedDate(),
+                    reviewPost.getLastModifiedDate(),
                     reviewPost.getMember().getId(),
                     photoService.getPhotoS3Path(reviewPost),
                     false,
                     false,
                     false,
-                    hashtagClassificationService.getHashtags(reviewPost.getId())
+                    hashtagClassificationService.getHashtags(reviewPost.getId()),
+                    reviewPost.getReviewType(),
+                    reviewPost.getStarPoint(),
+                    reviewPost.getWhereBuy()
             ));
         }
         return new PageResult<>(

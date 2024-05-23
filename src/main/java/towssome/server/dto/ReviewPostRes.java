@@ -1,5 +1,7 @@
 package towssome.server.dto;
 
+import towssome.server.enumrated.ReviewType;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -13,6 +15,9 @@ public record ReviewPostRes(
         boolean isMyPost,
         boolean isLikedPost,
         boolean isBookmarked,
-        List<String> hashTags
+        List<String> hashTags,
+        ReviewType reviewType,
+        int startPoint,
+        String whereBuy
 ) {
 }

@@ -79,13 +79,16 @@ public class ViewlikeService {
                     review.getBody(),
                     review.getPrice(),
                     review.getCreateDate(),
-                    review.getLatsModifiedDate(),
+                    review.getLastModifiedDate(),
                     review.getMember().getId(),
                     photoService.getPhotoS3Path(review),
                     reviewPostService.isMyPost(member, review),
                     true,
                     isBookmarkedPost(member, review),
-                    hashtagClassificationService.getHashtags(review.getId())
+                    hashtagClassificationService.getHashtags(review.getId()),
+                    review.getReviewType(),
+                    review.getStarPoint(),
+                    review.getWhereBuy()
             ));
         }
         cursorId = reviewPosts.isEmpty() ?
@@ -102,13 +105,16 @@ public class ViewlikeService {
                     review.getBody(),
                     review.getPrice(),
                     review.getCreateDate(),
-                    review.getLatsModifiedDate(),
+                    review.getLastModifiedDate(),
                     review.getMember().getId(),
                     photoService.getPhotoS3Path(review),
                     reviewPostService.isMyPost(member, review),
                     isLikedPost(member, review),
                     isBookmarkedPost(member, review),
-                    hashtagClassificationService.getHashtags(review.getId())
+                    hashtagClassificationService.getHashtags(review.getId()),
+                    review.getReviewType(),
+                    review.getStarPoint(),
+                    review.getWhereBuy()
             ));
         }
         cursorId = reviewPosts.isEmpty() ?

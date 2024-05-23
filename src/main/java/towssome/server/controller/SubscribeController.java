@@ -42,13 +42,13 @@ public class SubscribeController {
     }
 
     //슬라이스
-    @GetMapping()
-    public CursorResult<SubscribeRes> getSubscribe(
+    @GetMapping
+    public PageResult<SubscribeRes> getSubscribe(
             @RequestParam int page,
             @RequestParam int size){
 
         Member jwtMember = memberAdvice.findJwtMember();
-        return subscribeService.getSubscribeSlice(jwtMember, page, size);
+        return subscribeService.getSubscribePage(jwtMember, page, size);
     }
 
 }

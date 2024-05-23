@@ -1,8 +1,12 @@
 package towssome.server.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import towssome.server.controller.PageResult;
 import towssome.server.dto.*;
 import towssome.server.entity.Member;
 import towssome.server.entity.Subscribe;
@@ -49,12 +53,18 @@ public class SubscribeService {
     }
 
     @Transactional
-    public CursorResult<SubscribeRes> getSubscribeSlice(Member member, int offset, int limit) {
+    public PageResult<SubscribeRes> getSubscribePage(Member subscriber, int page, int size) {
         ArrayList<SubscribeRes> subscribeRes = new ArrayList<>();
-        SubscribeSliceDTO subscribeSliceDTO = subscribeRepository.subscribeSlice(member, offset, limit);
-        for (Subscribe subscribe : subscribeSliceDTO.subscribes()) {
+        Page<Subscribe> subscribePage = subscribeRepository.findAllBySubscriber(subscriber,
+                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createDate")));
+        for (Subscribe subscribe : subscribePage.getContent()) {
+
+            String profilePhotoPath =
+                    subscribe.getFollowed().getProfilePhoto() == null ? null :
+                            subscribe.getFollowed().getProfilePhoto().getS3Path();
+
             subscribeRes.add(new SubscribeRes(
-                    subscribe.getFollowed().getProfilePhoto().getS3Path(),
+                    profilePhotoPath,
                     subscribe.getFollowed().getNickName(),
                     subscribe.getId(),
                     subscribe.getFollowed().getId(),
@@ -62,10 +72,12 @@ public class SubscribeService {
             ));
         }
 
-        return new CursorResult<>(
+        return new PageResult<>(
                 subscribeRes,
-                null,
-                subscribeSliceDTO.hasNext()
+                subscribePage.getTotalElements(),
+                subscribePage.getTotalPages(),
+                page,
+                size
         );
     }
 

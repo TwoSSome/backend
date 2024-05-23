@@ -21,6 +21,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 
+import static towssome.server.jwt.JwtStatic.*;
+
 @RequiredArgsConstructor
 @Slf4j
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
@@ -58,11 +60,11 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String role = auth.getAuthority();
 
         //토큰 생성
-        String access = jwtUtil.createJwt("access", username, role, 600000L);
-        String refresh = jwtUtil.createJwt("refresh", username, role, 86400000L);
+        String access = jwtUtil.createJwt("access", username, role, ACCESS_EXPIRE_MS);
+        String refresh = jwtUtil.createJwt("refresh", username, role, REFRESH_EXPIRE_MS);
 
         //refreshToken 저장
-        addRefreshEntity(username,refresh,86400000L);
+        addRefreshEntity(username,refresh,REFRESH_EXPIRE_MS);
 
         //응답 설정
         response.setHeader("access", access);

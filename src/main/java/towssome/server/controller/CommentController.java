@@ -64,7 +64,7 @@ public class CommentController {
                     comment.getId(),
                     comment.getBody(),
                     comment.getCreateDate(),
-                    comment.getLatsModifiedDate(),
+                    comment.getLastModifiedDate(),
                     comment.getMember().getId(),
                     comment.getReviewPost().getId()
             ));
