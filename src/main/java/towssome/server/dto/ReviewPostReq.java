@@ -7,6 +7,6 @@ public record ReviewPostReq(
         int price,
         String whereBuy,
         int startPoint,
-        ReviewType reviewType
+        String reviewType
 ) {
 }
