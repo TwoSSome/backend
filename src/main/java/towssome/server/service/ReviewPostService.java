@@ -9,7 +9,9 @@ import org.springframework.web.multipart.MultipartFile;
 import towssome.server.dto.*;
 import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
+import towssome.server.enumrated.ReviewType;
 import towssome.server.exception.NotFoundReviewPostException;
+import towssome.server.exception.NotMatchReviewTypeException;
 import towssome.server.repository.ReviewPostRepository;
 import towssome.server.repository.ReviewPostRepositoryCustom;
 
@@ -33,10 +35,20 @@ public class ReviewPostService {
             ReviewPostReq reviewReq,
             List<MultipartFile> photos,
             Member member) throws IOException {
+
+        ReviewType reviewType = null;
+        if (reviewReq.reviewType().equals("RECEIVED")) {
+            reviewType = ReviewType.RECEIVED;
+        } else if (reviewReq.reviewType().equals("GIVEN")) {
+            reviewType = ReviewType.GIVEN;
+        } else {
+            throw new NotMatchReviewTypeException("정해진 타입이 아닙니다");
+        }
+
         ReviewPost reviewPost = new ReviewPost(
                 reviewReq.body(),
                 reviewReq.price(),
-                reviewReq.reviewType(),
+                reviewType,
                 reviewReq.whereBuy(),
                 reviewReq.startPoint(),
                 member

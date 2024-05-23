@@ -1,6 +1,5 @@
 import sys
 import subprocess
-subprocess.check_call([sys.executable,'-m', 'pip', 'install', '--upgrade', 'pip'])
 try:
     # 없는 모듈 import시 에러 발생
     from keybert import KeyBERT
@@ -31,6 +30,82 @@ except:
 
 from collections import Counter
 import re
+
+app = Flask(__name__)
+
+def remove_stop_words(text, stop_words): # 불용어 제거
+    okt.normalize(text)
+    pattern = r'\b(' + '|'.join(stop_words) + r')\b'
+    return re.sub(pattern, '', text, flags=re.IGNORECASE)
+
+def noun_extractor(text, phrase): # 의미있는 명사 추출
+    results = []
+    result = kiwi.analyze(text)
+    prev_token = ''
+
+    for token, pos, _, _ in result[0][0]:
+        if pos.startswith(('NNP', 'NNG')):  # 명사인 경우
+            if prev_token + " " + token in phrase:  # 연결된 토큰이 phrase에 포함되면
+                results.append(prev_token + token)  # 결과 리스트에 추가
+            else:
+                if prev_token:  # 이전 토큰이 비어있지 않은 경우
+                    results.append(prev_token)  # 이전 토큰을 결과에 추가
+                prev_token = token  # 현재 토큰을 이전 토큰으로 설정
+        else:
+            if prev_token:  # 비명사이며 이전 토큰이 비어있지 않은 경우
+                results.append(prev_token)  # 이전 토큰을 결과에 추가
+                prev_token = ''  # 이전 토큰 초기화
+    return results
+
+def updateFrequency(keywords, word_counts, existing_words):
+    for word, count in word_counts.items():
+        if count >= 2:  # 빈도수가 2 초과
+            if word not in existing_words:  # 기존 리스트에 없는 경우
+                keywords.append([word,count * 0.2])  # 새 단어를 추가하고 초기 가중치를 0.2로 설정
+            else:
+                index = existing_words.index(word)  # 기존 단어의 인덱스 찾기
+                if count == 1:
+                    keywords[index][1] -= 0.2  # 빈도수가 1인 경우 가중치 0.2 감소
+                if count >= 2:
+                    keywords[index][1] += count * 0.2  # 빈도수가 2인 경우 가중치 0.2 증가
+    return keywords
+
+@app.route('/makeHashtag', methods=['POST'])
+def main():
+    text = request.data.decode()  # JSON 데이터를 받습니다.
+    print("Received data:", text)
+    # 형태소 분석
+    pos_tagged = okt.pos(text)
+
+    # 형용사를 제외하고 단어 재조합
+    filtered_text = ''
+    for i, (word, pos) in enumerate(pos_tagged):
+        if pos == 'Josa' and word != '의' and i > 0:  # 조사인 경우, '의'는 제외
+            filtered_text += word  # 앞 단어와 붙여쓰기
+        elif pos not in ('Adjective', 'Verb', 'Josa'):  # 형용사, 동사, 모든 조사 제외
+            filtered_text += ' ' + word  # 그 외의 경우 앞에 공백
+
+    phrase = okt.phrases(filtered_text)
+    filtered_text = remove_stop_words(filtered_text, stopwords)
+    nouns = noun_extractor(filtered_text, phrase)
+
+    # Counter 객체 생성
+    word_counts = Counter(nouns)
+
+    text = ' '.join(nouns)
+    keywords = kw_model.extract_keywords(text, keyphrase_ngram_range=(1,1), stop_words=None, top_n=5)
+    keywords = [[k[0], k[1]] for k in keywords]
+
+    existing_words = [k[0] for k in keywords]  # 키워드 리스트에서 단어만 추출
+    keywords = updateFrequency(keywords, word_counts, existing_words)
+
+    # 가중치에 따라 keywords 리스트를 내림차순으로 정렬
+    sorted_keywords = sorted(keywords, key=lambda x: x[1], reverse=True)
+
+    # 상위 5개 항목 선택
+    top_five_keywords = [keyword[0] for keyword in sorted_keywords[:5]]
+    print(top_five_keywords)
+    return jsonify({"hashtags": top_five_keywords})
 
 model = BertModel.from_pretrained('skt/kobert-base-v1')
 kw_model = KeyBERT(model)
@@ -96,90 +171,9 @@ stopwords = [
     "한마디", "한적이있다", "한켠으로는", "한항목", "할 따름이다", "할 생각이다", "할 줄 안다", "할 지경이다", "할 힘이 있다", "할때",
     "할만하다", "할망정", "할뿐", "할수있다", "할수있어", "할줄알다", "할지라도", "할지언정", "함께", "해도된다",
     "해도좋다", "해봐요", "해서는 안된다", "해야한다", "해요", "했어요", "향하다", "향하여", "향해서", "허",
-    "허걱", "허허", "헉", "헉헉", "헐떡헐떡", "형식으로 쓰여", "혹시", "혹은", "혼자", "훨씬", "휘익", "휴", "흐흐", "흥", "힘입어"
+    "허걱", "허허", "헉", "헉헉", "헐떡헐떡", "형식으로 쓰여", "혹시", "혹은", "혼자", "훨씬", "'",'"'
+                                                                          "휘익", "휴", "흐흐", "흥", "힘입어"
 ]
-app = Flask(__name__)
-
-def remove_stop_words(text, stop_words): # 불용어 제거
-    okt.normalize(text)
-    pattern = r'\b(' + '|'.join(stop_words) + r')\b'
-    return re.sub(pattern, '', text, flags=re.IGNORECASE)
-
-def noun_extractor(text, phrase): # 의미있는 명사 추출
-    results = []
-    result = kiwi.analyze(text)
-    prev_token = ''
-
-    for token, pos, _, _ in result[0][0]:
-        if pos.startswith(('NNP', 'NNG')):  # 명사인 경우
-            if prev_token + " " + token in phrase:  # 연결된 토큰이 phrase에 포함되면
-                results.append(prev_token + token)  # 결과 리스트에 추가
-            else:
-                if prev_token:  # 이전 토큰이 비어있지 않은 경우
-                    results.append(prev_token)  # 이전 토큰을 결과에 추가
-                prev_token = token  # 현재 토큰을 이전 토큰으로 설정
-        else:
-            if prev_token:  # 비명사이며 이전 토큰이 비어있지 않은 경우
-                results.append(prev_token)  # 이전 토큰을 결과에 추가
-                prev_token = ''  # 이전 토큰 초기화
-    return results
-
-def update_frequency(keywords, word_counts, existing_words):
-    for word, count in word_counts.items():
-        if count >= 2:  # 빈도수가 2 초과
-            if word not in existing_words:  # 기존 리스트에 없는 경우
-                keywords.append([word,count * 0.2])  # 새 단어를 추가하고 초기 가중치를 0.2로 설정
-            else:
-                index = existing_words.index(word)  # 기존 단어의 인덱스 찾기
-                if count == 1:
-                    keywords[index][1] -= 0.2  # 빈도수가 1인 경우 가중치 0.2 감소
-                if count >= 2:
-                    keywords[index][1] += count * 0.2  # 빈도수가 2인 경우 가중치 0.2 증가
-    return keywords
-
-@app.route('/makeHashtag')
-def hashtag_maker():
-
-    text = "안녕 또막아" # JSON 데이터를 받습니다.
-    print("Received data:", text)
-    # 형태소 분석
-    pos_tagged = okt.pos(text)
-    print(pos_tagged)
-
-    # 형용사를 제외하고 단어 재조합
-    filtered_text = ''
-    for i, (word, pos) in enumerate(pos_tagged):
-        if pos == 'Josa' and word != '의' and i > 0:  # 조사인 경우, '의'는 제외
-            filtered_text += word  # 앞 단어와 붙여쓰기
-        elif pos not in ('Adjective', 'Verb', 'Josa'):  # 형용사, 동사, 모든 조사 제외
-            filtered_text += ' ' + word  # 그 외의 경우 앞에 공백
-
-    print(filtered_text)
-    phrase = okt.phrases(filtered_text)
-    filtered_text = remove_stop_words(filtered_text, stopwords)
-    nouns = noun_extractor(filtered_text, phrase)
-    print(nouns)
-    # Counter 객체 생성
-    word_counts = Counter(nouns)
-
-    text = ' '.join(nouns)
-    print(text)
-    keywords = kw_model.extract_keywords(text, keyphrase_ngram_range=(1,1), stop_words=None, top_n=5)
-    keywords = [[k[0], k[1]] for k in keywords]
-
-    print(keywords)
-    existing_words = [k[0] for k in keywords]  # 키워드 리스트에서 단어만 추출
-    keywords = update_frequency(keywords, word_counts, existing_words)
-    print(keywords)
-    # 가중치에 따라 keywords 리스트를 내림차순으로 정렬
-    sorted_keywords = sorted(keywords, key=lambda x: x[1], reverse=True)
-    print(sorted_keywords)
-    # 상위 5개 항목 선택
-    top_five_keywords = [keyword[0] for keyword in sorted_keywords[:5]]
-    print(top_five_keywords)
-    return jsonify({"hashtags": top_five_keywords})
-
-
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0",debug=True, port=5000)
+    app.run(debug=True, port=5000, host="0.0.0.0")

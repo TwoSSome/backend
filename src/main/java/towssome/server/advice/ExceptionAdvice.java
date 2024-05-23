@@ -53,4 +53,10 @@ public class ExceptionAdvice {
         return new ResponseEntity<>(errorResult, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler
+    public ResponseEntity<ErrorResult> notMatchReviewTypeException(NotMatchReviewTypeException e) {
+        ErrorResult errorResult = new ErrorResult("NotMatchReviewTypeException", e.getMessage());
+        return new ResponseEntity<>(errorResult, HttpStatus.NOT_FOUND);
+    }
+
 }
