@@ -2,7 +2,7 @@ package towssome.server.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import towssome.server.dto.SubscribeSliceDTO;
+import towssome.server.dto.SubscribePageDTO;
 import towssome.server.entity.Member;
 import towssome.server.entity.Subscribe;
 
@@ -16,7 +16,7 @@ public class SubscribeRepositoryImpl implements SubscribeRepositoryCustom{
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public SubscribeSliceDTO subscribeSlice(Member member, int offset, int limit) {
+    public SubscribePageDTO subscribeSlice(Member member, int offset, int limit) {
 
         List<Subscribe> content = queryFactory
                 .selectFrom(subscribe)
@@ -33,7 +33,7 @@ public class SubscribeRepositoryImpl implements SubscribeRepositoryCustom{
             content.remove(limit);
         }
 
-        return new SubscribeSliceDTO(
+        return new SubscribePageDTO(
                 content,
                 hasNext
         );

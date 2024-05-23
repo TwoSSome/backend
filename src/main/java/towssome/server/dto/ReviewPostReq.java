@@ -1,7 +1,12 @@
 package towssome.server.dto;
 
+import towssome.server.enumrated.ReviewType;
+
 public record ReviewPostReq(
         String body,
-        int price
+        int price,
+        String whereBuy,
+        int startPoint,
+        ReviewType reviewType
 ) {
 }

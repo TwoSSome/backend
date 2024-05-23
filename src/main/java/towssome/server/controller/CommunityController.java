@@ -183,7 +183,7 @@ public class CommunityController {
                 post.getTitle(),
                 post.getBody(),
                 post.getCreateDate(),
-                post.getLatsModifiedDate(),
+                post.getLastModifiedDate(),
                 photoS3Paths,
                 quotationId,
                 voteRes,

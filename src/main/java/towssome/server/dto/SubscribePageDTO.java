@@ -4,7 +4,7 @@ import towssome.server.entity.Subscribe;
 
 import java.util.List;
 
-public record SubscribeSliceDTO(
+public record SubscribePageDTO(
         List<Subscribe> subscribes,
         boolean hasNext
 ) {

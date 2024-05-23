@@ -14,6 +14,8 @@ import towssome.server.entity.RefreshToken;
 
 import java.util.Date;
 
+import static towssome.server.jwt.JwtStatic.*;
+
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -71,8 +73,8 @@ public class ReissueController {
         String role = jwtUtil.getRole(refresh);
 
         //make new JWT
-        String newAccess = jwtUtil.createJwt("access", username, role, 600000L);
-        String newRefresh = jwtUtil.createJwt("refresh", username, role, 86400000L); //새 리프레쉬 토큰 발급
+        String newAccess = jwtUtil.createJwt("access", username, role, ACCESS_EXPIRE_MS);
+        String newRefresh = jwtUtil.createJwt("refresh", username, role, REFRESH_EXPIRE_MS); //새 리프레쉬 토큰 발급
 
         if (refresh.equals(newRefresh)) {
             System.out.println("리프레쉬 값이 같습니다");
