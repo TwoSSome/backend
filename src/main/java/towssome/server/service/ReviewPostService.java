@@ -113,6 +113,7 @@ public class ReviewPostService {
                     null;
 
             reviewSimpleRes.add(new ReviewSimpleRes(
+                    review.getId(),
                     profilePhoto,
                     review.getMember().getNickName(),
                     bodyPhoto,
@@ -169,6 +170,7 @@ public class ReviewPostService {
             log.info("review = {}, photoS3path = {}",value.getBody(),bodyPhoto);
 
             reviewSimpleRes.add(new ReviewSimpleRes(
+                    value.getId(),
                     profilePhotoPath,
                     value.getMember().getNickName(),
                     bodyPhoto,
