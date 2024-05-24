@@ -14,7 +14,7 @@ import java.util.Optional;
 @NoArgsConstructor
 public class CommunityPost extends BaseEntity{
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "community_id")
     private Long id;
     private String title;
