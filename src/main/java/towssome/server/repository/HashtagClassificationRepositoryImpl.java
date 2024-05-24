@@ -84,7 +84,7 @@ public class HashtagClassificationRepositoryImpl implements HashtagClassificatio
         JPAQuery<Long> count = queryFactory
                 .select(hashtagClassification.count())
                 .from(hashtagClassification)
-                .where(hashtagContains(keyword))
+                .where(hashtagContains(keyword),nextReviewId(cursorId,false))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize());
 
