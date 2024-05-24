@@ -1,6 +1,7 @@
 package towssome.server.service;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -94,29 +95,28 @@ public class ReviewPostService {
     }
 
     /**최근 리뷰글 or 추천 리뷰글 */
-    public CursorResult<ReviewPostRes> getRecentReviewPage(Long cursorId, Boolean recommend, Pageable page) {
-        List<ReviewPostRes> reviewPostRes = new ArrayList<>();
+    public CursorResult<ReviewSimpleRes> getRecentReviewPage(Long cursorId, Boolean recommend, Pageable page) {
+        List<ReviewSimpleRes> reviewSimpleRes = new ArrayList<>();
         final Page<ReviewPost> reviewPosts = getRecentReviewPosts(cursorId, recommend, page);
+        return getReviewSimpleResCursorResult(reviewSimpleRes, reviewPosts);
+    }
+
+    private CursorResult<ReviewSimpleRes> getReviewSimpleResCursorResult(List<ReviewSimpleRes> reviewSimpleRes, Page<ReviewPost> reviewPosts) {
+        Long cursorId;
         for(ReviewPost review : reviewPosts) {
-            reviewPostRes.add(new ReviewPostRes(
-                    review.getBody(),
-                    review.getPrice(),
-                    review.getCreateDate(),
-                    review.getLastModifiedDate(),
-                    review.getMember().getId(),
-                    photoService.getPhotoS3Path(review),
-                    false,
-                    false,
-                    false,
-                    hashtagClassificationService.getHashtags(review.getId()),
-                    review.getReviewType(),
-                    review.getStarPoint(),
-                    review.getWhereBuy())
-            );
+            List<PhotoInPost> bodyPhotos = photoService.getPhotoS3Path(review);
+            String bodyPhoto = bodyPhotos.isEmpty() ? null : bodyPhotos.get(0).photoPath();
+
+            reviewSimpleRes.add(new ReviewSimpleRes(
+                    review.getMember().getProfilePhoto(),
+                    review.getMember().getNickName(),
+                    bodyPhoto,
+                    hashtagClassificationService.getHashtags(review.getId())
+            ));
         }
         cursorId = reviewPosts.isEmpty() ?
                 null : reviewPosts.getContent().get(reviewPosts.getContent().size() - 1).getId();
-        return new CursorResult<>(reviewPostRes, cursorId, reviewPosts.hasNext());
+        return new CursorResult<>(reviewSimpleRes, cursorId, reviewPosts.hasNext());
     }
 
     /**
@@ -136,31 +136,10 @@ public class ReviewPostService {
     }
 
     /**Get My Posts*/
-    public CursorResult<ReviewPostRes> getMyReviewPage(Member member, Long cursorId, String sort, Pageable page) {
-        List<ReviewPostRes> reviewPostRes = new ArrayList<>();
+    public CursorResult<ReviewSimpleRes> getMyReviewPage(Member member, Long cursorId, String sort, Pageable page) {
+        List<ReviewSimpleRes> reviewSimpleRes = new ArrayList<>();
         final Page<ReviewPost> reviewPosts = getMyReviewPosts(member.getId(), cursorId, sort, page);
-        for(ReviewPost review : reviewPosts) {
-            reviewPostRes.add(new ReviewPostRes(
-                    review.getBody(),
-                    review.getPrice(),
-                    review.getCreateDate(),
-                    review.getLastModifiedDate(),
-                    member.getId(),
-                    photoService.getPhotoS3Path(review),
-                    true,
-                    false,
-                    false,
-                    hashtagClassificationService.getHashtags(review.getId()),
-                    review.getReviewType(),
-                    review.getStarPoint(),
-                    review.getWhereBuy())
-            );
-        }
-
-        cursorId = reviewPosts.isEmpty() ?
-                null : reviewPosts.getContent().get(reviewPosts.getContent().size() - 1).getId();
-
-        return new CursorResult<>(reviewPostRes, cursorId, reviewPosts.hasNext());
+        return getReviewSimpleResCursorResult(reviewSimpleRes, reviewPosts);
     }
 
     private Page<ReviewPost> getMyReviewPosts(Long memberId, Long cursorId, String sort, Pageable page) {

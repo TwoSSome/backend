@@ -28,7 +28,7 @@ public class ReviewController {
     private final PhotoService photoService;
     private final MemberAdvice memberAdvice;
     private final ViewlikeService viewlikeService;
-    private static final int PAGE_SIZE = 2;
+    private static final int PAGE_SIZE = 5;
     private final HashtagClassificationService hashtagClassificationService;
 
     @PostMapping(path = "/create")
@@ -121,25 +121,11 @@ public class ReviewController {
      * @param recommend (추천) true or false
      */
     @GetMapping
-    public CursorResult<ReviewPostRes> getReviews(@RequestParam(value = "cursorId", required = false) Long cursorId,
+    public CursorResult<ReviewSimpleRes> getReviews(@RequestParam(value = "cursorId", required = false) Long cursorId,
                                                   @RequestParam(value = "size", required = false) Integer size,
                                                   @RequestParam(value = "recommend", required = false) Boolean recommend) {
         if(size == null) size = PAGE_SIZE;
         return reviewPostService.getRecentReviewPage(cursorId, recommend, PageRequest.of(0, size));
-    }
-
-    /** 내가 쓴 리뷰글 목록 조회
-     * @param cursorId (cursorId보다 작은 리뷰글들을 가져옴)
-     * @param size (가져올 리뷰글의 개수)
-     * @param sort (asc or desc(default))
-     */
-    @GetMapping("/my")
-    public CursorResult<ReviewPostRes> getMyReviews(@RequestParam(value = "cursorId", required = false) Long cursorId,
-                                                    @RequestParam(value = "size", required = false) Integer size,
-                                                    @RequestParam(value = "sort", required = false) String sort) {
-        Member member = memberAdvice.findJwtMember();
-        if(size == null) size = PAGE_SIZE;
-        return reviewPostService.getMyReviewPage(member, cursorId, sort, PageRequest.of(0, size));
     }
 
     /** 해시태그 검색 */

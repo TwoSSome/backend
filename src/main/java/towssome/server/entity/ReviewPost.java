@@ -36,4 +36,10 @@ public class ReviewPost extends BaseEntity{
         this.starPoint = starPoint;
         this.member = member;
     }
+
+    public ReviewPost(String body, int price, Member member){
+        this.body = body;
+        this.price = price;
+        this.member = member;
+    }
 }
