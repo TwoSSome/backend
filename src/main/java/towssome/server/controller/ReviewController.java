@@ -144,7 +144,7 @@ public class ReviewController {
 
     /** 해시태그 검색 */
     @GetMapping("/search")
-    public CursorResult<ReviewPostRes> keywordSearch(@RequestParam(value="keyword") String keyword,
+    public CursorResult<ReviewSimpleRes> keywordSearch(@RequestParam(value="keyword") String keyword,
                                                      @RequestParam(value = "cursorId", required = false) Long cursorId,
                                                      @RequestParam(value = "sort", defaultValue = "desc", required = false) String sort,
                                                      @RequestParam(value = "size", required = false) Integer size) {
