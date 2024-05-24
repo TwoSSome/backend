@@ -1,6 +1,7 @@
 package towssome.server.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,10 +11,7 @@ import towssome.server.dto.*;
 import towssome.server.entity.HashTag;
 import towssome.server.entity.Member;
 import towssome.server.entity.Photo;
-import towssome.server.service.BookMarkService;
-import towssome.server.service.MemberService;
-import towssome.server.service.PhotoService;
-import towssome.server.service.ViewlikeService;
+import towssome.server.service.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,6 +25,9 @@ public class ProfileController {
     private final PhotoService photoService;
     private final MemberAdvice memberAdvice;
     private final MemberService memberService;
+    private final ReviewPostService reviewPostService;
+    private static final int PAGE_SIZE = 5;
+
 
     @GetMapping("/my")
     public ProfileRes getMyProfile(){
@@ -91,7 +92,14 @@ public class ProfileController {
                 res);
     }
 
-
+    @GetMapping("/review")
+    public CursorResult<ReviewSimpleRes> getMyReviews(@RequestParam(value = "cursorId", required = false) Long cursorId,
+                                                    @RequestParam(value = "size", required = false) Integer size,
+                                                    @RequestParam(value = "sort", required = false) String sort) {
+        Member member = memberAdvice.findJwtMember();
+        if(size == null) size = PAGE_SIZE;
+        return reviewPostService.getMyReviewPage(member, cursorId, sort, PageRequest.of(0, size));
+    }
 
 
 
