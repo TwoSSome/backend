@@ -8,6 +8,8 @@ public record CommentRes(
         LocalDateTime createDate,
         LocalDateTime lastModifiedDate,
         Long memberId,
-        Long reviewId
+        Long reviewId,
+        Boolean isLiked,
+        Long likeCount
 ) {
 }

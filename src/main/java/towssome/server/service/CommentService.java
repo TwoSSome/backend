@@ -4,9 +4,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import towssome.server.advice.MemberAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.Comment;
 import towssome.server.entity.Member;
@@ -15,7 +15,6 @@ import towssome.server.exception.NotFoundCommentException;
 import towssome.server.exception.NotFoundMemberException;
 import towssome.server.exception.NotFoundReviewPostException;
 import towssome.server.repository.CommentRepository;
-import towssome.server.repository.CommentRepositoryImpl;
 import towssome.server.repository.ReviewPostRepository;
 
 import java.util.ArrayList;
@@ -28,6 +27,8 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final ReviewPostRepository reviewPostRepository;
     private final MemberService memberService;
+    private final CommentLikeService commentLikeService;
+    private final MemberAdvice memberAdvice;
 
     public void createComment(CommentReq commentReq, String username) {
         Long reviewId = commentReq.reviewPostId();
@@ -73,7 +74,9 @@ public class CommentService {
                     comment.getCreateDate(),
                     comment.getLastModifiedDate(),
                     comment.getMember().getId(),
-                    comment.getReviewPost().getId()
+                    comment.getReviewPost().getId(),
+                    commentLikeService.isLikedComment(memberAdvice.findJwtMember(),comment),
+                    commentLikeService.countLike(comment)
             ));
         }
         cursorId = comments.isEmpty()?

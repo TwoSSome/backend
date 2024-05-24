@@ -8,8 +8,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import towssome.server.advice.MemberAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.Comment;
+import towssome.server.entity.Member;
+import towssome.server.service.CommentLikeService;
 import towssome.server.service.CommentService;
 
 import java.io.IOException;
@@ -21,6 +24,8 @@ import java.util.ArrayList;
 @RequestMapping("/review")
 public class CommentController {
     private final CommentService commentService;
+    private final CommentLikeService commentLikeService;
+    private final MemberAdvice memberAdvice;
     private static final int DEFAULT_SIZE = 20;
 
     @PostMapping("/{reviewId}/create")
@@ -61,5 +66,13 @@ public class CommentController {
                                                 @RequestParam(value = "size", required = false) Integer size){
         if(size == null) size = DEFAULT_SIZE;
         return commentService.getCommentPageByReviewId(reviewId, cursorId, sort, PageRequest.of(0,size));
+    }
+
+    @PostMapping("/{reviewId}/commentLike/{commentId}")
+    public ResponseEntity<?> changeLike(@PathVariable Long reviewId, @PathVariable Long commentId){
+        Member user = memberAdvice.findJwtMember();
+        Comment comment = commentService.getComment(commentId);
+        commentLikeService.likeProcess(user, comment);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
