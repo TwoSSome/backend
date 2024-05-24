@@ -44,18 +44,12 @@ public class CommentService {
         commentRepository.save(comment);
     }
 
-    public Comment findComment(Long commentId) {
-        return commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundMemberException("Comment not found with id: " + commentId));
-    }
-
     public Comment getComment(Long commentId) {
         return commentRepository.findById(commentId).orElseThrow(() ->
                 new NotFoundCommentException("해당 코멘트가 존재하지 않습니다."));
     }
 
 
-    @Transactional
     public void updateComment(Long commentId, CommentUpdateReq req) {
         commentRepository.updateComment(commentId, req.body());
     }
@@ -64,6 +58,8 @@ public class CommentService {
         commentRepository.delete(comment);
     }
 
+
+    /* 댓글 조회 */
     public CursorResult<CommentRes> getCommentPageByReviewId(Long reviewId, Long cursorId, String sort, Pageable page){
         List<CommentRes> commentRes = new ArrayList<>();
         final Page<Comment> comments = getCommentsByReviewId(reviewId, cursorId, sort, page);
@@ -76,7 +72,8 @@ public class CommentService {
                     comment.getMember().getId(),
                     comment.getReviewPost().getId(),
                     commentLikeService.isLikedComment(memberAdvice.findJwtMember(),comment),
-                    commentLikeService.countLike(comment)
+                    commentLikeService.countLike(comment),
+                    comment.getFixFlag()
             ));
         }
         cursorId = comments.isEmpty()?
@@ -88,5 +85,23 @@ public class CommentService {
         return cursorId == null?
                 commentRepository.findFirstCommentPage(reviewId, sort, page):
                 commentRepository.findCommentPageByCursorId(reviewId, cursorId, sort, page);
+    }
+
+    /* 댓글 고정 */
+    public Comment getFixedCommentByReviewId(Long reviewId){
+        return commentRepository.findFixedCommentByReviewId(reviewId);
+    }
+
+    public void changeFixedComment(Long reviewId, Long commentId){
+        Comment fixedComment = getFixedCommentByReviewId(reviewId);
+        if(fixedComment != null){
+            commentRepository.updateFixFlag(fixedComment.getId(), false);
+        }
+        commentRepository.updateFixFlag(commentId, true);
+    }
+
+    public void unpinComment(Long reviewId) {
+        Comment fixedComment = getFixedCommentByReviewId(reviewId);
+        if(fixedComment != null) commentRepository.updateFixFlag(fixedComment.getId(), false);
     }
 }

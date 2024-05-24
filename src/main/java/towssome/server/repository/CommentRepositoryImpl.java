@@ -3,6 +3,8 @@ package towssome.server.repository;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +19,8 @@ import static towssome.server.entity.QComment.comment;
 @Repository
 @RequiredArgsConstructor
 public class CommentRepositoryImpl implements CommentRepositoryCustom {
+    @PersistenceContext
+    private EntityManager entityManager;
     private final JPAQueryFactory queryFactory;
 
     @Override
@@ -60,6 +64,16 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
 
         return PageableExecutionUtils.getPage(results, pageable, count::fetchOne);
     }
+
+    @Override
+    public Comment findFixedCommentByReviewId(Long reviewId) {
+        return queryFactory.selectFrom(comment)
+                .where(comment.reviewPost.id.eq(reviewId)
+                        .and(comment.fixFlag.isTrue()))
+                .fetchOne();
+    }
+
+
 
     private BooleanExpression reviewIdContains(Long reviewId) {
         return comment.reviewPost.id.eq(reviewId);

@@ -10,6 +10,7 @@ public record CommentRes(
         Long memberId,
         Long reviewId,
         Boolean isLiked,
-        Long likeCount
+        Long likeCount,
+        Boolean isfixed
 ) {
 }
