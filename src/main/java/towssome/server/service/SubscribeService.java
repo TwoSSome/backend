@@ -81,6 +81,8 @@ public class SubscribeService {
         );
     }
 
+    public CursorResult<>
+
     public Subscribe getSubscribe(Long id) {
         return subscribeRepository.findById(id).orElseThrow();
     }

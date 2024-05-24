@@ -28,7 +28,6 @@ public class ReviewPostService {
     private final PhotoService photoService;
     private final HashtagService hashtagService;
     private final HashtagClassificationService hashtagClassificationService;
-    private final ReviewPostRepositoryCustom reviewPostRepositoryCustom;
 
 
     public void createReview(
@@ -131,8 +130,8 @@ public class ReviewPostService {
 
     private Page<ReviewPost> getRecentReviewPosts(Long cursorId, Boolean recommend, Pageable page) {
         return cursorId == null ?
-                reviewPostRepositoryCustom.findFirstPageByOrderByReviewIdDesc(recommend, page) : // cursor_id가 null이면 가장 최신의 리뷰글부터 페이지를 가져옴 -> 최초 요청
-                reviewPostRepositoryCustom.findByCursorIdLessThanOrderByReviewIdDesc(cursorId, recommend, page); // cursor_id가 null이 아니면 cursor_id보다 작은 리뷰글부터 페이지를 가져옴
+                reviewPostRepository.findFirstPageByOrderByReviewIdDesc(recommend, page) : // cursor_id가 null이면 가장 최신의 리뷰글부터 페이지를 가져옴 -> 최초 요청
+                reviewPostRepository.findByCursorIdLessThanOrderByReviewIdDesc(cursorId, recommend, page); // cursor_id가 null이 아니면 cursor_id보다 작은 리뷰글부터 페이지를 가져옴
     }
 
     /**Get My Posts*/
@@ -163,9 +162,13 @@ public class ReviewPostService {
         return new CursorResult<>(reviewPostRes, cursorId, reviewPosts.hasNext());
     }
 
+    public CursorResult<ReviewPostRes> getSubscribeReviews() {
+        return null;
+    }
+
     private Page<ReviewPost> getMyReviewPosts(Long memberId, Long cursorId, String sort, Pageable page) {
         return cursorId == null ?
-                reviewPostRepositoryCustom.findMyPostFirstPageByMemberId(memberId, sort, page) :
-                reviewPostRepositoryCustom.findByMemberIdLessThanOrderByIdDesc(memberId, cursorId, sort, page);
+                reviewPostRepository.findMyPostFirstPageByMemberId(memberId, sort, page) :
+                reviewPostRepository.findByMemberIdLessThanOrderByIdDesc(memberId, cursorId, sort, page);
     }
 }
