@@ -127,9 +127,9 @@ public class PhotoService {
      * @param reviewPost
      * @return 사진의 URL 리스트
      */
-    public List<PhotoInPost> getPhotoS3Path(ReviewPost reviewPost) { //객체와 id 중에 뭘 파라미터로 받지??
+    public List<PhotoInPost> getPhotoS3Path(ReviewPost reviewPost) {
         List<Photo> photoList = photoRepository.findAllByReviewPost(reviewPost);
-        log.info("photoList = {}", Arrays.toString(photoList.toArray()));
+//        log.info("photoList = {}", Arrays.toString(photoList.toArray()));
         List<PhotoInPost> photos = new ArrayList<>();
         for (Photo photo : photoList) {
             photos.add(new PhotoInPost(photo.getId(),photo.getS3Path()));

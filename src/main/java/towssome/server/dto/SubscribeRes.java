@@ -9,7 +9,8 @@ public record SubscribeRes(
         String nickname,
         Long subscribeId,
         Long followingMemberId,
-        LocalDateTime subscribeDate
+        LocalDateTime subscribeDate,
+        List<String> hashtagList
 
 ) {
 }

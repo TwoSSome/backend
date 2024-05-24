@@ -128,6 +128,20 @@ public class ReviewController {
         return reviewPostService.getRecentReviewPage(cursorId, recommend, PageRequest.of(0, size));
     }
 
+    /**
+     * 구독 계정의 리뷰글 전체 조회
+     * @param page
+     * @return
+     */
+    @GetMapping("/subscribe")
+    public CursorResult<ReviewSimpleRes> getSubscribeReviews(@RequestParam int page){
+
+        Member jwtMember = memberAdvice.findJwtMember();
+
+        return reviewPostService.getSubscribeReview(jwtMember,page);
+    }
+
+
     /** 해시태그 검색 */
     @GetMapping("/search")
     public PageResult<ReviewPostRes> keywordSearch(@RequestPart(value="keyword") String keyword,@RequestParam String sort, @RequestParam int page){
