@@ -5,6 +5,6 @@ import org.springframework.data.domain.Pageable;
 import towssome.server.entity.Comment;
 
 public interface CommentRepositoryCustom {
-
-    Page<Comment> findAllByReviewIdOrderBySort(String sort, Long reviewId, Pageable pageable);
+    Page<Comment> findFirstCommentPage(Long reviewId, String sort, Pageable page);
+    Page<Comment> findCommentPageByCursorId(Long reviewId, Long cursorId, String sort, Pageable page);
 }

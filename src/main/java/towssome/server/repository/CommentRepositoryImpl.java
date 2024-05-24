@@ -20,8 +20,9 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Comment> findAllByReviewIdOrderBySort(String sort, Long reviewId, Pageable pageable) {
-        List<Comment> getComments = queryFactory
+    public Page<Comment> findFirstCommentPage(Long reviewId, String sort, Pageable pageable) {
+        List<Comment> results;
+        results = queryFactory
                 .selectFrom(comment)
                 .where(reviewIdContains(reviewId))
                 .orderBy(getOrderSpecifier(sort))
@@ -36,7 +37,28 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize());
 
-        return PageableExecutionUtils.getPage(getComments, pageable, count::fetchOne);
+        return PageableExecutionUtils.getPage(results, pageable, count::fetchOne);
+    }
+
+    @Override
+    public Page<Comment> findCommentPageByCursorId(Long reviewId,Long cursorId, String sort, Pageable pageable) {
+        List<Comment> results;
+        results = queryFactory
+                .selectFrom(comment)
+                .where(reviewIdContains(reviewId), nextCommentId(cursorId, sort))
+                .orderBy(getOrderSpecifier(sort))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        JPAQuery<Long> count = queryFactory
+                .select(comment.count())
+                .from(comment)
+                .where(reviewIdContains(reviewId), nextCommentId(cursorId, sort))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize());
+
+        return PageableExecutionUtils.getPage(results, pageable, count::fetchOne);
     }
 
     private BooleanExpression reviewIdContains(Long reviewId) {
@@ -45,9 +67,19 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
 
     private com.querydsl.core.types.OrderSpecifier<?> getOrderSpecifier(String sort) {
         if ("desc".equalsIgnoreCase(sort)) {
-            return comment.createDate.desc();
+            return comment.id.desc();
         } else {
-            return comment.createDate.asc();
+            return comment.id.asc();
+        }
+    }
+
+    private BooleanExpression nextCommentId(Long cursorId, String sort){
+        if(cursorId == null) return null;
+        if("desc".equalsIgnoreCase(sort)){
+            return comment.id.lt(cursorId);
+        }
+        else {
+            return comment.id.gt(cursorId);
         }
     }
 }

@@ -7,9 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import towssome.server.dto.CommentListRes;
-import towssome.server.dto.CommentReq;
-import towssome.server.dto.CommentUpdateReq;
+import towssome.server.dto.*;
 import towssome.server.entity.Comment;
 import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
@@ -19,6 +17,9 @@ import towssome.server.exception.NotFoundReviewPostException;
 import towssome.server.repository.CommentRepository;
 import towssome.server.repository.CommentRepositoryImpl;
 import towssome.server.repository.ReviewPostRepository;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -62,8 +63,27 @@ public class CommentService {
         commentRepository.delete(comment);
     }
 
-    public Page<Comment> getComments(String sort, Long reviewId, int page, int size) {
-        Pageable pageable = PageRequest.of(page,size);
-        return commentRepository.findAllByReviewIdOrderBySort(sort, reviewId, pageable);
+    public CursorResult<CommentRes> getCommentPageByReviewId(Long reviewId, Long cursorId, String sort, Pageable page){
+        List<CommentRes> commentRes = new ArrayList<>();
+        final Page<Comment> comments = getCommentsByReviewId(reviewId, cursorId, sort, page);
+        for(Comment comment:comments){
+            commentRes.add(new CommentRes(
+                    comment.getId(),
+                    comment.getBody(),
+                    comment.getCreateDate(),
+                    comment.getLastModifiedDate(),
+                    comment.getMember().getId(),
+                    comment.getReviewPost().getId()
+            ));
+        }
+        cursorId = comments.isEmpty()?
+                null:comments.getContent().get(comments.getContent().size()-1).getId();
+        return new CursorResult<>(commentRes, cursorId, comments.hasNext());
+    }
+
+    public Page<Comment> getCommentsByReviewId(Long reviewId, Long cursorId, String sort, Pageable page){
+        return cursorId == null?
+                commentRepository.findFirstCommentPage(reviewId, sort, page):
+                commentRepository.findCommentPageByCursorId(reviewId, cursorId, sort, page);
     }
 }
