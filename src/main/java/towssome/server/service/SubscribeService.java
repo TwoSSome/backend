@@ -9,7 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import towssome.server.controller.PageResult;
 import towssome.server.dto.*;
 import towssome.server.entity.Member;
+import towssome.server.entity.ProfileTag;
 import towssome.server.entity.Subscribe;
+import towssome.server.repository.ProfileTagRepository;
 import towssome.server.repository.SubscribeRepository;
 
 import java.util.ArrayList;
@@ -20,6 +22,7 @@ import java.util.List;
 public class SubscribeService {
 
     private final SubscribeRepository subscribeRepository;
+    private final ProfileTagRepository profileTagRepository;
 
     public Subscribe addSubscribe(Member subscriber, Member following) {
         Subscribe subscribe = new Subscribe(
@@ -63,12 +66,19 @@ public class SubscribeService {
                     subscribe.getFollowed().getProfilePhoto() == null ? null :
                             subscribe.getFollowed().getProfilePhoto().getS3Path();
 
+            List<ProfileTag> list = profileTagRepository.findAllByMember(subscribe.getFollowed());
+            ArrayList<String> hashtags = new ArrayList<>();
+            for (ProfileTag profileTag : list) {
+                hashtags.add(profileTag.getHashTag().getName());
+            }
+
             subscribeRes.add(new SubscribeRes(
                     profilePhotoPath,
                     subscribe.getFollowed().getNickName(),
                     subscribe.getId(),
                     subscribe.getFollowed().getId(),
-                    subscribe.getCreateDate()
+                    subscribe.getCreateDate(),
+                    hashtags
             ));
         }
 

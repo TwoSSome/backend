@@ -7,18 +7,51 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
+import towssome.server.dto.CursorResult;
+import towssome.server.entity.Member;
+import towssome.server.entity.QMember;
+import towssome.server.entity.QSubscribe;
 import towssome.server.entity.ReviewPost;
 
 import java.util.List;
 import java.util.Objects;
 
+import static towssome.server.entity.QMember.*;
 import static towssome.server.entity.QReviewPost.reviewPost;
-@Repository
+import static towssome.server.entity.QSubscribe.*;
+
 @RequiredArgsConstructor
 public class ReviewPostRepositoryImpl implements ReviewPostRepositoryCustom {
     private final JPAQueryFactory queryFactory;
+
+    @Override
+    public CursorResult<ReviewPost> findSubscribeReviewList(Member subscriber, Pageable pageable) {
+
+        List<ReviewPost> content = queryFactory.select(reviewPost)
+                .from(subscribe)
+                .innerJoin(subscribe.followed,member)
+                .innerJoin(reviewPost).on(reviewPost.member.eq(member))
+                .where(subscribe.subscriber.eq(subscriber))
+                .orderBy(reviewPost.createDate.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize() + 1)
+                .fetch();
+
+        boolean hasNext = false;
+        if (content.size() > pageable.getPageSize()) {
+            hasNext = true;
+            content.remove(pageable.getPageSize());
+        }
+
+        return new CursorResult<>(
+                content,
+                pageable.getOffset(),
+                hasNext
+        );
+    }
 
     @Override
     public Page<ReviewPost> findFirstPageByOrderByReviewIdDesc(Boolean recommend, Pageable page) {

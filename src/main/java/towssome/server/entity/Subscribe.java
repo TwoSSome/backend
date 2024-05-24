@@ -17,12 +17,12 @@ public class Subscribe extends BaseEntity{
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "subscriber_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Member subscriber;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "following_id")
+    @JoinColumn(name = "followed_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Member followed;
 

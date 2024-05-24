@@ -41,7 +41,7 @@ public class SubscribeController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    //슬라이스
+    //페이지네이션
     @GetMapping
     public PageResult<SubscribeRes> getSubscribe(
             @RequestParam int page,

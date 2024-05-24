@@ -34,12 +34,9 @@ public class ProfileController {
         Member jwtMember = memberAdvice.findJwtMember();
 
         List<HashTag> list = memberService.getProfileTag(jwtMember);
-        ArrayList<HashtagRes> res = new ArrayList<>();
+        ArrayList<String > res = new ArrayList<>();
         for (HashTag hashTag : list) {
-            res.add(new HashtagRes(
-                    hashTag.getId(),
-                    hashTag.getName()
-            ));
+            res.add(hashTag.getName());
         }
 
         return new ProfileRes(
@@ -78,17 +75,14 @@ public class ProfileController {
 
         Member member = memberService.getMember(id);
         List<HashTag> list = memberService.getProfileTag(member);
-        ArrayList<HashtagRes> res = new ArrayList<>();
+        ArrayList<String > res = new ArrayList<>();
         for (HashTag hashTag : list) {
-            res.add(new HashtagRes(
-                    hashTag.getId(),
-                    hashTag.getName()
-            ));
+            res.add(hashTag.getName());
         }
 
         return new ProfileRes(
                 member.getNickName(),
-                member.getProfilePhoto().getS3Path(),
+                member.getProfilePhoto() == null ? null : member.getProfilePhoto().getS3Path(),
                 res);
     }
 

@@ -3,11 +3,14 @@ package towssome.server.service;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.dto.*;
+import towssome.server.entity.HashTag;
 import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
 import towssome.server.enumrated.ReviewType;
@@ -22,6 +25,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReviewPostService {
 
     private final ReviewPostRepository reviewPostRepository;
@@ -29,8 +33,6 @@ public class ReviewPostService {
     private final PhotoService photoService;
     private final HashtagService hashtagService;
     private final HashtagClassificationService hashtagClassificationService;
-    private final ReviewPostRepositoryCustom reviewPostRepositoryCustom;
-
 
     public void createReview(
             ReviewPostReq reviewReq,
@@ -106,9 +108,12 @@ public class ReviewPostService {
         for(ReviewPost review : reviewPosts) {
             List<PhotoInPost> bodyPhotos = photoService.getPhotoS3Path(review);
             String bodyPhoto = bodyPhotos.isEmpty() ? null : bodyPhotos.get(0).photoPath();
+            String profilePhoto = review.getMember().getProfilePhoto() != null ?
+                    review.getMember().getProfilePhoto().getS3Path() :
+                    null;
 
             reviewSimpleRes.add(new ReviewSimpleRes(
-                    review.getMember().getProfilePhoto(),
+                    profilePhoto,
                     review.getMember().getNickName(),
                     bodyPhoto,
                     hashtagClassificationService.getHashtags(review.getId())
@@ -131,8 +136,8 @@ public class ReviewPostService {
 
     private Page<ReviewPost> getRecentReviewPosts(Long cursorId, Boolean recommend, Pageable page) {
         return cursorId == null ?
-                reviewPostRepositoryCustom.findFirstPageByOrderByReviewIdDesc(recommend, page) : // cursor_id가 null이면 가장 최신의 리뷰글부터 페이지를 가져옴 -> 최초 요청
-                reviewPostRepositoryCustom.findByCursorIdLessThanOrderByReviewIdDesc(cursorId, recommend, page); // cursor_id가 null이 아니면 cursor_id보다 작은 리뷰글부터 페이지를 가져옴
+                reviewPostRepository.findFirstPageByOrderByReviewIdDesc(recommend, page) : // cursor_id가 null이면 가장 최신의 리뷰글부터 페이지를 가져옴 -> 최초 요청
+                reviewPostRepository.findByCursorIdLessThanOrderByReviewIdDesc(cursorId, recommend, page); // cursor_id가 null이 아니면 cursor_id보다 작은 리뷰글부터 페이지를 가져옴
     }
 
     /**Get My Posts*/
@@ -142,9 +147,45 @@ public class ReviewPostService {
         return getReviewSimpleResCursorResult(reviewSimpleRes, reviewPosts);
     }
 
+    @Transactional
+    public CursorResult<ReviewSimpleRes> getSubscribeReview(Member subscriber, int page) {
+        CursorResult<ReviewPost> subscribeReviewList = reviewPostRepository.findSubscribeReviewList(subscriber, PageRequest.of(page, 10));
+
+        ArrayList<ReviewSimpleRes> reviewSimpleRes = new ArrayList<>();
+        for (ReviewPost value : subscribeReviewList.values()) {
+
+            List<HashTag> allByReviewPost = hashtagService.findAllByReviewPost(value);
+            ArrayList<String> tags = new ArrayList<>();
+            for (HashTag hashTag : allByReviewPost) {
+                tags.add(hashTag.getName());
+            }
+
+            String profilePhotoPath = value.getMember().getProfilePhoto() != null ?
+                    value.getMember().getProfilePhoto().getS3Path() :
+                    null;
+
+            List<PhotoInPost> photoS3Path = photoService.getPhotoS3Path(value);
+            String bodyPhoto = photoS3Path.isEmpty() ? null : photoS3Path.get(0).photoPath();
+            log.info("review = {}, photoS3path = {}",value.getBody(),bodyPhoto);
+
+            reviewSimpleRes.add(new ReviewSimpleRes(
+                    profilePhotoPath,
+                    value.getMember().getNickName(),
+                    bodyPhoto,
+                    tags
+            ));
+        }
+
+        return new CursorResult<>(
+                reviewSimpleRes,
+                (long) page,
+                subscribeReviewList.hasNext()
+        );
+    }
+
     private Page<ReviewPost> getMyReviewPosts(Long memberId, Long cursorId, String sort, Pageable page) {
         return cursorId == null ?
-                reviewPostRepositoryCustom.findMyPostFirstPageByMemberId(memberId, sort, page) :
-                reviewPostRepositoryCustom.findByMemberIdLessThanOrderByIdDesc(memberId, cursorId, sort, page);
+                reviewPostRepository.findMyPostFirstPageByMemberId(memberId, sort, page) :
+                reviewPostRepository.findByMemberIdLessThanOrderByIdDesc(memberId, cursorId, sort, page);
     }
 }
