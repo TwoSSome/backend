@@ -18,20 +18,33 @@ import static towssome.server.entity.QHashTag.hashTag;
 
 @RequiredArgsConstructor
 @Slf4j
-public class HashtagClassificationRepositoryImpl implements HashtagClassificationRepositoryCustom{
+public class HashtagClassificationRepositoryImpl implements HashtagClassificationRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<ReviewPost> findReviewsByHashtagOrderBySort(String keyword, String sort, Pageable pageable){
-        List<ReviewPost> result = queryFactory
-                .select(hashtagClassification.reviewPost)
-                .from(hashtagClassification)
-                .join(hashtagClassification.hashTag, hashTag)
-                .where(hashtagContains(keyword))
-                .orderBy(getOrderSpecifier(sort))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
+    public Page<ReviewPost> findFirstReviewPageByHashtag(String keyword, String sort, Pageable pageable) {
+        List<ReviewPost> results;
+        if (sort.equalsIgnoreCase("asc")) {
+            results = queryFactory
+                    .select(hashtagClassification.reviewPost)
+                    .from(hashtagClassification)
+                    .join(hashtagClassification.hashTag, hashTag)
+                    .where(hashtagContains(keyword))
+                    .orderBy(reviewPost.id.asc())
+                    .offset(pageable.getOffset())
+                    .limit(pageable.getPageSize())
+                    .fetch();
+        } else {
+            results = queryFactory
+                    .select(hashtagClassification.reviewPost)
+                    .from(hashtagClassification)
+                    .join(hashtagClassification.hashTag, hashTag)
+                    .where(hashtagContains(keyword))
+                    .orderBy(reviewPost.id.desc())
+                    .offset(pageable.getOffset())
+                    .limit(pageable.getPageSize())
+                    .fetch();
+        }
 
         JPAQuery<Long> count = queryFactory
                 .select(hashtagClassification.count())
@@ -40,7 +53,42 @@ public class HashtagClassificationRepositoryImpl implements HashtagClassificatio
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize());
 
-        return PageableExecutionUtils.getPage(result, pageable, count::fetchOne);
+        return PageableExecutionUtils.getPage(results, pageable, count::fetchOne);
+    }
+
+    @Override
+    public Page<ReviewPost> findReviewPageByCursorIdAndHashTag(String keyword, Long cursorId, String sort, Pageable pageable) {
+        List<ReviewPost> results;
+        if (sort.equalsIgnoreCase("asc")) {
+            results = queryFactory
+                    .select(hashtagClassification.reviewPost)
+                    .from(hashtagClassification)
+                    .join(hashtagClassification.hashTag, hashTag)
+                    .where(hashtagContains(keyword),nextReviewId(cursorId,true))
+                    .orderBy(reviewPost.id.asc())
+                    .offset(pageable.getOffset())
+                    .limit(pageable.getPageSize())
+                    .fetch();
+        } else {
+            results = queryFactory
+                    .select(hashtagClassification.reviewPost)
+                    .from(hashtagClassification)
+                    .join(hashtagClassification.hashTag, hashTag)
+                    .where(hashtagContains(keyword),nextReviewId(cursorId,false))
+                    .orderBy(reviewPost.id.desc())
+                    .offset(pageable.getOffset())
+                    .limit(pageable.getPageSize())
+                    .fetch();
+        }
+
+        JPAQuery<Long> count = queryFactory
+                .select(hashtagClassification.count())
+                .from(hashtagClassification)
+                .where(hashtagContains(keyword))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize());
+
+        return PageableExecutionUtils.getPage(results, pageable, count::fetchOne);
     }
 
     @Override
@@ -54,16 +102,19 @@ public class HashtagClassificationRepositoryImpl implements HashtagClassificatio
 
     private BooleanExpression hashtagContains(String keyword) {
         if (keyword == null || keyword.isEmpty()) {
-            return null; // 조건이 없음을 나타냅니다.
+            return null;
         }
         return hashtagClassification.hashTag.name.containsIgnoreCase(keyword);
     }
 
-    private com.querydsl.core.types.OrderSpecifier<?> getOrderSpecifier(String sort) {
-        if ("asc".equalsIgnoreCase(sort)) {
-            return reviewPost.createDate.asc();
+    private BooleanExpression nextReviewId(Long cursorId, boolean asc) {
+        if (cursorId == null) {
+            return null;
+        }
+        if (asc) {
+            return hashtagClassification.reviewPost.id.gt(cursorId);
         } else {
-            return reviewPost.createDate.desc();
+            return hashtagClassification.reviewPost.id.lt(cursorId);
         }
     }
 }

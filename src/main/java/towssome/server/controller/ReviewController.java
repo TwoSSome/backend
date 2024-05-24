@@ -144,33 +144,12 @@ public class ReviewController {
 
     /** 해시태그 검색 */
     @GetMapping("/search")
-    public PageResult<ReviewPostRes> keywordSearch(@RequestPart(value="keyword") String keyword,@RequestParam String sort, @RequestParam int page){
-        Page<ReviewPost> result = hashtagClassificationService.getReviewPostByHashtag(keyword, sort, page-1, PAGE_SIZE);
-        ArrayList<ReviewPostRes> reviewPostListRes = new ArrayList<>();
-        for(ReviewPost reviewPost: result.getContent()){
-            reviewPostListRes.add(new ReviewPostRes(
-                    reviewPost.getBody(),
-                    reviewPost.getPrice(),
-                    reviewPost.getCreateDate(),
-                    reviewPost.getLastModifiedDate(),
-                    reviewPost.getMember().getId(),
-                    photoService.getPhotoS3Path(reviewPost),
-                    false,
-                    false,
-                    false,
-                    hashtagClassificationService.getHashtags(reviewPost.getId()),
-                    reviewPost.getReviewType(),
-                    reviewPost.getStarPoint(),
-                    reviewPost.getWhereBuy()
-            ));
-        }
-        return new PageResult<>(
-                reviewPostListRes,
-                result.getTotalElements(),
-                result.getTotalPages(),
-                result.getNumber()+1,
-                PAGE_SIZE
-        );
+    public CursorResult<ReviewPostRes> keywordSearch(@RequestParam(value="keyword") String keyword,
+                                                     @RequestParam(value = "cursorId", required = false) Long cursorId,
+                                                     @RequestParam(value = "sort", defaultValue = "desc", required = false) String sort,
+                                                     @RequestParam(value = "size", required = false) Integer size) {
+        if (size == null) size = PAGE_SIZE;
+        return hashtagClassificationService.getReviewPageByHashtag(keyword, cursorId, sort, PageRequest.of(0,size));
     }
 
 }
