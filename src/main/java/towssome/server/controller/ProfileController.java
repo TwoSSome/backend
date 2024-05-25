@@ -95,6 +95,23 @@ public class ProfileController {
         return reviewPostService.getMyReviewPage(member, cursorId, sort, PageRequest.of(0, size));
     }
 
+    @GetMapping("/search")
+    public ProfileRes searchProfile(@RequestParam(value="username") String username) {
+        Member searchedMember = memberService.getMember(username);
+        List<HashTag> list = memberService.getProfileTag(searchedMember);
+
+        ArrayList<String> res = new ArrayList<>();
+        for (HashTag hashTag : list) {
+            res.add(hashTag.getName());
+        }
+
+        return new ProfileRes(
+                searchedMember.getNickName(),
+                searchedMember.getProfilePhoto() == null ? null : searchedMember.getProfilePhoto().getS3Path(),
+                res
+        );
+    }
+
 
 
 }
