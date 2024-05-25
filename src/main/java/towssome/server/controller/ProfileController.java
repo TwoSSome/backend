@@ -10,10 +10,8 @@ import towssome.server.advice.MemberAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.HashTag;
 import towssome.server.entity.Member;
-import towssome.server.entity.Photo;
 import towssome.server.service.*;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +20,6 @@ import java.util.List;
 @RequestMapping("/profile")
 public class ProfileController {
 
-    private final PhotoService photoService;
     private final MemberAdvice memberAdvice;
     private final MemberService memberService;
     private final ReviewPostService reviewPostService;
@@ -42,7 +39,8 @@ public class ProfileController {
         return new ProfileRes(
                 jwtMember.getNickName(),
                 jwtMember.getProfilePhoto() == null ? null : jwtMember.getProfilePhoto().getS3Path(),
-                res
+                res,
+                jwtMember.getId()
         );
     }
 
@@ -83,7 +81,8 @@ public class ProfileController {
         return new ProfileRes(
                 member.getNickName(),
                 member.getProfilePhoto() == null ? null : member.getProfilePhoto().getS3Path(),
-                res);
+                res,
+                member.getId());
     }
 
     @GetMapping("/review")
@@ -108,7 +107,8 @@ public class ProfileController {
         return new ProfileRes(
                 searchedMember.getNickName(),
                 searchedMember.getProfilePhoto() == null ? null : searchedMember.getProfilePhoto().getS3Path(),
-                res
+                res,
+                searchedMember.getId()
         );
     }
 

@@ -1,5 +1,6 @@
 package towssome.server.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,18 +28,29 @@ public class ViewlikeService {
     private final ViewLikeRepositoryCustom viewLikeRepositoryCustom;
 
     /** 조회 기록 저장(최초 조회 시) */
+    @Transactional
     public void viewProcess(ReviewPost review, Member member) {
 
-        ViewLike viewLike = new ViewLike(
-                review,
-                member,
-                true,
-                false
-        );
-        viewLikeRepository.save(viewLike);
+        if (!viewLikeRepository.existsByMemberAndReviewPost(member, review)) {
+            ViewLike viewLike = new ViewLike(
+                    review,
+                    member,
+                    true,
+                    false
+            );
+            viewLikeRepository.save(viewLike);
+            review.getMember().addRankPoint(1);//랭크포인트 추가
+        } else {
+            ViewLike viewlike = viewLikeRepository.findByReviewPostAndMember(review, member);
+            viewlike.addViewAmount(); //조회수 추가
+            review.getMember().addRankPoint(1); //랭크포인트 추가
+        }
+
+
     }
 
     /** 좋아요 or 좋아요 취소 */
+    @Transactional
     public void likeProcess(ReviewPost review, Member member) {
         ViewLike viewLike = viewLikeRepository.findByReviewPostIdAndMemberId(review.getId(), member.getId());
         if (viewLike == null) {
@@ -51,8 +63,10 @@ public class ViewlikeService {
         } else {
             if (viewLike.getLikeFlag()) { // 이미 좋아요를 누른 경우
                 viewLike.setUnlike();
+                review.getMember().addRankPoint(-10);
             } else { // 좋아요를 누르지 않은 경우
                 viewLike.setLike();
+                review.getMember().addRankPoint(10);
             }
         }
         viewLikeRepository.save(viewLike);

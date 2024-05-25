@@ -69,7 +69,7 @@ public class SecurityConfig {
         http.httpBasic(AbstractHttpConfigurer::disable);
         //경로별 인가 작업 -> 여기서 인증이 필요한 URL 등록
         http.authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login", "/", "/join","/logout").permitAll() //모든 요청 인가
+                        .requestMatchers("/login", "/", "/join","/logout","/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**").permitAll() //모든 요청 인가
                         .requestMatchers("/admin").hasRole("ADMIN") //role 이 ROLE_ADMIN 인 경우만 인가
                         .requestMatchers("/reissue").permitAll()
                         .requestMatchers("/auth","/subscribe/*",

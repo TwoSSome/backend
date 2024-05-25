@@ -9,9 +9,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import towssome.server.config.S3Config;
 
 @EnableJpaAuditing
+@EnableScheduling
 @SpringBootApplication
 @Import(S3Config.class)
 public class ServerApplication {

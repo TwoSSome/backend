@@ -56,9 +56,12 @@ public class ReviewPostService {
                 reviewReq.startPoint(),
                 member
         );
+
         reviewPostRepository.save(reviewPost);
         hashtagService.createHashtag(reviewPost);
         photoService.saveReviewPhoto(photos, reviewPost);
+
+        member.addRankPoint(10);
     }
 
     public ReviewPost getReview(Long reviewId) {

@@ -7,6 +7,7 @@ import java.util.List;
 public record ProfileRes(
         String nickName,
         String profileImagePath,
-        List<String> profileTagList
+        List<String> profileTagList,
+        Long memberId
 ) {
 }
