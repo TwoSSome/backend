@@ -12,8 +12,10 @@ import towssome.server.advice.MemberAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.Comment;
 import towssome.server.entity.Member;
+import towssome.server.entity.ReviewPost;
 import towssome.server.service.CommentLikeService;
 import towssome.server.service.CommentService;
+import towssome.server.service.ReviewPostService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 public class CommentController {
     private final CommentService commentService;
     private final CommentLikeService commentLikeService;
+    private final ReviewPostService reviewPostService;
     private final MemberAdvice memberAdvice;
     private static final int DEFAULT_SIZE = 20;
 
@@ -53,7 +56,7 @@ public class CommentController {
         if(!commentService.getComment(commentId).getMember().getUsername().equals(username)){
             return new ResponseEntity<>("You are not the author of this comment", HttpStatus.FORBIDDEN);
         }
-        Comment comment = commentService.findComment(commentId);
+        Comment comment = commentService.getComment(commentId);
         log.info(String.valueOf(comment));
         commentService.deleteComment(comment);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -73,6 +76,39 @@ public class CommentController {
         Member user = memberAdvice.findJwtMember();
         Comment comment = commentService.getComment(commentId);
         commentLikeService.likeProcess(user, comment);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("{reviewId}/fixedComment")
+    public ResponseEntity<CommentRes> getFixedComment(@PathVariable Long reviewId){
+        Comment comment = commentService.getFixedCommentByReviewId(reviewId);
+        CommentRes commentRes;
+        if(comment == null) commentRes = null;
+        else{
+            commentRes = new CommentRes(
+                    comment.getId(),
+                    comment.getBody(),
+                    comment.getCreateDate(),
+                    comment.getLastModifiedDate(),
+                    comment.getMember().getId(),
+                    comment.getReviewPost().getId(),
+                    commentLikeService.isLikedComment(memberAdvice.findJwtMember(),comment),
+                    commentLikeService.countLike(comment),
+                    comment.getFixFlag()
+            );
+        }
+        return new ResponseEntity<>(commentRes, HttpStatus.OK);
+    }
+
+    @PostMapping("{reviewId}/fix/{commentId}")
+    public ResponseEntity<?> changeFixedComment(@PathVariable Long reviewId, @PathVariable Long commentId){
+        commentService.changeFixedComment(reviewId, commentId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("{reviewId}/unpin")
+    public ResponseEntity<?> unpinComment(@PathVariable Long reviewId){
+        commentService.unpinComment(reviewId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
