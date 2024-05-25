@@ -3,14 +3,16 @@ package towssome.server.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import towssome.server.dto.CommentReq;
-import towssome.server.dto.CommentListRes;
-import towssome.server.dto.CommentUpdateReq;
+import towssome.server.advice.MemberAdvice;
+import towssome.server.dto.*;
 import towssome.server.entity.Comment;
+import towssome.server.entity.Member;
+import towssome.server.service.CommentLikeService;
 import towssome.server.service.CommentService;
 
 import java.io.IOException;
@@ -22,6 +24,8 @@ import java.util.ArrayList;
 @RequestMapping("/review")
 public class CommentController {
     private final CommentService commentService;
+    private final CommentLikeService commentLikeService;
+    private final MemberAdvice memberAdvice;
     private static final int DEFAULT_SIZE = 20;
 
     @PostMapping("/{reviewId}/create")
@@ -56,25 +60,19 @@ public class CommentController {
     }
 
     @GetMapping("/{reviewId}/comments")
-    public PageResult<CommentListRes> getCommentList(@PathVariable Long reviewId, @RequestParam String sort, @RequestParam int page){
-        Page<Comment> commentList = commentService.getComments(sort, reviewId, page-1, DEFAULT_SIZE);
-        ArrayList<CommentListRes> commentListRes = new ArrayList<>();
-        for(Comment comment: commentList.getContent()){
-            commentListRes.add(new CommentListRes(
-                    comment.getId(),
-                    comment.getBody(),
-                    comment.getCreateDate(),
-                    comment.getLastModifiedDate(),
-                    comment.getMember().getId(),
-                    comment.getReviewPost().getId()
-            ));
-        }
-        return new PageResult<>(
-                commentListRes,
-                commentList.getTotalElements(),
-                commentList.getTotalPages(),
-                commentList.getNumber()+1,
-                DEFAULT_SIZE
-        );
+    public CursorResult<CommentRes> getComments(@PathVariable Long reviewId,
+                                                @RequestParam(value = "cursorId", required = false) Long cursorId,
+                                                @RequestParam(value = "sort", defaultValue = "asc", required = false) String sort,
+                                                @RequestParam(value = "size", required = false) Integer size){
+        if(size == null) size = DEFAULT_SIZE;
+        return commentService.getCommentPageByReviewId(reviewId, cursorId, sort, PageRequest.of(0,size));
+    }
+
+    @PostMapping("/{reviewId}/commentLike/{commentId}")
+    public ResponseEntity<?> changeLike(@PathVariable Long reviewId, @PathVariable Long commentId){
+        Member user = memberAdvice.findJwtMember();
+        Comment comment = commentService.getComment(commentId);
+        commentLikeService.likeProcess(user, comment);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
