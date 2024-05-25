@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import towssome.server.dto.ProfileRes;
+import towssome.server.dto.RankerRes;
 import towssome.server.entity.*;
 import towssome.server.exception.NotFoundMemberException;
 import towssome.server.repository.*;
@@ -99,6 +101,36 @@ public class MemberService {
         }
 
         return result;
+    }
+
+    @Transactional
+    public List<String> getProfileTagString(Member member) {
+        ArrayList<String > result = new ArrayList<>();
+
+        List<ProfileTag> list = profileTagRepository.findAllByMember(member);
+        for (ProfileTag profileTag : list) {
+            result.add(profileTag.getHashTag().getName());
+        }
+
+        return result;
+    }
+
+    @Transactional
+    public List<RankerRes> getRanker() {
+        List<Member> ranker = memberRepository.findRanker(10);
+        ArrayList<RankerRes> profileRes = new ArrayList<>();
+        int rank = 1;
+        for (Member member : ranker) {
+            profileRes.add(new RankerRes(
+                    member.getId(),
+                    member.getNickName(),
+                    member.getProfilePhoto() != null ? member.getProfilePhoto().getS3Path() : null,
+                    getProfileTagString(member),
+                    member.getRankPoint(),
+                    rank++
+            ));
+        }
+        return profileRes;
     }
 
 
