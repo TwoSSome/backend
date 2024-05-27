@@ -22,6 +22,7 @@ public class ViewLike {
     private Member member;
 
     private Boolean viewFlag;
+    private int viewAmount;
     private Boolean likeFlag;
 
     public ViewLike(ReviewPost reviewPost, Member member, boolean view, boolean like) {
@@ -29,6 +30,11 @@ public class ViewLike {
         this.member = member;
         this.viewFlag = view;
         this.likeFlag = like;
+        this.viewAmount = 1;
+    }
+
+    public void addViewAmount() {
+        this.viewAmount++;
     }
 
     public void setLike() {

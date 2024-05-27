@@ -17,6 +17,7 @@ public class Member extends BaseEntity{
     private String password;
     private String nickName;
     private int point;
+    private int rankPoint;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "photo_id")
@@ -31,6 +32,7 @@ public class Member extends BaseEntity{
         this.point = point;
         this.profilePhoto = profilePhoto;
         this.role = role;
+        this.rankPoint = 0;
     }
 
     public void changeProfilePhoto(Photo photo){
@@ -40,4 +42,9 @@ public class Member extends BaseEntity{
     public void changeProfile(String nickName) {
         this.nickName = nickName;
     }
+
+    public void addRankPoint(int point) {
+        this.rankPoint += point;
+    }
+
 }

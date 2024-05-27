@@ -30,6 +30,7 @@ public class CommentService {
     private final CommentLikeService commentLikeService;
     private final MemberAdvice memberAdvice;
 
+    @Transactional
     public void createComment(CommentReq commentReq, String username) {
         Long reviewId = commentReq.reviewPostId();
         Member member = memberService.getMember(username);
@@ -42,6 +43,7 @@ public class CommentService {
                 reviewPost
         );
         commentRepository.save(comment);
+        reviewPost.getMember().addRankPoint(5);
     }
 
     public Comment getComment(Long commentId) {
@@ -54,7 +56,9 @@ public class CommentService {
         commentRepository.updateComment(commentId, req.body());
     }
 
+    @Transactional
     public void deleteComment(Comment comment) {
+        comment.getMember().addRankPoint(-3);
         commentRepository.delete(comment);
     }
 

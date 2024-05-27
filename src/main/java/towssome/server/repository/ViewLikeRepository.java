@@ -31,4 +31,6 @@ public interface ViewLikeRepository extends JpaRepository<ViewLike,Long> {
 
     ViewLike findByReviewPostAndMember(ReviewPost reviewPost, Member member);
 
+    boolean existsByMemberAndReviewPost(Member member, ReviewPost reviewPost);
+
 }
