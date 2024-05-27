@@ -32,13 +32,15 @@ public class ReviewController {
     private final HashtagClassificationService hashtagClassificationService;
 
     @PostMapping(path = "/create")
-    public ResponseEntity<?> createReview(@RequestPart(value = "body") ReviewPostReq req,
+    public ResponseEntity<CreateRes> createReview(@RequestPart(value = "body") ReviewPostReq req,
                                           @RequestPart(value = "photos", required = false) List<MultipartFile> photos) throws IOException { // additional implementation needed for session
         log.info("reviewPostDTO = {}", req);
 
         Member jwtMember = memberAdvice.findJwtMember();
-        reviewPostService.createReview(req, photos, jwtMember);
-        return new ResponseEntity<>("Review Create Complete", HttpStatus.OK);
+        ReviewPost review = reviewPostService.createReview(req, photos, jwtMember);
+        return new ResponseEntity<>(new CreateRes(
+                review.getId()
+        ), HttpStatus.OK);
     }
 
     /** 특정리뷰글 조회 */

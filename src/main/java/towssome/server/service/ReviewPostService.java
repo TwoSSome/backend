@@ -34,7 +34,7 @@ public class ReviewPostService {
     private final HashtagService hashtagService;
     private final HashtagClassificationService hashtagClassificationService;
 
-    public void createReview(
+    public ReviewPost createReview(
             ReviewPostReq reviewReq,
             List<MultipartFile> photos,
             Member member) throws IOException {
@@ -59,6 +59,7 @@ public class ReviewPostService {
         reviewPostRepository.save(reviewPost);
         hashtagService.createHashtag(reviewPost);
         photoService.saveReviewPhoto(photos, reviewPost);
+        return reviewPost;
     }
 
     public ReviewPost getReview(Long reviewId) {

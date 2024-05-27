@@ -18,6 +18,7 @@ public class CommunityPost extends BaseEntity{
     @Column(name = "community_id")
     private Long id;
     private String title;
+    @Lob
     private String body;
     private boolean isAnonymous;
 

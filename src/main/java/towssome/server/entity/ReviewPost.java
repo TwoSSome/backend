@@ -14,6 +14,7 @@ public class ReviewPost extends BaseEntity{
     @Column(name = "review_id")
     private Long id;
 
+    @Lob
     private String body;
     private int price;
 
