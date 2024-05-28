@@ -5,10 +5,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import towssome.server.advice.MemberAdvice;
+import towssome.server.dto.CursorResult;
 import towssome.server.dto.HashtagDeleteReq;
 import towssome.server.dto.HashtagRes;
 import towssome.server.entity.HashTag;
 import towssome.server.entity.Member;
+import towssome.server.exception.PageException;
 import towssome.server.service.HashtagClassificationService;
 import towssome.server.service.HashtagService;
 import towssome.server.service.MemberService;
@@ -56,5 +58,31 @@ public class HashtagController {
         }
 
         return hashtagRes;
+    }
+
+    @GetMapping("/search")
+    public CursorResult<HashtagRes> searchHashtag(
+            @RequestParam String hashtagName,
+            @RequestParam int page){
+
+        if (page <= 0) {
+            throw new PageException("페이지 번호는 0보다 커야 합니다");
+        }
+
+        CursorResult<HashTag> result = hashtagService.searchHashtag(hashtagName, page, 20);
+
+        ArrayList<HashtagRes> hashtagRes = new ArrayList<>();
+        for (HashTag res : result.values()) {
+            hashtagRes.add(new HashtagRes(
+                    res.getId(),
+                    res.getName()
+            ));
+        }
+
+        return new CursorResult<>(
+                hashtagRes,
+                result.cursorId(),
+                result.hasNext()
+        );
     }
 }

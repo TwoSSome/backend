@@ -30,6 +30,7 @@ public class JoinService {
     public Member joinProcess(JoinDTO joinDTO, MultipartFile multipartFile)  {
 
         String username = joinDTO.username();
+
         String password = joinDTO.password();
         String nickname = joinDTO.nickname();
 

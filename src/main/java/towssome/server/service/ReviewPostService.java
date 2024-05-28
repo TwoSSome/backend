@@ -34,7 +34,7 @@ public class ReviewPostService {
     private final HashtagService hashtagService;
     private final HashtagClassificationService hashtagClassificationService;
 
-    public void createReview(
+    public ReviewPost createReview(
             ReviewPostReq reviewReq,
             List<MultipartFile> photos,
             Member member) throws IOException {
@@ -56,12 +56,10 @@ public class ReviewPostService {
                 reviewReq.startPoint(),
                 member
         );
-
         reviewPostRepository.save(reviewPost);
         hashtagService.createHashtag(reviewPost);
         photoService.saveReviewPhoto(photos, reviewPost);
-
-        member.addRankPoint(10);
+        return reviewPost;
     }
 
     public ReviewPost getReview(Long reviewId) {
@@ -153,7 +151,7 @@ public class ReviewPostService {
 
     @Transactional
     public CursorResult<ReviewSimpleRes> getSubscribeReview(Member subscriber, int page) {
-        CursorResult<ReviewPost> subscribeReviewList = reviewPostRepository.findSubscribeReviewList(subscriber, PageRequest.of(page, 10));
+        CursorResult<ReviewPost> subscribeReviewList = reviewPostRepository.findSubscribeReviewList(subscriber, PageRequest.of(page-1, 10));
 
         ArrayList<ReviewSimpleRes> reviewSimpleRes = new ArrayList<>();
         for (ReviewPost value : subscribeReviewList.values()) {
@@ -183,7 +181,7 @@ public class ReviewPostService {
 
         return new CursorResult<>(
                 reviewSimpleRes,
-                (long) page,
+                (long) page +1,
                 subscribeReviewList.hasNext()
         );
     }
