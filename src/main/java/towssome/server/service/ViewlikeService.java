@@ -6,8 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import towssome.server.dto.CursorResult;
+import towssome.server.dto.PhotoInPost;
+import towssome.server.dto.ReviewSimpleRes;
 import towssome.server.entity.BookMark;
-import towssome.server.dto.ReviewPostRes;
 import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
 import towssome.server.entity.ViewLike;
@@ -23,7 +24,6 @@ public class ViewlikeService {
     private final BookMarkRepository bookMarkRepository;
     private final ViewLikeRepository viewLikeRepository;
     private final PhotoService photoService;
-    private final ReviewPostService reviewPostService;
     private final HashtagClassificationService hashtagClassificationService;
     private final ViewLikeRepositoryCustom viewLikeRepositoryCustom;
 
@@ -85,24 +85,26 @@ public class ViewlikeService {
     }
 
     /** ----------------- 자신의 좋아요 기록 조회 ----------------- */
-    public CursorResult<ReviewPostRes> getLike(Member member, Long cursorId, String sort, Pageable page) {
-        List<ReviewPostRes> reviewPostRes = new ArrayList<>();
+    public CursorResult<ReviewSimpleRes> getLike(Member member, Long cursorId, String sort, Pageable page) {
+        List<ReviewSimpleRes> reviewPostRes = new ArrayList<>();
         final Page<ReviewPost> reviewPosts = getLikePosts(member.getId(), cursorId, sort, page);
+        return getReviewSimpleResCursorResult(member, reviewPostRes, reviewPosts);
+    }
+
+    private CursorResult<ReviewSimpleRes> getReviewSimpleResCursorResult(Member member, List<ReviewSimpleRes> reviewPostRes, Page<ReviewPost> reviewPosts) {
+        Long cursorId;
         for(ReviewPost review : reviewPosts) {
-            reviewPostRes.add(new ReviewPostRes(
-                    review.getBody(),
-                    review.getPrice(),
-                    review.getCreateDate(),
-                    review.getLastModifiedDate(),
-                    review.getMember().getId(),
-                    photoService.getPhotoS3Path(review),
-                    reviewPostService.isMyPost(member, review),
-                    true,
-                    isBookmarkedPost(member, review),
-                    hashtagClassificationService.getHashtags(review.getId()),
-                    review.getReviewType(),
-                    review.getStarPoint(),
-                    review.getWhereBuy()
+            List<PhotoInPost> bodyPhotos = photoService.getPhotoS3Path(review);
+            String bodyPhoto = bodyPhotos.isEmpty() ? null : bodyPhotos.get(0).photoPath();
+            String profilePhoto = member.getProfilePhoto() != null ?
+                    member.getProfilePhoto().getS3Path() :
+                    null;
+            reviewPostRes.add(new ReviewSimpleRes(
+                    review.getId(),
+                    profilePhoto,
+                    member.getNickName(),
+                    bodyPhoto,
+                    hashtagClassificationService.getHashtags(review.getId())
             ));
         }
         cursorId = reviewPosts.isEmpty() ?
@@ -111,29 +113,10 @@ public class ViewlikeService {
     }
 
     /** ----------------- 자신의 최근 조회 기록 조회 ----------------- */
-    public CursorResult<ReviewPostRes> getRecentView(Member member, Long cursorId, String sort, Pageable page) {
-        List<ReviewPostRes> reviewPostRes = new ArrayList<>();
+    public CursorResult<ReviewSimpleRes> getRecentView(Member member, Long cursorId, String sort, Pageable page) {
+        List<ReviewSimpleRes> reviewPostRes = new ArrayList<>();
         final Page<ReviewPost> reviewPosts = getRecentViewPosts(member.getId(), cursorId, sort, page);
-        for(ReviewPost review : reviewPosts) {
-            reviewPostRes.add(new ReviewPostRes(
-                    review.getBody(),
-                    review.getPrice(),
-                    review.getCreateDate(),
-                    review.getLastModifiedDate(),
-                    review.getMember().getId(),
-                    photoService.getPhotoS3Path(review),
-                    reviewPostService.isMyPost(member, review),
-                    isLikedPost(member, review),
-                    isBookmarkedPost(member, review),
-                    hashtagClassificationService.getHashtags(review.getId()),
-                    review.getReviewType(),
-                    review.getStarPoint(),
-                    review.getWhereBuy()
-            ));
-        }
-        cursorId = reviewPosts.isEmpty() ?
-                null : reviewPosts.getContent().get(reviewPosts.getContent().size() - 1).getId();
-        return new CursorResult<>(reviewPostRes, cursorId, reviewPosts.hasNext());
+        return getReviewSimpleResCursorResult(member, reviewPostRes, reviewPosts);
     }
 
     /**cursorId보다 작은페이지(다음페이지)에서 좋아요 누른 리뷰글만 불러옴*/
