@@ -1,5 +1,8 @@
 package towssome.server.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -20,6 +23,7 @@ import towssome.server.service.ReviewPostService;
 import java.io.IOException;
 import java.util.ArrayList;
 
+@Tag(name = "댓글")
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -31,16 +35,24 @@ public class CommentController {
     private final MemberAdvice memberAdvice;
     private static final int DEFAULT_SIZE = 20;
 
+    @Operation(summary = "댓글 생성 API", parameters = {
+            @Parameter(name = "reviewId", description = "댓글이 생성될 리뷰글 id"),
+            @Parameter(name = "req", description = "body : 댓글 본문 ")
+    })
     @PostMapping("/{reviewId}/create")
     public ResponseEntity<?> createComment(@PathVariable Long reviewId, @RequestBody CommentReq req) throws IOException{
         log.info("commentDTO = {}", req);
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        commentService.createComment(req, username);
+        commentService.createComment(reviewId, req.body(), username);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Operation(summary = "댓글 업데이트 API", parameters = {
+            @Parameter(name = "commentId", description = "업데이트할 댓글 id"),
+            @Parameter(name = "req", description = "body : 업데이트 본문")
+    })
     @PostMapping("/{reviewId}/update/{commentId}")
-    public ResponseEntity<?> updateComment(@PathVariable Long reviewId, @PathVariable Long commentId, @RequestBody CommentUpdateReq req) {
+    public ResponseEntity<?> updateComment(@PathVariable Long commentId, @RequestBody CommentUpdateReq req, @PathVariable String reviewId) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         if(!commentService.getComment(commentId).getMember().getUsername().equals(username)){
             return new ResponseEntity<>("You are not the author of this comment", HttpStatus.FORBIDDEN);
@@ -50,6 +62,9 @@ public class CommentController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Operation(summary = "댓글 삭제 API", parameters = {
+            @Parameter(name = "commentId", description = "삭제할 댓글 id")
+    })
     @PostMapping("/{reviewId}/delete/{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable Long reviewId, @PathVariable Long commentId){
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -62,6 +77,9 @@ public class CommentController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Operation(summary = "댓글 조회 API", description = "선택한 리뷰글의 댓글을 조회", parameters = {
+            @Parameter(name = "reviewId", description = "리뷰 id")
+    })
     @GetMapping("/{reviewId}/comments")
     public CursorResult<CommentRes> getComments(@PathVariable Long reviewId,
                                                 @RequestParam(value = "cursorId", required = false) Long cursorId,
@@ -71,6 +89,9 @@ public class CommentController {
         return commentService.getCommentPageByReviewId(reviewId, cursorId, sort, PageRequest.of(0,size));
     }
 
+    @Operation(summary = "댓글 좋아요/취소 API", description = "선택한 리뷰글의 댓글을 조회", parameters = {
+            @Parameter(name = "commentId", description = "좋아요/취소할 댓글의 id")
+    })
     @PostMapping("/{reviewId}/commentLike/{commentId}")
     public ResponseEntity<?> changeLike(@PathVariable Long reviewId, @PathVariable Long commentId){
         Member user = memberAdvice.findJwtMember();
@@ -79,6 +100,9 @@ public class CommentController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Operation(summary = "고정 댓글 조회 API", description = "선택한 리뷰글의 고정 댓글을 조회", parameters = {
+            @Parameter(name = "reviewId", description = "조회할 리뷰 id")
+    })
     @GetMapping("{reviewId}/fixedComment")
     public ResponseEntity<CommentRes> getFixedComment(@PathVariable Long reviewId){
         Comment comment = commentService.getFixedCommentByReviewId(reviewId);

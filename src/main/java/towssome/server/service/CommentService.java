@@ -31,14 +31,13 @@ public class CommentService {
     private final MemberAdvice memberAdvice;
 
     @Transactional
-    public void createComment(CommentReq commentReq, String username) {
-        Long reviewId = commentReq.reviewPostId();
+    public void createComment(Long reviewId, String body, String username) {
         Member member = memberService.getMember(username);
         // reviewId로 ReviewPost 조회
         ReviewPost reviewPost = reviewPostRepository.findById(reviewId)
                 .orElseThrow(() -> new NotFoundReviewPostException("ReviewPost not found with id: " + reviewId));
         Comment comment = new Comment(
-                commentReq.body(),
+                body,
                 member,
                 reviewPost
         );
