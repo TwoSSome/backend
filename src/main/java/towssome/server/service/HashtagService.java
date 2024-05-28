@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import towssome.server.dto.CursorResult;
 import towssome.server.entity.HashTag;
 import towssome.server.entity.HashtagClassification;
 import towssome.server.entity.ReviewPost;
@@ -30,7 +31,6 @@ import java.util.regex.Pattern;
 public class HashtagService {
     @Autowired
     private RestTemplate restTemplate;
-    private final HashTagRepository hashTagRepository;
     private final HashTagRepository hashtagRepository;
     private final HashtagClassificationRepository hashtagClassificationRepository;
 
@@ -134,4 +134,16 @@ public class HashtagService {
         hashTag.setCount(hashTag.getCount()-1);
         hashtagClassificationRepository.delete(byReviewPostAndHashTag);
     }
+
+    /**
+     * name을 포함한 hashtag 리스트 반환
+     * @param name
+     * @param page
+     * @param size
+     * @return
+     */
+    public CursorResult<HashTag> searchHashtag(String name, int page, int size) {
+        return hashtagRepository.searchHashtag(name, page, size);
+    }
+
 }

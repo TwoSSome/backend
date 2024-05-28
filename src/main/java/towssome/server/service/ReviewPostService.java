@@ -151,7 +151,7 @@ public class ReviewPostService {
 
     @Transactional
     public CursorResult<ReviewSimpleRes> getSubscribeReview(Member subscriber, int page) {
-        CursorResult<ReviewPost> subscribeReviewList = reviewPostRepository.findSubscribeReviewList(subscriber, PageRequest.of(page, 10));
+        CursorResult<ReviewPost> subscribeReviewList = reviewPostRepository.findSubscribeReviewList(subscriber, PageRequest.of(page-1, 10));
 
         ArrayList<ReviewSimpleRes> reviewSimpleRes = new ArrayList<>();
         for (ReviewPost value : subscribeReviewList.values()) {
@@ -181,7 +181,7 @@ public class ReviewPostService {
 
         return new CursorResult<>(
                 reviewSimpleRes,
-                (long) page,
+                (long) page +1,
                 subscribeReviewList.hasNext()
         );
     }

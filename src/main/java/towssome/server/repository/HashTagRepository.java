@@ -5,7 +5,7 @@ import towssome.server.entity.HashTag;
 
 import java.util.List;
 
-public interface HashTagRepository extends JpaRepository<HashTag,Long> {
+public interface HashTagRepository extends JpaRepository<HashTag,Long>, HashTagRepositoryCustom {
 
     boolean existsByName(String name);
 

@@ -29,6 +29,7 @@ public class HashtagClassificationService{
         final Page<ReviewPost> reviewPosts = getReviewPostByHashtag(keyword, cursorId, sort, page);
         return getReviewSimpleResCursorResult(reviewSimpleRes, reviewPosts);
     }
+
     private CursorResult<ReviewSimpleRes> getReviewSimpleResCursorResult(List<ReviewSimpleRes> reviewSimpleRes, Page<ReviewPost> reviewPosts) {
         Long cursorId;
         for(ReviewPost review : reviewPosts) {

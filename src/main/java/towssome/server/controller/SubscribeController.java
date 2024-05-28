@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import towssome.server.advice.MemberAdvice;
-import towssome.server.dto.CursorResult;
+import towssome.server.dto.PageResult;
 import towssome.server.dto.SubscribeRes;
 import towssome.server.entity.Member;
 import towssome.server.entity.Subscribe;

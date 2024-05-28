@@ -1,5 +1,8 @@
 package towssome.server.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -15,6 +18,7 @@ import towssome.server.service.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Tag(name = "프로필", description = "프로필 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/profile")
@@ -23,9 +27,11 @@ public class ProfileController {
     private final MemberAdvice memberAdvice;
     private final MemberService memberService;
     private final ReviewPostService reviewPostService;
+    private final ViewlikeService viewlikeService;
     private static final int PAGE_SIZE = 5;
 
 
+    @Operation(summary = "내 프로필 조회 API",description = "닉네임, 프로필 사진, id 반환")
     @GetMapping("/my")
     public ProfileRes getMyProfile(){
         Member jwtMember = memberAdvice.findJwtMember();
@@ -44,6 +50,7 @@ public class ProfileController {
         );
     }
 
+    @Operation(summary = "가상 연인 프로필 생성 API", description = "해시태그 리스트를 받아서 생성")
     @PostMapping("/createVirtual")
     public ResponseEntity<?> createVirtual(@RequestBody CreateVirtualRes res){
 
@@ -53,6 +60,9 @@ public class ProfileController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+
+    @Operation(summary = "프로필 사진 변경 API", description = "이전 사진이 있을 경우 삭제되고 교체됨",
+    parameters = @Parameter(name = "photo", description = "multipart/form-data 형식으로 보내야 함"))
     @PostMapping("/updateProfileImage")
     public ResponseEntity<?> updateProfileImage(@RequestBody MultipartFile photo) {
         Member jwtMember = memberAdvice.findJwtMember();
@@ -60,6 +70,7 @@ public class ProfileController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Operation(summary = "프로필 변경 API", description = "현재 닉네임만 교체 가능")
     @PostMapping("/update")
     public ResponseEntity<?> updateProfile(@RequestBody UpdateProfileReq req){
         Member jwtMember = memberAdvice.findJwtMember();
@@ -68,6 +79,7 @@ public class ProfileController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Operation(summary = "프로필 조회 API", description = "멤버 id로 조회 가능")
     @GetMapping("/{id}")
     public ProfileRes getProfile(@PathVariable Long id){
 
@@ -85,6 +97,20 @@ public class ProfileController {
                 member.getId());
     }
 
+    @Operation(summary = "타인 리뷰글 조회 API",
+            description = "cursorId를 기준으로 리뷰글 반환, 예를 들어 cursorId가 10이면 id가 10이하인 리뷰글을 size만큼 가져옴")
+    @GetMapping("/{id}/review")
+    public CursorResult<ReviewSimpleRes> getOtherReviews(@RequestParam(value = "cursorId", required = false) Long cursorId,
+                                                         @RequestParam(value = "size", required = false) Integer size,
+                                                         @RequestParam(value = "sort", required = false) String sort,
+                                                         @PathVariable String id) {
+        Member member = memberService.getMember(id);
+        if(size == null) size = PAGE_SIZE;
+        return reviewPostService.getMyReviewPage(member, cursorId, sort, PageRequest.of(0, size));
+    }
+
+    @Operation(summary = "내 리뷰글 조회 API",
+            description = "cursorId를 기준으로 리뷰글 반환, 예를 들어 cursorId가 10이면 id가 10이하인 리뷰글을 size만큼 가져옴")
     @GetMapping("/review")
     public CursorResult<ReviewSimpleRes> getMyReviews(@RequestParam(value = "cursorId", required = false) Long cursorId,
                                                     @RequestParam(value = "size", required = false) Integer size,
@@ -92,6 +118,26 @@ public class ProfileController {
         Member member = memberAdvice.findJwtMember();
         if(size == null) size = PAGE_SIZE;
         return reviewPostService.getMyReviewPage(member, cursorId, sort, PageRequest.of(0, size));
+    }
+
+    @Operation(summary = "내 조회글 조회 API", description = "cursorId를 기준으로 리뷰글 반환, 예를 들어 cursorId가 10이면 id가 10이하인 리뷰글을 size만큼 가져옴")
+    @GetMapping("/view")
+    public CursorResult<ReviewPostRes> getRecentView(@RequestParam(value = "cursorId", required = false) Long cursorId,
+                                                     @RequestParam(value = "size", required = false) Integer size,
+                                                     @RequestParam(value = "sort", required = false) String sort) { // get all review(size 만큼의 리뷰글과 다음 리뷰글의 존재여부(boolean) 전달)
+        Member member = memberAdvice.findJwtMember();
+        if(size == null) size = PAGE_SIZE;
+        return viewlikeService.getRecentView(member, cursorId, sort, PageRequest.of(0, size));
+    }
+
+    @Operation(summary = "내가 좋아요한 글 조회 API", description = "cursorId를 기준으로 리뷰글 반환, 예를 들어 cursorId가 10이면 id가 10이하인 리뷰글을 size만큼 가져옴")
+    @GetMapping("/like")
+    public CursorResult<ReviewPostRes> getLike(@RequestParam(value = "cursorId", required = false) Long cursorId,
+                                               @RequestParam(value = "size", required = false) Integer size,
+                                               @RequestParam(value = "sort", required = false) String sort) {
+        Member member = memberAdvice.findJwtMember();
+        if(size == null) size = PAGE_SIZE;
+        return viewlikeService.getLike(member, cursorId, sort, PageRequest.of(0, size));
     }
 
     @GetMapping("/search")
@@ -111,7 +157,6 @@ public class ProfileController {
                 searchedMember.getId()
         );
     }
-
 
 
 }

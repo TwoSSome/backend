@@ -1,4 +1,4 @@
-package towssome.server.controller;
+package towssome.server.dto;
 
 import java.util.List;
 
