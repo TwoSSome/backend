@@ -1,5 +1,6 @@
 package towssome.server.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -9,14 +10,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import towssome.server.dto.ErrorResult;
 import towssome.server.entity.RefreshToken;
+import towssome.server.repository.MemberRepository;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -30,6 +35,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final MemberRepository memberRepository;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -44,7 +50,20 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password, null);
 
         //token 에 담긴 검증을 위한 토큰을 AuthenticationManager 로 전달
-        return authenticationManager.authenticate(authToken);
+        try {
+            return authenticationManager.authenticate(authToken);
+        } catch (BadCredentialsException e) {
+            // 잘못된 자격 증명 예외 처리
+            if (!userExist(username)) {
+                throw new CustomAuthenticationException("존재하지 않는 id입니다");
+            } else {
+                throw new CustomAuthenticationException("비밀번호가 틀립니다");
+            }
+        }
+    }
+
+    private boolean userExist(String username) {
+        return memberRepository.existsByUsername(username);
     }
 
     //로그인 성공시 실행하는 메소드 (여기서 JWT 를 발급하면 됨)
@@ -76,7 +95,17 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     //로그인 실패시 실행하는 메소드
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-        response.setStatus(401);
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        ErrorResult errorResponse = new ErrorResult("UNAUTHORIZED EXCEPTION", failed.getMessage());
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonResponse = objectMapper.writeValueAsString(errorResponse);
+
+        PrintWriter writer = response.getWriter();
+        writer.print(jsonResponse);
+        writer.flush();
     }
 
     //쿠키 생성 메서드

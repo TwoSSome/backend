@@ -1,5 +1,6 @@
 package towssome.server.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -11,6 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
+import towssome.server.dto.ErrorResult;
 import towssome.server.entity.Member;
 
 import java.io.IOException;
@@ -41,12 +43,29 @@ public class JwtFilter extends OncePerRequestFilter {
             jwtUtil.isExpired(accessToken);
         } catch (ExpiredJwtException e) {
 
-            //response body
-            PrintWriter writer = response.getWriter();
-            writer.print("access token expired");
+            ErrorResult errorResult = new ErrorResult(
+                    "ACCESS TOKEN EXPIRED",
+                    "access token expired, try to /reissue for new access token"
+            );
 
+//            //response body
+//            PrintWriter writer = response.getWriter();
+//            writer.print("access token expired");
+
+            // JSON으로 변환할 ObjectMapper 생성
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            // JSON으로 변환
+            String jsonResponse = objectMapper.writeValueAsString(errorResult);
+
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
             //response status code
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+            PrintWriter writer = response.getWriter();
+            writer.print(jsonResponse);
+            writer.flush();
             return;
         }
 
