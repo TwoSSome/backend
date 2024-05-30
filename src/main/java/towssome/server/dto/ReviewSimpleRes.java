@@ -1,11 +1,11 @@
 package towssome.server.dto;
 
-import towssome.server.entity.Photo;
 
 import java.util.List;
 
 public record ReviewSimpleRes(
         Long reviewId,
+        String body,
         String profilePhoto,
         String nickname,
         String bodyPhoto,

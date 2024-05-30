@@ -11,4 +11,6 @@ public interface HashtagClassificationRepository extends JpaRepository<HashtagCl
     List<HashtagClassification> findAllByReviewPost(ReviewPost reviewPost);
 
     HashtagClassification findByReviewPostIdAndHashTagId(Long reviewId, Long hashtagId);
+
+    Boolean existsByReviewPostIdAndHashTagId(Long reviewId, Long hashtagId);
 }

@@ -13,7 +13,9 @@ import towssome.server.advice.MemberAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.HashTag;
 import towssome.server.entity.Member;
-import towssome.server.service.*;
+import towssome.server.service.MemberService;
+import towssome.server.service.ReviewPostService;
+import towssome.server.service.ViewlikeService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -120,25 +122,25 @@ public class ProfileController {
         return reviewPostService.getMyReviewPage(member, cursorId, sort, PageRequest.of(0, size));
     }
 
-//    @Operation(summary = "내 조회글 조회 API", description = "cursorId를 기준으로 리뷰글 반환, 예를 들어 cursorId가 10이면 id가 10이하인 리뷰글을 size만큼 가져옴")
-//    @GetMapping("/view")
-//    public CursorResult<ReviewPostRes> getRecentView(@RequestParam(value = "cursorId", required = false) Long cursorId,
-//                                                     @RequestParam(value = "size", required = false) Integer size,
-//                                                     @RequestParam(value = "sort", required = false) String sort) { // get all review(size 만큼의 리뷰글과 다음 리뷰글의 존재여부(boolean) 전달)
-//        Member member = memberAdvice.findJwtMember();
-//        if(size == null) size = PAGE_SIZE;
-//        return viewlikeService.getRecentView(member, cursorId, sort, PageRequest.of(0, size));
-//    }
-//
-//    @Operation(summary = "내가 좋아요한 글 조회 API", description = "cursorId를 기준으로 리뷰글 반환, 예를 들어 cursorId가 10이면 id가 10이하인 리뷰글을 size만큼 가져옴")
-//    @GetMapping("/like")
-//    public CursorResult<ReviewPostRes> getLike(@RequestParam(value = "cursorId", required = false) Long cursorId,
-//                                               @RequestParam(value = "size", required = false) Integer size,
-//                                               @RequestParam(value = "sort", required = false) String sort) {
-//        Member member = memberAdvice.findJwtMember();
-//        if(size == null) size = PAGE_SIZE;
-//        return viewlikeService.getLike(member, cursorId, sort, PageRequest.of(0, size));
-//    }
+    @Operation(summary = "내 조회글 조회 API", description = "cursorId를 기준으로 리뷰글 반환, 예를 들어 cursorId가 10이면 id가 10이하인 리뷰글을 size만큼 가져옴")
+    @GetMapping("/view")
+    public CursorResult<ReviewSimpleRes> getRecentView(@RequestParam(value = "cursorId", required = false) Long cursorId,
+                                                     @RequestParam(value = "size", required = false) Integer size,
+                                                     @RequestParam(value = "sort", required = false) String sort) { // get all review(size 만큼의 리뷰글과 다음 리뷰글의 존재여부(boolean) 전달)
+        Member member = memberAdvice.findJwtMember();
+        if(size == null) size = PAGE_SIZE;
+        return viewlikeService.getRecentView(member, cursorId, sort, PageRequest.of(0, size));
+    }
+
+    @Operation(summary = "내가 좋아요한 글 조회 API", description = "cursorId를 기준으로 리뷰글 반환, 예를 들어 cursorId가 10이면 id가 10이하인 리뷰글을 size만큼 가져옴")
+    @GetMapping("/like")
+    public CursorResult<ReviewSimpleRes> getLike(@RequestParam(value = "cursorId", required = false) Long cursorId,
+                                               @RequestParam(value = "size", required = false) Integer size,
+                                               @RequestParam(value = "sort", required = false) String sort) {
+        Member member = memberAdvice.findJwtMember();
+        if(size == null) size = PAGE_SIZE;
+        return viewlikeService.getLike(member, cursorId, sort, PageRequest.of(0, size));
+    }
 
     @GetMapping("/search")
     public ProfileRes searchProfile(@RequestParam(value="username") String username) {

@@ -12,7 +12,9 @@ import towssome.server.entity.BookMark;
 import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
 import towssome.server.entity.ViewLike;
-import towssome.server.repository.*;
+import towssome.server.repository.BookMarkRepository;
+import towssome.server.repository.ViewLikeRepository;
+import towssome.server.repository.ViewLikeRepositoryCustom;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -101,6 +103,7 @@ public class ViewlikeService {
                     null;
             reviewPostRes.add(new ReviewSimpleRes(
                     review.getId(),
+                    review.getBody(),
                     profilePhoto,
                     member.getNickName(),
                     bodyPhoto,
