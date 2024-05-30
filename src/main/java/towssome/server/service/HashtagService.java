@@ -72,8 +72,10 @@ public class HashtagService {
                 forReviewPostHashtag.add(save);
             } else {
                 HashTag find = hashtagRepository.findByName(s);
-                find.setCount(find.getCount() + 1);
-                forReviewPostHashtag.add(find);
+                if(!hashtagClassificationRepository.existsByReviewPostIdAndHashTagId(reviewPost.getId(), find.getId())) {
+                    find.setCount(find.getCount() + 1);
+                    forReviewPostHashtag.add(find);
+                }
             }
         }
 
@@ -111,6 +113,22 @@ public class HashtagService {
             hashTag.setCount(hashTag.getCount()-1);
         }
         hashtagClassificationRepository.deleteAll(byReviewPost);
+    }
+
+    /**
+     * 미리 정해진 카테고리를 해시태그로 저장합니다
+     * @param reviewPost
+     * @param category
+     */
+    @Transactional
+    public void saveCategoryInHashtag(ReviewPost reviewPost, String category){
+        HashTag hashTag = hashtagRepository.findByName(category);
+        if(hashTag == null){
+            hashTag = hashtagRepository.save(new HashTag(category, 1L));
+        }else{
+            hashTag.setCount(hashTag.getCount()+1);
+        }
+        hashtagClassificationRepository.save(new HashtagClassification(hashTag, reviewPost));
     }
 
     /**

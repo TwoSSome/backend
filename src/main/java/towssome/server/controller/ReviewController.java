@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +15,12 @@ import towssome.server.dto.*;
 import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
 import towssome.server.exception.PageException;
-import towssome.server.service.*;
+import towssome.server.service.HashtagClassificationService;
+import towssome.server.service.PhotoService;
+import towssome.server.service.ReviewPostService;
+import towssome.server.service.ViewlikeService;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Tag(name = "리뷰글", description = "리뷰글 API")
@@ -50,7 +51,7 @@ public class ReviewController {
     }
 
     @Operation(summary = "리뷰글 단건 조회 API", description = "비회원 사용 가능, reviewId로 get")
-    /** 특정리뷰글 조회 */
+    /* 특정리뷰글 조회 */
     @GetMapping("/{reviewId}")
     public ResponseEntity<ReviewPostRes> getReview(@PathVariable Long reviewId){ // get review by reviewId
         Member member = memberAdvice.findJwtMember();
@@ -118,7 +119,7 @@ public class ReviewController {
 
     @Operation(summary = "리뷰글 삭제 API", description = "리뷰글 삭제 요청",
     parameters = @Parameter(name = "reviewId", description = "삭제할 리뷰 id"))
-    /** 리뷰글 삭제 */
+    /* 리뷰글 삭제 */
     @PostMapping("/delete/{reviewId}")
     public ResponseEntity<?> deleteReview(@PathVariable Long reviewId) { // delete review by reviewId
         Member member = memberAdvice.findJwtMember();
