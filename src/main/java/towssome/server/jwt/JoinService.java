@@ -4,13 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.entity.*;
 import towssome.server.exception.DuplicateIdException;
-import towssome.server.repository.CategoryRepository;
-import towssome.server.repository.HashTagRepository;
-import towssome.server.repository.MemberRepository;
-import towssome.server.repository.ProfileTagRepository;
+import towssome.server.repository.*;
 import towssome.server.service.MailSendService;
 import towssome.server.service.PhotoService;
 
@@ -28,10 +26,15 @@ public class JoinService {
     private final HashTagRepository hashTagRepository;
     private final ProfileTagRepository profileTagRepository;
     private final MailSendService mailSendService;
+    private final EmailVerificationRepository emailVerificationRepository;
 
+    @Transactional
     public int sendEmailVerification(String email) {
         if (memberRepository.existsByUsername(email)) {
             throw new DuplicateIdException("이미 가입되어 있는 이메일 입니다");
+        }
+        if (emailVerificationRepository.existsByEmail(email)) {
+            emailVerificationRepository.deleteByEmail(email);
         }
         return mailSendService.joinEmail(email);
     }

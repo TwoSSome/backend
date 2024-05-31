@@ -14,4 +14,7 @@ public interface EmailVerificationRepository extends JpaRepository<EmailVerifica
     Optional<EmailVerification> findByEmail(String email);
 
     List<EmailVerification> findByCreateDateBefore(LocalDateTime fiveMinutesAgo);
+
+    void deleteByEmail(String email);
+
 }
