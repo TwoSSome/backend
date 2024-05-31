@@ -59,7 +59,7 @@ public class SecurityConfig {
 
                         configuration.setExposedHeaders(Collections.singletonList("Authorization"));
 
-                        return null;
+                        return configuration;
                     }
                 }));
 
