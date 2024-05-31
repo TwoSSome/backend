@@ -5,6 +5,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import towssome.server.entity.EmailVerification;
+import towssome.server.exception.EmailSendException;
 import towssome.server.exception.ExpirationEmailException;
 import towssome.server.repository.EmailVerificationRepository;
 
@@ -67,7 +68,7 @@ public class MailSendService {
             mailSender.send(message);
         } catch (MessagingException e) {//이메일 서버에 연결할 수 없거나, 잘못된 이메일 주소를 사용하거나, 인증 오류가 발생하는 등 오류
             // 이러한 경우 MessagingException이 발생
-            e.printStackTrace();//e.printStackTrace()는 예외를 기본 오류 스트림에 출력하는 메서드
+            throw new EmailSendException("이메일을 보내지 못했습니다");
         }
 
 

@@ -32,14 +32,19 @@ public class MemberController {
     private final JoinService joinService;
     private final MemberAdvice memberAdvice;
 
-    @Operation(summary = "이메일 인증 요청 API",parameters = {@Parameter(name = "email", description = "인증할 이메일")})
+    @Operation(summary = "이메일 인증 요청 API",parameters = {@Parameter(name = "email", description = "인증할 이메일")},
+    responses = {
+            @ApiResponse(responseCode = "500", description = "이메일 형식이 올바르지 않음"),
+            @ApiResponse(responseCode = "200", description = "이메일 정상 발송")
+    })
     @PostMapping("/{email}/send")
     public ResponseEntity<?> emailVerificationReq(@PathVariable String email){
         joinService.sendEmailVerification(email);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @Operation(summary = "이메일 인증번호 체크 요청 API", responses = {
+    @Operation(summary = "이메일 인증번호 체크 요청 API", description = "인증 요청 API를 먼저 보내야 합니다",
+            responses = {
             @ApiResponse(responseCode = "200", description = "이메일 인증 성공"),
             @ApiResponse(responseCode = "401", description = "이메일 인증번호 다름"),
             @ApiResponse(responseCode = "400", description = "중복된 이메일 가입 시도", content = @Content(schema = @Schema(implementation = ErrorResult.class)))

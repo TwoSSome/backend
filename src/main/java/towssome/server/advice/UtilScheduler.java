@@ -50,7 +50,7 @@ public class UtilScheduler {
      */
     @Scheduled(fixedRate = 60000) // 1분마다 실행
     public void deleteOldEntities() {
-        LocalDateTime fiveMinutesAgo = LocalDateTime.now().minusMinutes(5);
+        LocalDateTime fiveMinutesAgo = LocalDateTime.now().minusMinutes(1);
         List<EmailVerification> result = emailVerificationRepository.findByCreateDateBefore(fiveMinutesAgo);
         emailVerificationRepository.deleteAll(result);
     }
