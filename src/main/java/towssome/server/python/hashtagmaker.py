@@ -1,5 +1,6 @@
-import sys
 import subprocess
+import sys
+
 try:
     # 없는 모듈 import시 에러 발생
     from keybert import KeyBERT
@@ -28,91 +29,71 @@ except:
     from flask import Flask
 
 
-from collections import Counter
 import re
 
 app = Flask(__name__)
+
+def noun_extractor(text): # 의미있는 명사 추출
+    results = []
+    result = kiwi.analyze(text)
+    prev_end = ''
+    prev_pos = ''
+
+    for token, pos, start, length in result[0][0]:
+        if pos.startswith(('NNP', 'NNG', 'NP', 'XPN')):  # 명사인 경우
+            if(prev_end == start):
+                element = results[-1] + token
+                results.pop()
+                results.append(element)
+                prev_end = start + length
+
+            elif(prev_pos.startswith('NNP')):
+                compound = results[-1] + token
+                results.pop()
+                results.append(compound)
+                prev_pos = ''
+
+            else:
+                results.append(token)
+                prev_end = start + length
+        prev_pos = pos
+
+    return results
 
 def remove_stop_words(text, stop_words): # 불용어 제거
     okt.normalize(text)
     pattern = r'\b(' + '|'.join(stop_words) + r')\b'
     return re.sub(pattern, '', text, flags=re.IGNORECASE)
 
-def noun_extractor(text, phrase): # 의미있는 명사 추출
-    results = []
-    result = kiwi.analyze(text)
-    prev_token = ''
+def updateFrequency(words):
+    keywords = []
+    # 가중치 증가 로직
+    for word in words:
+        word, weight = word[0], word[1]
+        if word in items or word in relationship_types:
+            weight += 1
+        keywords.append((word, weight))
 
-    for token, pos, _, _ in result[0][0]:
-        if pos.startswith(('NNP', 'NNG')):  # 명사인 경우
-            if prev_token + " " + token in phrase:  # 연결된 토큰이 phrase에 포함되면
-                results.append(prev_token + token)  # 결과 리스트에 추가
-            else:
-                if prev_token:  # 이전 토큰이 비어있지 않은 경우
-                    results.append(prev_token)  # 이전 토큰을 결과에 추가
-                prev_token = token  # 현재 토큰을 이전 토큰으로 설정
-        else:
-            if prev_token:  # 비명사이며 이전 토큰이 비어있지 않은 경우
-                results.append(prev_token)  # 이전 토큰을 결과에 추가
-                prev_token = ''  # 이전 토큰 초기화
-    return results
-
-def updateFrequency(keywords, word_counts, existing_words):
-    for word, count in word_counts.items():
-        if count >= 2:  # 빈도수가 2 초과
-            if word not in existing_words:  # 기존 리스트에 없는 경우
-                keywords.append([word,count * 0.2])  # 새 단어를 추가하고 초기 가중치를 0.2로 설정
-            else:
-                index = existing_words.index(word)  # 기존 단어의 인덱스 찾기
-                if count == 1:
-                    keywords[index][1] -= 0.2  # 빈도수가 1인 경우 가중치 0.2 감소
-                if count >= 2:
-                    keywords[index][1] += count * 0.2  # 빈도수가 2인 경우 가중치 0.2 증가
     return keywords
 
 @app.route('/makeHashtag', methods=['POST'])
 def main():
     text = request.data.decode()  # JSON 데이터를 받습니다.
-    print("Received data:", text)
-    # 형태소 분석
-    pos_tagged = okt.pos(text)
-
-    # 형용사를 제외하고 단어 재조합
-    filtered_text = ''
-    for i, (word, pos) in enumerate(pos_tagged):
-        if pos == 'Josa' and word != '의' and i > 0:  # 조사인 경우, '의'는 제외
-            filtered_text += word  # 앞 단어와 붙여쓰기
-        elif pos not in ('Adjective', 'Verb', 'Josa'):  # 형용사, 동사, 모든 조사 제외
-            filtered_text += ' ' + word  # 그 외의 경우 앞에 공백
-
-    phrase = okt.phrases(filtered_text)
-    filtered_text = remove_stop_words(filtered_text, stopwords)
-    nouns = noun_extractor(filtered_text, phrase)
-
-    # Counter 객체 생성
-    word_counts = Counter(nouns)
-
-    text = ' '.join(nouns)
-    keywords = kw_model.extract_keywords(text, keyphrase_ngram_range=(1,1), stop_words=None, top_n=5)
+    nouns = ' '.join(noun_extractor(text))
+    remove_stopwords = remove_stop_words(nouns, stop_words)
+    keywords = kw_model.extract_keywords(remove_stopwords, keyphrase_ngram_range=(1,1), stop_words=None, top_n=30)
     keywords = [[k[0], k[1]] for k in keywords]
-
-    existing_words = [k[0] for k in keywords]  # 키워드 리스트에서 단어만 추출
-    keywords = updateFrequency(keywords, word_counts, existing_words)
-
-    # 가중치에 따라 keywords 리스트를 내림차순으로 정렬
+    keywords = updateFrequency(keywords)
     sorted_keywords = sorted(keywords, key=lambda x: x[1], reverse=True)
-
-    # 상위 5개 항목 선택
-    top_five_keywords = [keyword[0] for keyword in sorted_keywords[:5]]
-    print(top_five_keywords)
+    top_five_keywords = [keyword[0] for keyword in sorted_keywords[:4]]
     return jsonify({"hashtags": top_five_keywords})
 
 model = BertModel.from_pretrained('skt/kobert-base-v1')
 kw_model = KeyBERT(model)
-kiwi = Kiwi()
+kiwi = Kiwi(model_type='sbg', typos='basic')
 okt = Okt()
 
-stopwords = [
+stop_words = [
     "가", "가까스로", "가령", "각", "각각", "각자", "각종", "갖고말하자면", "같다", "같이",
     "개의치않고", "거니와", "거바", "거의", "것", "것과 같이", "것들", "게다가", "게우다", "겨우",
     "견지에서", "결과에 이르다", "결국", "결론을 낼 수 있다", "겸사겸사", "고려하면", "고로", "곧", "공동으로", "과",
@@ -130,7 +111,7 @@ stopwords = [
     "등등", "딩동", "따라", "따라서", "따위", "따지지 않다", "딱", "때", "때가 되어", "때문에",
     "또", "또한", "뚝뚝", "라 해도", "령", "로", "로 인하여", "로부터", "로써", "륙",
     "를", "마음대로", "마저", "마저도", "마치", "막론하고", "만 못하다", "만약", "만약에", "만은 아니다",
-    "만이 아니다", "만일", "만큼", "말하자면", "말할것도 없고", "매", "매번", "메쓰겁다", "몇", "모",
+    "만이 아니다", "만일", "만큼", "말하자면","말할것도 없고", "매", "매번", "메쓰겁다", "몇", "모",
     "모두", "무렵", "무릎쓰고", "무슨", "무엇", "무엇때문에", "물론", "및", "바꾸어말하면", "바꾸어말하자면",
     "바꾸어서 말하면", "바꾸어서 한다면", "바꿔 말하면", "바로", "바와같이", "밖에 안된다", "반대로", "반대로 말하자면", "반드시", "버금",
     "보는데서", "보다더", "보드득", "본대로", "봐", "봐라", "부류의 사람들", "부터", "불구하고", "불문하고",
@@ -171,9 +152,70 @@ stopwords = [
     "한마디", "한적이있다", "한켠으로는", "한항목", "할 따름이다", "할 생각이다", "할 줄 안다", "할 지경이다", "할 힘이 있다", "할때",
     "할만하다", "할망정", "할뿐", "할수있다", "할수있어", "할줄알다", "할지라도", "할지언정", "함께", "해도된다",
     "해도좋다", "해봐요", "해서는 안된다", "해야한다", "해요", "했어요", "향하다", "향하여", "향해서", "허",
-    "허걱", "허허", "헉", "헉헉", "헐떡헐떡", "형식으로 쓰여", "혹시", "혹은", "혼자", "훨씬", "'",'"'
-                                                                          "휘익", "휴", "흐흐", "흥", "힘입어"
+    "허걱", "허허", "헉", "헉헉", "헐떡헐떡", "형식으로 쓰여", "혹시", "혹은", "혼자", "훨씬", "평소", "완전", "만족", "기분", "주문", "선물"
+    "휘익", "휴", "흐흐", "흥", "힘입어", "확신", "덕분", "마음", "행복", "특별", "준비", "고민", "나이", "생각", "발견", "이거", "수고", "칭찬",
+    "맞이", "완전", "그녀", "그", "고급", "모습", "감사", "하루", "배송", "제조일자", "추천", "포장", "신경", "후회", "소비", "그날", "기쁨", "이야기", "기억", "처음",
+    "눈물", "행복", "기분", "모양", "리본", "하나하나", "순간"
 ]
 
+relationship_types = [
+    "연인", "남친", "여친", "남사친", "여사친", "여자친구", "남자친구",
+    "가족", "아빠", "엄마", "아버지", "어머니", "형제", "자매", "형", "오빠", "누나", "언니",
+    "동료", "상사", "부하", "친구", "절친",
+    "멘토", "멘티", "이웃", "동창", "클럽회원",
+    "온라인친구", "룸메이트", "파트너", "고객", "사업파트너",
+    "친척", "사촌", "삼촌", "이모", "고모",
+    "조부모", "할아버지", "할머니", "조카", "조카딸",
+    "애완동물", "선생님", "학생", "교수", "연구동료",
+    "팀원", "프로젝트매니저", "자원봉사자", "트레이너", "코치",
+    "직장동료", "직장상사", "부서원", "협력업체 직원", "고문",
+    "비서", "파트타이머", "아르바이트생", "인턴", "전 직장 동료",
+    "재택근무동료", "프리랜서", "기술지원", "영업대표", "회계사",
+    "변호사", "의사", "간호사", "치료사", "상담사",
+    "정비사", "배달원", "미용사", "트레이너", "요리사",
+    "운전기사", "가정부", "유모", "베이비시터",
+    "운동동료", "동호회회원", "게임친구", "여행동반자", "동네친구"
+]
+
+items = [
+    "취미", "여가", "스포츠", "운동", "요가", "헬스장", "음악",
+    "독서", "여행", "예술", "공예", "스포츠", "운동",
+
+    "미용","건강"
+    ,"스킨케어", "페이셜", "클렌저", "스킨케어세트",
+    "헤어케어", "헤어오일", "샴푸", "컨디셔너", "헤어드라이어",
+    "피트니스", "피트니스트래커", "운동복", "요가블록", "향수",
+    "웰니스", "아로마테라피", "명상도구", "마사지기기",
+
+
+    "음식", "초콜릿", "치즈플래터", "스낵바스켓","케잌","케이크"
+    ,"음료", "와인", "커피세트", "차세트",
+    "요리", "요리책", "조리도구", "스파이스세트",
+    "베이킹", "베이킹키트", "쿠키커터", "케이크믹스",
+
+    "가정", "인테리어",
+    "가구", "소형책상", "의자", "선반",
+    "장식품", "그림", "촛대", "화병",
+    "생활용품", "블랭킷", "쿠션", "양초",
+    "정리정돈", "수납함", "옷걸이", "정리도구",
+
+    "기술","전자기기",
+    "스마트폰", "케이스", "충전기", "이어폰",
+    "컴퓨터", "키보드", "마우스", "USB드라이브",
+    "가전제품", "스마트스피커", "커피메이커", "전자책리더기",
+    "게임", "비디오게임", "게임콘솔", "게임액세서리",
+
+    "패션", "엑세서리",
+    "의류", "셔츠", "드레스", "스웨터",
+    "신발", "운동화", "부츠", "샌들",
+    "액세서리", "목걸이", "팔찌", "시계",
+    "가방", "핸드백", "백팩", "클러치", "차키케이스","케이스", "키링"
+
+    "경험", "활동",
+    "레저", "테마파크티켓", "탈출게임방티켓", "박물관입장권",
+    "교육", "온라인강의", "워크숍티켓", "세미나입장권",
+    "스파", "힐링", "마사지", "명상",
+    "커스텀", "핸드메이드"
+]
 if __name__ == "__main__":
     app.run(debug=True, port=5000, host="0.0.0.0")
