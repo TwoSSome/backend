@@ -25,16 +25,19 @@ public class ReviewPost extends BaseEntity{
 
     private int starPoint;
 
+    private String category;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
-    public ReviewPost(String body, int price, ReviewType reviewType, String whereBuy, int starPoint, Member member) {
+    public ReviewPost(String body, int price, ReviewType reviewType, String whereBuy, int starPoint, String category, Member member) {
         this.body = body;
         this.price = price;
         this.reviewType = reviewType;
         this.whereBuy = whereBuy;
         this.starPoint = starPoint;
+        this.category = category;
         this.member = member;
     }
 

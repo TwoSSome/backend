@@ -3,12 +3,10 @@ package towssome.server.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import towssome.server.dto.CursorResult;
 import towssome.server.dto.PhotoInPost;
-import towssome.server.dto.ReviewPostRes;
 import towssome.server.dto.ReviewSimpleRes;
 import towssome.server.entity.ReviewPost;
 import towssome.server.repository.HashtagClassificationRepository;
@@ -41,6 +39,7 @@ public class HashtagClassificationService{
 
             reviewSimpleRes.add(new ReviewSimpleRes(
                     review.getId(),
+                    review.getBody(),
                     profilePhoto,
                     review.getMember().getNickName(),
                     bodyPhoto,

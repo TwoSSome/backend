@@ -1,7 +1,6 @@
 package towssome.server.service;
 
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -17,7 +16,6 @@ import towssome.server.enumrated.ReviewType;
 import towssome.server.exception.NotFoundReviewPostException;
 import towssome.server.exception.NotMatchReviewTypeException;
 import towssome.server.repository.ReviewPostRepository;
-import towssome.server.repository.ReviewPostRepositoryCustom;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,10 +51,12 @@ public class ReviewPostService {
                 reviewReq.price(),
                 reviewType,
                 reviewReq.whereBuy(),
-                reviewReq.startPoint(),
+                reviewReq.starPoint(),
+                reviewReq.category(),
                 member
         );
         reviewPostRepository.save(reviewPost);
+        hashtagService.saveCategoryInHashtag(reviewPost, reviewReq.category());
         hashtagService.createHashtag(reviewPost);
         photoService.saveReviewPhoto(photos, reviewPost);
         return reviewPost;
@@ -115,6 +115,7 @@ public class ReviewPostService {
 
             reviewSimpleRes.add(new ReviewSimpleRes(
                     review.getId(),
+                    review.getBody(),
                     profilePhoto,
                     review.getMember().getNickName(),
                     bodyPhoto,
@@ -172,6 +173,7 @@ public class ReviewPostService {
 
             reviewSimpleRes.add(new ReviewSimpleRes(
                     value.getId(),
+                    value.getBody(),
                     profilePhotoPath,
                     value.getMember().getNickName(),
                     bodyPhoto,
