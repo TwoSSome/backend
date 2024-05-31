@@ -28,8 +28,6 @@ public class JoinService {
     private final HashTagRepository hashTagRepository;
     private final ProfileTagRepository profileTagRepository;
     private final MailSendService mailSendService;
-    @Value("${email.verification.required}")
-    private boolean emailVerification;
 
     public int sendEmailVerification(String email) {
         if (memberRepository.existsByUsername(email)) {
