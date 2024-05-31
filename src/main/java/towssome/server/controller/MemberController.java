@@ -8,12 +8,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.advice.MemberAdvice;
 import towssome.server.dto.CreateRes;
+import towssome.server.dto.EmailCheckReq;
 import towssome.server.dto.ErrorResult;
 import towssome.server.entity.Member;
 import towssome.server.jwt.JoinDTO;
@@ -29,6 +31,29 @@ public class MemberController {
     private final MemberService memberService;
     private final JoinService joinService;
     private final MemberAdvice memberAdvice;
+
+    @Operation(summary = "이메일 인증 요청 API",parameters = {@Parameter(name = "email", description = "인증할 이메일")})
+    @PostMapping("/{email}/send")
+    public ResponseEntity<?> emailVerificationReq(@PathVariable String email){
+        joinService.sendEmailVerification(email);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Operation(summary = "이메일 인증번호 체크 요청 API", responses = {
+            @ApiResponse(responseCode = "200", description = "이메일 인증 성공"),
+            @ApiResponse(responseCode = "401", description = "이메일 인증번호 다름"),
+            @ApiResponse(responseCode = "400", description = "중복된 이메일 가입 시도", content = @Content(schema = @Schema(implementation = ErrorResult.class)))
+    }, parameters = {
+            @Parameter(name = "email", description = "인증할 이메일"),
+            @Parameter(name = "req", description = "입력한 인증번호")
+    })
+    @PostMapping("/{email}/check")
+    public ResponseEntity<?> emailCheck(@PathVariable String email, @RequestBody EmailCheckReq req){
+        if (joinService.verificationEmail(email, req.authNum())) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
 
     @Operation(summary = "회원가입 API", description = "회원가입 성공시 가입된 멤버의 id 반환",
     parameters = {@Parameter(name = "req", description = "username(ID), password, nickname, 프로필 태그들의 id / json으로 보내야 함")},
