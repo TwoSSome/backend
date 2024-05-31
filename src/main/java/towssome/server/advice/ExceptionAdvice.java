@@ -59,4 +59,16 @@ public class ExceptionAdvice {
         return new ResponseEntity<>(errorResult, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler
+    public ResponseEntity<ErrorResult> validEmailExpirationException(ExpirationEmailException e) {
+        ErrorResult errorResult = new ErrorResult("ExpirationEmailException", e.getMessage());
+        return new ResponseEntity<>(errorResult, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResult> noSendEmailException(EmailSendException e) {
+        ErrorResult errorResult = new ErrorResult("EmailSendException", e.getMessage());
+        return new ResponseEntity<>(errorResult, HttpStatus.NOT_FOUND);
+    }
+
 }
