@@ -67,10 +67,16 @@ def remove_stop_words(text, stop_words): # 불용어 제거
 
 def updateFrequency(words):
     keywords = []
+    item_count = 0
+    relationship_count = 0
     # 가중치 증가 로직
     for word in words:
         word, weight = word[0], word[1]
-        if word in items or word in relationship_types:
+        if word in items and item_count < 2:
+            item_count += 1
+            weight += 1
+        if word in relationship_types and relationship_count < 3:
+            relationship_count += 1
             weight += 1
         keywords.append((word, weight))
 
@@ -85,7 +91,7 @@ def main():
     keywords = [[k[0], k[1]] for k in keywords]
     keywords = updateFrequency(keywords)
     sorted_keywords = sorted(keywords, key=lambda x: x[1], reverse=True)
-    top_five_keywords = [keyword[0] for keyword in sorted_keywords[:4]]
+    top_five_keywords = [keyword[0] for keyword in sorted_keywords[:5]]
     return jsonify({"hashtags": top_five_keywords})
 
 model = BertModel.from_pretrained('skt/kobert-base-v1')
@@ -159,7 +165,7 @@ stop_words = [
 ]
 
 relationship_types = [
-    "연인", "남친", "여친", "남사친", "여사친", "여자친구", "남자친구",
+    "연인", "남친", "여친", "남사친", "여사친", "여자친구", "남자친구", "애인", "커플", "연인"
     "가족", "아빠", "엄마", "아버지", "어머니", "형제", "자매", "형", "오빠", "누나", "언니",
     "동료", "상사", "부하", "친구", "절친",
     "멘토", "멘티", "이웃", "동창", "클럽회원",
@@ -181,8 +187,8 @@ items = [
     "취미", "여가", "스포츠", "운동", "요가", "헬스장", "음악",
     "독서", "여행", "예술", "공예", "스포츠", "운동",
 
-    "미용","건강"
-    ,"스킨케어", "페이셜", "클렌저", "스킨케어세트",
+    "미용","건강",
+    "스킨케어", "페이셜", "클렌저", "스킨케어세트",
     "헤어케어", "헤어오일", "샴푸", "컨디셔너", "헤어드라이어",
     "피트니스", "피트니스트래커", "운동복", "요가블록", "향수",
     "웰니스", "아로마테라피", "명상도구", "마사지기기",
