@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,13 +14,10 @@ import towssome.server.advice.MemberAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.Comment;
 import towssome.server.entity.Member;
-import towssome.server.entity.ReviewPost;
 import towssome.server.service.CommentLikeService;
 import towssome.server.service.CommentService;
-import towssome.server.service.ReviewPostService;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 @Tag(name = "댓글")
 @RestController
@@ -31,7 +27,6 @@ import java.util.ArrayList;
 public class CommentController {
     private final CommentService commentService;
     private final CommentLikeService commentLikeService;
-    private final ReviewPostService reviewPostService;
     private final MemberAdvice memberAdvice;
     private static final int DEFAULT_SIZE = 20;
 
