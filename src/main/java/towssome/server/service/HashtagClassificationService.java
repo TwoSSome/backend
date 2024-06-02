@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import towssome.server.dto.CursorResult;
 import towssome.server.dto.PhotoInPost;
+import towssome.server.dto.QuickRecommendReq;
 import towssome.server.dto.ReviewSimpleRes;
 import towssome.server.entity.ReviewPost;
 import towssome.server.repository.HashtagClassificationRepository;
@@ -28,7 +29,8 @@ public class HashtagClassificationService{
         return getReviewSimpleResCursorResult(reviewSimpleRes, reviewPosts);
     }
 
-    private CursorResult<ReviewSimpleRes> getReviewSimpleResCursorResult(List<ReviewSimpleRes> reviewSimpleRes, Page<ReviewPost> reviewPosts) {
+    private CursorResult<ReviewSimpleRes> getReviewSimpleResCursorResult(List<ReviewSimpleRes> reviewSimpleRes,
+                                                                         Page<ReviewPost> reviewPosts) {
         Long cursorId;
         for(ReviewPost review : reviewPosts) {
             List<PhotoInPost> bodyPhotos = photoService.getPhotoS3Path(review);
@@ -65,4 +67,19 @@ public class HashtagClassificationService{
     public Object getAllHashtags() {
         return hashtagClassificationRepository.findAll();
     }
+
+
+    public CursorResult<ReviewSimpleRes> getRecommendPageByHashtag(QuickRecommendReq req, Long cursorId, String sort, Pageable page) {
+        List<ReviewSimpleRes> reviewSimpleRes = new ArrayList<>();
+
+        final Page<ReviewPost> reviewPosts = getRecommendReviewByHashtag(req, cursorId, sort, page);
+        return getReviewSimpleResCursorResult(reviewSimpleRes, reviewPosts);
+    }
+    public Page<ReviewPost> getRecommendReviewByHashtag(QuickRecommendReq req, Long cursorId, String sort, Pageable page){
+        return cursorId == null ?
+                hashtagClassificationRepository.findFirstRecommendPageByHashtag(req, sort, page):
+                hashtagClassificationRepository.findRecommendPageByCursorIdAndHashTag(req, cursorId, sort, page);
+    }
+
+
 }
