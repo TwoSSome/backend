@@ -41,10 +41,11 @@ public class HashtagService {
      * @param reviewPost
      */
     public void createHashtag(ReviewPost reviewPost) {
+        String stringWithoutNewLines = reviewPost.getBody().replaceAll("\\r\\n|\\r|\\n", "");
         String url = "http://localhost:5000/makeHashtag";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));  // 문자열 전송을 위한 컨텐트 타입
-        HttpEntity<String> entity = new HttpEntity<>(reviewPost.getBody(), headers);
+        HttpEntity<String> entity = new HttpEntity<>(stringWithoutNewLines, headers);
         ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
 
         System.out.println("Response from Python: " + response.getBody());
