@@ -36,4 +36,13 @@ public class HashTagRepositoryImpl implements HashTagRepositoryCustom{
                 hasNext
         );
     }
+
+    @Override
+    public List<HashTag> getHashtagRank() {
+        return queryFactory
+                .selectFrom(hashTag)
+                .orderBy(hashTag.count.desc())
+                .limit(15)
+                .fetch();
+    }
 }

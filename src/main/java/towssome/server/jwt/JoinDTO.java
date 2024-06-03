@@ -6,6 +6,6 @@ public record JoinDTO(
         String username,
         String password,
         String nickname,
-        List<Long> profileTagIds
+        List<String> profileTagNames
 ) {
 }
