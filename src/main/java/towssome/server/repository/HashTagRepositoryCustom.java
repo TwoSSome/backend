@@ -9,4 +9,6 @@ public interface HashTagRepositoryCustom {
 
     CursorResult<HashTag> searchHashtag(String name, int page, int size);
 
+    List<HashTag> getHashtagRank();
+
 }

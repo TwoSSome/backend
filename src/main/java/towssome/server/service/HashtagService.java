@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import towssome.server.dto.CursorResult;
+import towssome.server.dto.HashtagRes;
 import towssome.server.entity.HashTag;
 import towssome.server.entity.HashtagClassification;
 import towssome.server.entity.ReviewPost;
@@ -164,5 +165,22 @@ public class HashtagService {
     public CursorResult<HashTag> searchHashtag(String name, int page, int size) {
         return hashtagRepository.searchHashtag(name, page, size);
     }
+
+    public List<HashtagRes> getHashtagRank() {
+        List<HashTag> hashtagRank = hashtagRepository.getHashtagRank();
+
+        ArrayList<HashtagRes> result = new ArrayList<>();
+
+        for (HashTag hashTag : hashtagRank) {
+            result.add(new HashtagRes(
+                    hashTag.getId(),
+                    hashTag.getName()
+            ));
+        }
+
+        return result;
+    }
+
+
 
 }

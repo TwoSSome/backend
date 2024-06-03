@@ -85,4 +85,10 @@ public class HashtagController {
                 result.hasNext()
         );
     }
+
+    @GetMapping("/rank")
+    public List<HashtagRes> getHashtagRank(){
+
+        return hashtagService.getHashtagRank();
+    }
 }

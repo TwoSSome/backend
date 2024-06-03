@@ -1,7 +1,6 @@
 package towssome.server.jwt;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +13,7 @@ import towssome.server.service.PhotoService;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -83,9 +83,25 @@ public class JoinService {
         categoryRepository.save(category);
 
         //프로필태그 생성
+        profileTageSave(joinDTO.profileTagNames(),member);
+
+        return member;
+    }
+
+    private void profileTageSave(List<String> list, Member member) {
+
         ArrayList<HashTag> hashTags = new ArrayList<>();
-        for (Long profileTagId : joinDTO.profileTagIds()) {
-            hashTags.add(hashTagRepository.findById(profileTagId).orElseThrow());
+
+        for (String name : list) {
+            if (hashTagRepository.existsByName(name)) {
+                hashTags.add(hashTagRepository.findByName(name));
+            }else{
+                HashTag save = hashTagRepository.save(new HashTag(
+                        name,
+                        0L
+                ));
+                hashTags.add(save);
+            }
         }
 
         for (HashTag hashTag : hashTags) {
@@ -95,7 +111,6 @@ public class JoinService {
             ));
         }
 
-        return member;
     }
 
 
