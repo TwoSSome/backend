@@ -75,7 +75,8 @@ public class ReviewController {
                     hashtagClassificationService.getHashtags(reviewId),
                     review.getReviewType(),
                     review.getStarPoint(),
-                    review.getWhereBuy()
+                    review.getWhereBuy(),
+                    review.getMember().getNickName()
                     );
         }else {
             //회원 조회
@@ -93,7 +94,8 @@ public class ReviewController {
                     hashtagClassificationService.getHashtags(reviewId),
                     review.getReviewType(),
                     review.getStarPoint(),
-                    review.getWhereBuy()
+                    review.getWhereBuy(),
+                    review.getMember().getNickName()
             );
         }
 
