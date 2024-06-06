@@ -66,11 +66,11 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         return memberRepository.existsByUsername(username);
     }
 
-    //로그인 성공시 실행하는 메소드 (여기서 JWT 를 발급하면 됨)
+    // 로그인 성공 시 실행하는 메소드 (여기서 JWT를 발급하면 됨)
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
 
-        //유저 정보
+        // 유저 정보
         String username = authentication.getName();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
@@ -78,19 +78,26 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
 
-        //토큰 생성
+        // 토큰 생성
         String access = jwtUtil.createJwt("access", username, role, ACCESS_EXPIRE_MS);
         String refresh = jwtUtil.createJwt("refresh", username, role, REFRESH_EXPIRE_MS);
 
-        //refreshToken 저장
-        addRefreshEntity(username,refresh,REFRESH_EXPIRE_MS);
+        // refreshToken 저장
+        addRefreshEntity(username, refresh, REFRESH_EXPIRE_MS);
 
-        //응답 설정
-        response.setHeader("access", access);
-        response.addCookie(createCookie("refresh", refresh)); //refresh token 은 쿠키로
+        // 응답 설정
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        // JSON 형식으로 반환
+        PrintWriter out = response.getWriter();
+        out.print("{\"access\":\"" + access + "\", \"refresh\":\"" + refresh + "\"}");
+        out.flush();
+
         response.setStatus(HttpStatus.OK.value());
-
     }
+
+
 
     //로그인 실패시 실행하는 메소드
     @Override
@@ -123,6 +130,11 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private void addRefreshEntity(String username, String refresh, Long expiredMs) {
 
         Date date = new Date(System.currentTimeMillis() + expiredMs);
+
+        if (refreshTokenRepository.existsByUsername(username)) {
+            RefreshToken byUsername = refreshTokenRepository.findByUsername(username);
+            refreshTokenRepository.delete(byUsername);
+        }
 
         RefreshToken refreshEntity = new RefreshToken(username,refresh,date.toString());
 

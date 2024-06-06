@@ -39,14 +39,27 @@ public class MemberService {
      * @param hashtags
      * @param member
      */
-    public void createVirtual(List<Long> hashtags, Member member) {
-        for (Long id : hashtags) {
-            HashTag hashTag = hashTagRepository.findById(id).orElseThrow();
-            virtualMateHashtagRepository.save(new VirtualMateHashtag(
-                    member,
-                    hashTag
-            ));
+    public void createVirtual(List<String> hashtags, Member member) {
+
+        for (String hashtag : hashtags) {
+            if (hashTagRepository.existsByName(hashtag)) {
+                HashTag hashTag = hashTagRepository.findHashTagByName(hashtag).orElseThrow();
+                virtualMateHashtagRepository.save(new VirtualMateHashtag(
+                        member,
+                        hashTag
+                ));
+            }else{
+                HashTag save = hashTagRepository.save(new HashTag(
+                        hashtag,
+                        0L
+                ));
+                virtualMateHashtagRepository.save(new VirtualMateHashtag(
+                        member,
+                        save
+                ));
+            }
         }
+
     }
 
     /**

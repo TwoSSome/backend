@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import towssome.server.entity.RefreshToken;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Date;
 
 import static towssome.server.jwt.JwtStatic.*;
@@ -25,76 +27,67 @@ public class ReissueController {
     private final RefreshTokenRepository refreshTokenRepository;
 
     @PostMapping("/reissue")
-    public ResponseEntity<?> reissue(HttpServletResponse response, HttpServletRequest request) {
+    public ResponseEntity<?> reissue(HttpServletResponse response, HttpServletRequest request) throws IOException {
 
-        //리프레쉬 토큰 get
-        String refresh = null;
-        Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
-
-            if (cookie.getName().equals("refresh")) {
-                refresh = cookie.getValue();
-            }
-
-        }
+        // 리프레쉬 토큰 get
+        String refresh = request.getHeader("refresh");
 
         if (refresh == null) {
-
             return new ResponseEntity<>("refresh token null", HttpStatus.BAD_REQUEST);
         }
 
-        //expired check
+        // expired check
         try {
             jwtUtil.isExpired(refresh);
         } catch (ExpiredJwtException e) {
-
-            //response status code
             return new ResponseEntity<>("refresh token expired", HttpStatus.BAD_REQUEST);
         }
 
-        // 토큰이 refresh인지 확인 (발급시 페이로드에 명시)
+        // 토큰이 refresh인지 확인 (발급 시 페이로드에 명시)
         String category = jwtUtil.getCategory(refresh);
 
         if (!category.equals("refresh")) {
-
-            //response status code
             return new ResponseEntity<>("invalid refresh token", HttpStatus.BAD_REQUEST);
         }
 
-        //DB에 저장되어 있는지 확인
+        // DB에 저장되어 있는지 확인
         Boolean isExist = refreshTokenRepository.existsByRefresh(refresh);
         if (!isExist) {
-
-            //response body
             return new ResponseEntity<>("invalid refresh token", HttpStatus.BAD_REQUEST);
         }
 
         String username = jwtUtil.getUsername(refresh);
         String role = jwtUtil.getRole(refresh);
 
-        //make new JWT
+        // 새 JWT 발급
         String newAccess = jwtUtil.createJwt("access", username, role, ACCESS_EXPIRE_MS);
-        String newRefresh = jwtUtil.createJwt("refresh", username, role, REFRESH_EXPIRE_MS); //새 리프레쉬 토큰 발급
+        String newRefresh = jwtUtil.createJwt("refresh", username, role, REFRESH_EXPIRE_MS);
 
         if (refresh.equals(newRefresh)) {
             System.out.println("리프레쉬 값이 같습니다");
         } else {
             System.out.println("리프레쉬 값이 다릅니다");
-            log.info("refresh = {}",refresh);
-            log.info("new refresh = {}",newRefresh);
+            log.info("refresh = {}", refresh);
+            log.info("new refresh = {}", newRefresh);
         }
 
-        //Refresh 토큰 저장 DB에 기존의 Refresh 토큰 삭제 후 새 Refresh 토큰 저장
+        // Refresh 토큰 저장 DB에 기존의 Refresh 토큰 삭제 후 새 Refresh 토큰 저장
         refreshTokenRepository.deleteByRefresh(refresh);
         addRefreshEntity(username, newRefresh, 86400000L);
 
-        //response
-        response.setHeader("access", newAccess);
-        response.addCookie(createCookie("refresh", newRefresh));
+        // response
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        PrintWriter out = response.getWriter();
+        out.print("{\"access\":\"" + newAccess + "\", \"refresh\":\"" + newRefresh + "\"}");
+        out.flush();
+
+        response.setStatus(HttpStatus.OK.value());
 
         return new ResponseEntity<>(HttpStatus.OK);
-
     }
+
 
     private Cookie createCookie(String key, String value) {
 
