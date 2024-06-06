@@ -18,6 +18,7 @@ public record ReviewPostRes(
         List<String> hashTags,
         ReviewType reviewType,
         int startPoint,
-        String whereBuy
+        String whereBuy,
+        String nickname
 ) {
 }
