@@ -14,4 +14,6 @@ public interface SubscribeRepository extends JpaRepository<Subscribe,Long>, Subs
 
     Page<Subscribe> findAllBySubscriber(Member subscribe, Pageable pageable);
 
+    boolean existsBySubscriber(Member member);
+
 }

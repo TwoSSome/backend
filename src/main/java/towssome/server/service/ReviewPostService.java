@@ -16,6 +16,7 @@ import towssome.server.enumrated.ReviewType;
 import towssome.server.exception.NotFoundReviewPostException;
 import towssome.server.exception.NotMatchReviewTypeException;
 import towssome.server.repository.ReviewPostRepository;
+import towssome.server.repository.SubscribeRepository;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ public class ReviewPostService {
     private final PhotoService photoService;
     private final HashtagService hashtagService;
     private final HashtagClassificationService hashtagClassificationService;
+    private final SubscribeRepository subscribeRepository;
 
     public ReviewPost createReview(
             ReviewPostReq reviewReq,
@@ -152,6 +154,15 @@ public class ReviewPostService {
 
     @Transactional
     public CursorResult<ReviewSimpleRes> getSubscribeReview(Member subscriber, int page) {
+
+        if (!subscribeRepository.existsBySubscriber(subscriber)) {
+            return new CursorResult<>(
+                    new ArrayList<>(1),
+                    (long)page,
+                    false
+            );
+        }
+
         CursorResult<ReviewPost> subscribeReviewList = reviewPostRepository.findSubscribeReviewList(subscriber, PageRequest.of(page-1, 10));
 
         ArrayList<ReviewSimpleRes> reviewSimpleRes = new ArrayList<>();

@@ -61,6 +61,8 @@ public class ProfileController {
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
+    
+
 
 
     @Operation(summary = "프로필 사진 변경 API", description = "이전 사진이 있을 경우 삭제되고 교체됨",
