@@ -87,7 +87,13 @@ public class ViewlikeService {
 
     /** ----------------- 자신의 좋아요 기록 조회 ----------------- */
     public CursorResult<ReviewSimpleRes> getLike(Member member, Long pageId, String sort, int size) {
-        pageId = (pageId == null) ? 0 : pageId - 1; // 1 page부터 시작을 표현
+        if (pageId == null) {
+            pageId = 0L;
+        } else if (pageId < 0) {
+            throw new IllegalArgumentException("pageId는 0 이상이어야 합니다.");
+        } else if (pageId > 0) {
+            pageId = pageId - 1;
+        }
         final CursorResult<ReviewPost> reviewPosts = getLikePosts(member.getId(), pageId, sort, size);
         return getReviewSimpleResCursorResult(member, reviewPosts);
     }
@@ -100,7 +106,13 @@ public class ViewlikeService {
 
     /** ----------------- 자신의 최근 조회 기록 조회 ----------------- */
     public CursorResult<ReviewSimpleRes> getRecentView(Member member, Long pageId, String sort, int size) {
-        pageId = (pageId == null) ? 0 : pageId - 1; // 1 page부터 시작을 표현
+        if (pageId == null) {
+            pageId = 0L;
+        } else if (pageId < 0) {
+            throw new IllegalArgumentException("pageId는 0 이상이어야 합니다.");
+        } else if (pageId > 0) {
+            pageId = pageId - 1;
+        }
         final CursorResult<ReviewPost> reviewPosts = getRecentViewPosts(member.getId(), pageId, sort, size);
         return getReviewSimpleResCursorResult(member, reviewPosts);
     }
