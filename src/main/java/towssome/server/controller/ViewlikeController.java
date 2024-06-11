@@ -18,7 +18,6 @@ import towssome.server.service.ViewlikeService;
 @Slf4j
 @RequiredArgsConstructor
 public class ViewlikeController {
-    private static final int PAGE_SIZE = 10;
     private final ViewlikeService viewlikeService;
     private final ReviewPostService reviewPostService;
     private final MemberAdvice memberAdvice;

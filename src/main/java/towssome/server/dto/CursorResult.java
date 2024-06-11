@@ -4,6 +4,6 @@ import java.util.List;
 
 public record CursorResult<T>(
         List<T> values,
-        Long cursorId,
+        Long nextPageId,
         boolean hasNext) {
 }
