@@ -1,16 +1,14 @@
 package towssome.server.repository;
 
 import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
+import towssome.server.dto.CursorResult;
 import towssome.server.entity.ReviewPost;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,109 +20,73 @@ public class ViewLikeRepositoryImpl implements ViewLikeRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<ReviewPost> findLikeByMemberIdOrderByIdDesc(Long memberId, String sort, Pageable page) {
-        List<ReviewPost> result = queryFactory
-                .select(reviewPost)
-                .from(reviewPost)
-                .join(viewLike).on(reviewPost.id.eq(viewLike.reviewPost.id))
-                .where(viewLike.member.id.eq(memberId)
-                        .and(viewLike.likeFlag.eq(true)))
-                .orderBy(getOrderSpecifier(sort))
-                .offset(page.getOffset())
-                .limit(page.getPageSize())
-                .fetch();
+    public CursorResult<ReviewPost> findLikeByMemberIdOrderByIdDesc(Long memberId, Long pageId, String sort, int size) {
+        if(pageId == null) {
+            List<ReviewPost> result = buildQuery(memberId, sort, size, null, false).fetch();
 
-        JPAQuery<Long> count = queryFactory
-                .select(viewLike.count())
-                .from(viewLike)
-                .where(viewLike.member.id.eq(memberId)
-                        .and(viewLike.likeFlag.eq(true)))
-                .offset(page.getOffset())
-                .limit(page.getPageSize());
+            return new CursorResult<>(
+                    result,
+                    2L,
+                    hasNext(result, size));
+        }
+        else{
+            Long offset = pageId * size;
+            List<ReviewPost> result = buildQuery(memberId, sort, size, offset, false).fetch();
 
-        return PageableExecutionUtils.getPage(result, page, count::fetchOne);
+            return new CursorResult<>(
+                    result,
+                    pageId + 2,
+                    hasNext(result, size));
+        }
     }
 
     @Override
-    public Page<ReviewPost> findLikeByIdAndMemberIdLessThanOrderByIdDesc(Long cursorId, Long memberId, String sort, Pageable page) {
-        List<ReviewPost> result = queryFactory
+    public CursorResult<ReviewPost> findRecentByMemberIdOrderByIdDesc(Long memberId, Long pageId, String sort, int size) {
+        if(pageId == null) {
+            List<ReviewPost> result = buildQuery(memberId, sort, size, null, true).fetch();
+
+            return new CursorResult<>(
+                    result,
+                    2L,
+                    hasNext(result, size));
+        }
+        else{
+            Long offset = pageId * size;
+            List<ReviewPost> result = buildQuery(memberId, sort, size, offset, true).fetch();
+
+            return new CursorResult<>(
+                    result,
+                    pageId + 2,
+                    hasNext(result, size));
+        }
+    }
+
+
+    private JPAQuery<ReviewPost> buildQuery(Long memberId, String sort, int size, Long offset, boolean viewFlag) {
+        JPAQuery<ReviewPost> query = queryFactory
                 .select(reviewPost)
                 .from(reviewPost)
                 .join(viewLike).on(reviewPost.id.eq(viewLike.reviewPost.id))
-                .where(viewLike.member.id.eq(memberId)
-                        .and(viewLike.likeFlag.eq(true))
-                        .and(getLTGT(sort, cursorId)))
+                .where(viewLike.member.id.eq(memberId))
                 .orderBy(getOrderSpecifier(sort))
-                .offset(page.getOffset())
-                .limit(page.getPageSize())
-                .fetch();
+                .limit(size + 1);
 
-        JPAQuery<Long> count = queryFactory
-                .select(viewLike.count())
-                .from(viewLike)
-                .where(viewLike.member.id.eq(memberId)
-                        .and(viewLike.likeFlag.eq(true))
-                        .and(getLTGT(sort, cursorId)))
-                .offset(page.getOffset())
-                .limit(page.getPageSize());
+        if (offset != null) {
+            query.offset(offset);
+        }
 
-        return PageableExecutionUtils.getPage(result, page, count::fetchOne);
+        if(viewFlag) query.where(viewLike.viewFlag.eq(true));
+        else query.where(viewLike.likeFlag.eq(true));
+
+
+        return query;
     }
 
-    @Override
-    public Page<ReviewPost> findRecentByMemberIdOrderByIdDesc(Long memberId, String sort, Pageable page) {
-        List<ReviewPost> result = queryFactory
-                .select(reviewPost)
-                .from(reviewPost)
-                .join(viewLike).on(reviewPost.id.eq(viewLike.reviewPost.id))
-                .where(viewLike.member.id.eq(memberId)
-                        .and(viewLike.viewFlag.eq(true)))
-                .orderBy(getOrderSpecifier(sort))
-                .offset(page.getOffset())
-                .limit(page.getPageSize())
-                .fetch();
-
-        JPAQuery<Long> count = queryFactory.select(viewLike.count())
-                .from(viewLike)
-                .where(viewLike.member.id.eq(memberId)
-                        .and(viewLike.viewFlag.eq(true)))
-                .offset(page.getOffset())
-                .limit(page.getPageSize());
-
-        return PageableExecutionUtils.getPage(result, page, count::fetchOne);
+    private OrderSpecifier<LocalDateTime> getOrderSpecifier(String sort) {
+        return Objects.equals(sort, "asc") ? viewLike.lastModifiedDate.asc() : viewLike.lastModifiedDate.desc();
     }
 
-    @Override
-    public Page<ReviewPost> findRecentByMemberIdLessThanOrderByIdDesc(Long cursorId, Long memberId, String sort, Pageable page) {
-        List<ReviewPost> result = queryFactory
-                .select(reviewPost)
-                .from(reviewPost)
-                .join(viewLike).on(reviewPost.id.eq(viewLike.reviewPost.id))
-                .where(viewLike.member.id.eq(memberId)
-                        .and(viewLike.viewFlag.eq(true))
-                        .and(getLTGT(sort, cursorId)))
-                .orderBy(getOrderSpecifier(sort))
-                .offset(page.getOffset())
-                .limit(page.getPageSize())
-                .fetch();
-
-        JPAQuery<Long> count = queryFactory
-                .select(viewLike.count())
-                .from(viewLike)
-                .where(viewLike.member.id.eq(memberId)
-                        .and(viewLike.viewFlag.eq(true))
-                        .and(getLTGT(sort, cursorId)))
-                .offset(page.getOffset())
-                .limit(page.getPageSize());
-
-        return PageableExecutionUtils.getPage(result, page, count::fetchOne);
-    }
-
-    private OrderSpecifier<Long> getOrderSpecifier(String sort) {
-        return Objects.equals(sort, "asc") ? viewLike.id.asc() : viewLike.id.desc();
-    }
-
-    private BooleanExpression getLTGT(String sort, Long cursorId){
-        return Objects.equals(sort, "asc") ? viewLike.id.gt(cursorId) : viewLike.id.lt(cursorId);
+    private Boolean hasNext(List<ReviewPost> result, int size) {
+        return result.size() > size;
     }
 }

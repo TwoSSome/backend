@@ -81,7 +81,7 @@ public class HashtagController {
 
         return new CursorResult<>(
                 hashtagRes,
-                result.cursorId(),
+                result.nextPageId(),
                 result.hasNext()
         );
     }
