@@ -1,5 +1,6 @@
 package towssome.server.repository;
 
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -16,9 +17,9 @@ import towssome.server.entity.ReviewPost;
 
 import java.util.List;
 
+import static towssome.server.entity.QHashTag.hashTag;
 import static towssome.server.entity.QHashtagClassification.hashtagClassification;
 import static towssome.server.entity.QReviewPost.reviewPost;
-import static towssome.server.entity.QHashTag.hashTag;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -82,9 +83,9 @@ public class HashtagClassificationRepositoryImpl implements HashtagClassificatio
     }
 
     @Override
-    public List<String> findHashtagsByReviewId(Long reviewId) {
+    public List<Tuple> findHashtagsByReviewId(Long reviewId) {
         return queryFactory
-                .select(hashtagClassification.hashTag.name)
+                .select(hashtagClassification.hashTag.id, hashtagClassification.hashTag.name)
                 .from(hashtagClassification)
                 .where(hashtagClassification.reviewPost.id.eq(reviewId))
                 .fetch();

@@ -1,5 +1,6 @@
 package towssome.server.service;
 
+import com.querydsl.core.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.dto.*;
-import towssome.server.entity.HashTag;
 import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
 import towssome.server.enumrated.ReviewType;
@@ -28,7 +28,7 @@ import java.util.List;
 public class ReviewPostService {
 
     private final ReviewPostRepository reviewPostRepository;
-    private final MemberService memberService;
+    private final ViewlikeService viewlikeService;
     private final PhotoService photoService;
     private final HashtagService hashtagService;
     private final HashtagClassificationService hashtagClassificationService;
@@ -39,14 +39,11 @@ public class ReviewPostService {
             List<MultipartFile> photos,
             Member member) throws IOException {
 
-        ReviewType reviewType = null;
-        if (reviewReq.reviewType().equals("RECEIVED")) {
-            reviewType = ReviewType.RECEIVED;
-        } else if (reviewReq.reviewType().equals("GIVEN")) {
-            reviewType = ReviewType.GIVEN;
-        } else {
-            throw new NotMatchReviewTypeException("정해진 타입이 아닙니다");
-        }
+        ReviewType reviewType = switch (reviewReq.reviewType()) {
+            case "RECEIVED" -> ReviewType.RECEIVED;
+            case "GIVEN" -> ReviewType.GIVEN;
+            default -> throw new NotMatchReviewTypeException("정해진 타입이 아닙니다");
+        };
 
         ReviewPost reviewPost = new ReviewPost(
                 reviewReq.body(),
@@ -67,6 +64,66 @@ public class ReviewPostService {
     public ReviewPost getReview(Long reviewId) {
         return reviewPostRepository.findById(reviewId).orElseThrow(() ->
                 new NotFoundReviewPostException("해당 리뷰글이 존재하지 않습니다."));
+    }
+
+    public ReviewPostRes getReview(Long reviewId, Member member){
+        ReviewPost review = getReview(reviewId);
+        List<PhotoInPost> photo = photoService.getPhotoS3Path(review);
+        ReviewPostRes reviewRes;
+
+        List<HashtagRes> hashtags = new ArrayList<>();
+        for(Tuple tuple : hashtagClassificationService.getHashtags(review.getId())) {
+            hashtags.add(new HashtagRes(
+                    tuple.get(0, Long.class),
+                    tuple.get(1, String.class)
+            ));
+        }
+        //비회원 조회
+        if (member == null) {
+            Member postMember = review.getMember();
+            reviewRes = new ReviewPostRes(
+                    review.getBody(),
+                    review.getPrice(),
+                    review.getCreateDate(),
+                    review.getLastModifiedDate(),
+                    postMember.getId(),
+                    postMember.getProfilePhoto() != null ?
+                            postMember.getProfilePhoto().getS3Path() :
+                            null,
+                    photo,
+                    false,
+                    false,
+                    false,
+                    hashtags,
+                    review.getReviewType(),
+                    review.getStarPoint(),
+                    review.getWhereBuy(),
+                    postMember.getNickName()
+            );
+        }else {
+            //회원 조회
+            viewlikeService.viewProcess(review, member);
+            reviewRes = new ReviewPostRes(
+                    review.getBody(),
+                    review.getPrice(),
+                    review.getCreateDate(),
+                    review.getLastModifiedDate(),
+                    member.getId(),
+                    member.getProfilePhoto() != null ?
+                            member.getProfilePhoto().getS3Path() :
+                            null,
+                    photo,
+                    isMyPost(member, review),
+                    viewlikeService.isLikedPost(member, review),
+                    viewlikeService.isBookmarkedPost(member, review),
+                    hashtags,
+                    review.getReviewType(),
+                    review.getStarPoint(),
+                    review.getWhereBuy(),
+                    member.getNickName()
+            );
+        }
+        return reviewRes;
     }
 
     @Transactional
@@ -115,13 +172,21 @@ public class ReviewPostService {
                     review.getMember().getProfilePhoto().getS3Path() :
                     null;
 
+            List<HashtagRes> hashtags = new ArrayList<>();
+            for(Tuple tuple : hashtagClassificationService.getHashtags(review.getId())) {
+                hashtags.add(new HashtagRes(
+                        tuple.get(0, Long.class),
+                        tuple.get(1, String.class)
+                ));
+            }
+
             reviewSimpleRes.add(new ReviewSimpleRes(
                     review.getId(),
                     review.getBody(),
                     profilePhoto,
                     review.getMember().getNickName(),
                     bodyPhoto,
-                    hashtagClassificationService.getHashtags(review.getId())
+                    hashtags
             ));
         }
         cursorId = reviewPosts.isEmpty() ?
@@ -167,28 +232,27 @@ public class ReviewPostService {
 
         ArrayList<ReviewSimpleRes> reviewSimpleRes = new ArrayList<>();
         for (ReviewPost value : subscribeReviewList.values()) {
-
-            List<HashTag> allByReviewPost = hashtagService.findAllByReviewPost(value);
-            ArrayList<String> tags = new ArrayList<>();
-            for (HashTag hashTag : allByReviewPost) {
-                tags.add(hashTag.getName());
-            }
-
             String profilePhotoPath = value.getMember().getProfilePhoto() != null ?
                     value.getMember().getProfilePhoto().getS3Path() :
                     null;
 
             List<PhotoInPost> photoS3Path = photoService.getPhotoS3Path(value);
             String bodyPhoto = photoS3Path.isEmpty() ? null : photoS3Path.get(0).photoPath();
-            log.info("review = {}, photoS3path = {}",value.getBody(),bodyPhoto);
 
+            List<HashtagRes> hashtags = new ArrayList<>();
+            for(Tuple tuple : hashtagClassificationService.getHashtags(value.getId())) {
+                hashtags.add(new HashtagRes(
+                        tuple.get(0, Long.class),
+                        tuple.get(1, String.class)
+                ));
+            }
             reviewSimpleRes.add(new ReviewSimpleRes(
                     value.getId(),
                     value.getBody(),
                     profilePhotoPath,
                     value.getMember().getNickName(),
                     bodyPhoto,
-                    tags
+                    hashtags
             ));
         }
 

@@ -1,9 +1,11 @@
 package towssome.server.service;
 
+import com.querydsl.core.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import towssome.server.dto.CursorResult;
+import towssome.server.dto.HashtagRes;
 import towssome.server.dto.PhotoInPost;
 import towssome.server.dto.ReviewSimpleRes;
 import towssome.server.entity.BookMark;
@@ -130,16 +132,25 @@ public class ViewlikeService {
         for(ReviewPost review : result.values()) {
             List<PhotoInPost> bodyPhotos = photoService.getPhotoS3Path(review);
             String bodyPhoto = bodyPhotos.isEmpty() ? null : bodyPhotos.get(0).photoPath();
+
             String profilePhoto = member.getProfilePhoto() != null ?
                     member.getProfilePhoto().getS3Path() :
                     null;
+
+            List<HashtagRes> hashtags = new ArrayList<>();
+            for(Tuple tuple : hashtagClassificationService.getHashtags(review.getId())) {
+                hashtags.add(new HashtagRes(
+                        tuple.get(0, Long.class),
+                        tuple.get(1, String.class)
+                ));
+            }
             reviewPostRes.add(new ReviewSimpleRes(
                     review.getId(),
                     review.getBody(),
                     profilePhoto,
                     member.getNickName(),
                     bodyPhoto,
-                    hashtagClassificationService.getHashtags(review.getId())
+                    hashtags
             ));
         }
         return new CursorResult<>(reviewPostRes, result.nextPageId(), result.hasNext());
