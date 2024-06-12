@@ -9,6 +9,6 @@ public record ReviewSimpleRes(
         String profilePhoto,
         String nickname,
         String bodyPhoto,
-        List<String> hashTags
+        List<HashtagRes> hashTags
 ) {
 }

@@ -1,14 +1,12 @@
 package towssome.server.service;
 
+import com.querydsl.core.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import towssome.server.dto.CursorResult;
-import towssome.server.dto.PhotoInPost;
-import towssome.server.dto.QuickRecommendReq;
-import towssome.server.dto.ReviewSimpleRes;
+import towssome.server.dto.*;
 import towssome.server.entity.ReviewPost;
 import towssome.server.repository.HashtagClassificationRepository;
 
@@ -39,13 +37,21 @@ public class HashtagClassificationService{
                     review.getMember().getProfilePhoto().getS3Path() :
                     null;
 
+            List<HashtagRes> hashtags = new ArrayList<>();
+            for(Tuple tuple : getHashtags(review.getId())) {
+                hashtags.add(new HashtagRes(
+                        tuple.get(0, Long.class),
+                        tuple.get(1, String.class)
+                ));
+            }
+
             reviewSimpleRes.add(new ReviewSimpleRes(
                     review.getId(),
                     review.getBody(),
                     profilePhoto,
                     review.getMember().getNickName(),
                     bodyPhoto,
-                    getHashtags(review.getId())
+                    hashtags
             ));
         }
         cursorId = reviewPosts.isEmpty() ?
@@ -60,7 +66,7 @@ public class HashtagClassificationService{
                 hashtagClassificationRepository.findReviewPageByCursorIdAndHashTag(keyword, cursorId, sort, page);
     }
 
-    public List<String> getHashtags(Long reviewId) {
+    public List<Tuple> getHashtags(Long reviewId) {
         return hashtagClassificationRepository.findHashtagsByReviewId(reviewId);
     }
 

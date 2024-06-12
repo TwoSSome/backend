@@ -16,9 +16,7 @@ import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
 import towssome.server.exception.PageException;
 import towssome.server.service.HashtagClassificationService;
-import towssome.server.service.PhotoService;
 import towssome.server.service.ReviewPostService;
-import towssome.server.service.ViewlikeService;
 
 import java.io.IOException;
 import java.util.List;
@@ -31,9 +29,7 @@ import java.util.List;
 public class ReviewController {
 
     private final ReviewPostService reviewPostService;
-    private final PhotoService photoService;
     private final MemberAdvice memberAdvice;
-    private final ViewlikeService viewlikeService;
     private static final int PAGE_SIZE = 5;
     private final HashtagClassificationService hashtagClassificationService;
 
@@ -55,51 +51,7 @@ public class ReviewController {
     @GetMapping("/{reviewId}")
     public ResponseEntity<ReviewPostRes> getReview(@PathVariable Long reviewId){ // get review by reviewId
         Member member = memberAdvice.findJwtMember();
-        ReviewPost review = reviewPostService.getReview(reviewId);
-        log.info("review = {}",review.getId());
-        List<PhotoInPost> photo = photoService.getPhotoS3Path(review);
-        ReviewPostRes reviewRes;
-
-        //비회원 조회
-        if (member == null) {
-            reviewRes = new ReviewPostRes(
-                    review.getBody(),
-                    review.getPrice(),
-                    review.getCreateDate(),
-                    review.getLastModifiedDate(),
-                    review.getMember().getId(),
-                    photo,
-                    false,
-                    false,
-                    false,
-                    hashtagClassificationService.getHashtags(reviewId),
-                    review.getReviewType(),
-                    review.getStarPoint(),
-                    review.getWhereBuy(),
-                    review.getMember().getNickName()
-                    );
-        }else {
-            //회원 조회
-            viewlikeService.viewProcess(review, member);
-            reviewRes = new ReviewPostRes(
-                    review.getBody(),
-                    review.getPrice(),
-                    review.getCreateDate(),
-                    review.getLastModifiedDate(),
-                    review.getMember().getId(),
-                    photo,
-                    reviewPostService.isMyPost(member, review),
-                    viewlikeService.isLikedPost(member, review),
-                    viewlikeService.isBookmarkedPost(member, review),
-                    hashtagClassificationService.getHashtags(reviewId),
-                    review.getReviewType(),
-                    review.getStarPoint(),
-                    review.getWhereBuy(),
-                    review.getMember().getNickName()
-            );
-        }
-
-        return new ResponseEntity<>(reviewRes, HttpStatus.OK);
+        return new ResponseEntity<>(reviewPostService.getReview(reviewId, member), HttpStatus.OK);
     }
 
     /** 리뷰글 수정 */
@@ -142,7 +94,7 @@ public class ReviewController {
             description = "리뷰글 전체 조회 API",
             parameters = {@Parameter(name = "cursorId", description = "cursorId보다 id가 작은 게시글 가져옴"),
             @Parameter(name = "size", description = "가져올 게시글의 갯수"),
-            @Parameter(name = "recommend", description = "")})
+            @Parameter(name = "recommend", description = "추천 여부")})
     @GetMapping
     public CursorResult<ReviewSimpleRes> getReviews(@RequestParam(value = "cursorId", required = false) Long cursorId,
                                                   @RequestParam(value = "size", required = false) Integer size,
@@ -153,8 +105,8 @@ public class ReviewController {
 
     /**
      * 구독 계정의 리뷰글 전체 조회
-     * @param page
-     * @return
+     * @param page (페이지 번호)
+     * @return 구독 계정의 리뷰글 전체 조회
      */
     @Operation(summary = "구독 계정 리뷰글 조회 API",
             description = "구독한 계정들의 리뷰글 전체 조회 API",
@@ -175,7 +127,6 @@ public class ReviewController {
     @Parameter(name = "cursorId", description = "cursorId"),
     @Parameter(name = "sort", description = "최신순 정렬 desc(기본값), 오래된 순 정렬 asc"),
     @Parameter(name = "size", description = "가져올 게시글 수")})
-    /** 해시태그 검색 */
     @GetMapping("/search")
     public CursorResult<ReviewSimpleRes> keywordSearch(@RequestParam(value="keyword") String keyword,
                                                      @RequestParam(value = "cursorId", required = false) Long cursorId,
