@@ -7,7 +7,7 @@ public record SubscribeRes(
 
         String profilePhotoPath,
         String nickname,
-        Long subscribeId,
+        Long id,
         Long followingMemberId,
         LocalDateTime subscribeDate,
         List<String> hashtagList
