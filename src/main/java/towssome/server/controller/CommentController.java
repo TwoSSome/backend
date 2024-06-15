@@ -38,8 +38,8 @@ public class CommentController {
     public ResponseEntity<?> createComment(@PathVariable Long reviewId, @RequestBody CommentReq req) throws IOException{
         log.info("commentDTO = {}", req);
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        commentService.createComment(reviewId, req.body(), username);
-        return new ResponseEntity<>(HttpStatus.OK);
+        Long commentId = commentService.createComment(reviewId, req.body(), username);
+        return new ResponseEntity<>("Create Comment Id: " + commentId, HttpStatus.OK);
     }
 
     @Operation(summary = "댓글 업데이트 API", parameters = {
