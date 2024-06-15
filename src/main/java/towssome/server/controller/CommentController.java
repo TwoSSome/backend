@@ -35,11 +35,11 @@ public class CommentController {
             @Parameter(name = "req", description = "body : 댓글 본문 ")
     })
     @PostMapping("/{reviewId}/create")
-    public ResponseEntity<?> createComment(@PathVariable Long reviewId, @RequestBody CommentReq req) throws IOException{
+    public ResponseEntity<CreateRes> createComment(@PathVariable Long reviewId, @RequestBody CommentReq req) throws IOException{
         log.info("commentDTO = {}", req);
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Long commentId = commentService.createComment(reviewId, req.body(), username);
-        return new ResponseEntity<>("Create Comment Id: " + commentId, HttpStatus.OK);
+        Comment comment = commentService.createComment(reviewId, req.body(), username);
+        return new ResponseEntity<>(new CreateRes(comment.getId()), HttpStatus.OK);
     }
 
     @Operation(summary = "댓글 업데이트 API", parameters = {

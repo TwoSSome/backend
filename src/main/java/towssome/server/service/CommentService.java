@@ -30,7 +30,7 @@ public class CommentService {
     private final MemberAdvice memberAdvice;
 
     @Transactional
-    public Long createComment(Long reviewId, String body, String username) {
+    public Comment createComment(Long reviewId, String body, String username) {
         Member member = memberService.getMember(username);
         // reviewId로 ReviewPost 조회
         ReviewPost reviewPost = reviewPostRepository.findById(reviewId)
@@ -42,7 +42,7 @@ public class CommentService {
         );
         Comment savedComment = commentRepository.save(comment);
         reviewPost.getMember().addRankPoint(5);
-        return savedComment.getId();
+        return savedComment;
     }
 
     public Comment getComment(Long commentId) {
