@@ -3,6 +3,7 @@ package towssome.server.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,9 +57,9 @@ public class SubscribeService {
     }
 
     @Transactional
-    public PageResult<SubscribeRes> getSubscribePage(Member subscriber, int page, int size) {
+    public CursorResult<SubscribeRes> getSubscribePage(Member subscriber, int page, int size) {
         ArrayList<SubscribeRes> subscribeRes = new ArrayList<>();
-        Page<Subscribe> subscribePage = subscribeRepository.findAllBySubscriber(subscriber,
+        Slice<Subscribe> subscribePage = subscribeRepository.findAllBySubscriber(subscriber,
                 PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createDate")));
         for (Subscribe subscribe : subscribePage.getContent()) {
 
@@ -82,12 +83,10 @@ public class SubscribeService {
             ));
         }
 
-        return new PageResult<>(
+        return new CursorResult<>(
                 subscribeRes,
-                subscribePage.getTotalElements(),
-                subscribePage.getTotalPages(),
-                page,
-                size
+                (long)page+2,
+                subscribePage.hasNext()
         );
     }
 
