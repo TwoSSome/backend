@@ -61,16 +61,16 @@ public class SubscribeController {
     })
     @GetMapping
     public CursorResult<SubscribeRes> getSubscribe(
-            @RequestParam int page,
+            @RequestParam int cursorId,
             @RequestParam(required = false) Integer size){
 
-        if (page < 1) {
+        if (cursorId < 1) {
             throw new PageException("페이지는 1보다 작을 수 없습니다!!");
         }
 
         if(size == null) size = 10;
         Member jwtMember = memberAdvice.findJwtMember();
-        return subscribeService.getSubscribePage(jwtMember, page-1, size);
+        return subscribeService.getSubscribePage(jwtMember, cursorId -1, size);
     }
 
 }
