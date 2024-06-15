@@ -13,6 +13,7 @@ import towssome.server.repository.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +40,12 @@ public class MemberService {
      * @param hashtags
      * @param member
      */
-    public void createVirtual(List<String> hashtags, Member member) {
+    @Transactional
+    public void createVirtual(List<String> hashtags, Member member, MultipartFile file, String mateName) {
+
+        Photo photo = photoService.saveVirtualPhoto(file);
+        member.changeVirtualPhoto(photo);
+        member.changeVirtualMateName(mateName);
 
         for (String hashtag : hashtags) {
             if (hashTagRepository.existsByName(hashtag)) {
@@ -95,8 +101,34 @@ public class MemberService {
     }
 
     @Transactional
-    public void changeProfile(Member member, String nickName) {
+    public void changeProfile(String username, String nickName, List<String> tagList) {
+
+        Member member = memberRepository.findByUsername(username).orElseThrow();
+
         member.changeProfile(nickName);
+        profileTagRepository.deleteAllByMember(member);
+
+        ArrayList<HashTag> hashTags = new ArrayList<>();
+
+        for (String name : tagList) {
+            if (hashTagRepository.existsByName(name)) {
+                hashTags.add(hashTagRepository.findByName(name));
+            }else{
+                HashTag save = hashTagRepository.save(new HashTag(
+                        name,
+                        0L
+                ));
+                hashTags.add(save);
+            }
+        }
+
+        for (HashTag hashTag : hashTags) {
+            profileTagRepository.save(new ProfileTag(
+                    member,
+                    hashTag
+            ));
+        }
+
     }
 
     /**

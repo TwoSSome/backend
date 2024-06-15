@@ -10,8 +10,6 @@ public record ReviewPostReq(
         int price,
         @Schema(description = "구매처")
         String whereBuy,
-        @Schema(description = "별점")
-        int starPoint,
         @Schema(description = "카테고리")
         String category,
         @Schema(description = "리뷰 타입, 반드시 GIVEN or RECEIVED 둘 중 하나일 것")

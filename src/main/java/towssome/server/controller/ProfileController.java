@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/profile")
+@Slf4j
 public class ProfileController {
 
     private final MemberAdvice memberAdvice;
@@ -52,18 +54,39 @@ public class ProfileController {
         );
     }
 
-    @Operation(summary = "가상 연인 프로필 생성 API", description = "해시태그 리스트를 받아서 생성")
+    @Operation(summary = "가상 연인 프로필 생성 API", description = "해시태그 리스트를 받아서 생성, AT 필요")
     @PostMapping("/createVirtual")
-    public ResponseEntity<?> createVirtual(@RequestBody CreateVirtualRes res){
+    public ResponseEntity<?> createVirtual(
+            @RequestPart CreateVirtualRes req,
+            @RequestPart MultipartFile file){
 
         Member jwtMember = memberAdvice.findJwtMember();
-        memberService.createVirtual(res.hashtagList(),jwtMember);
+        memberService.createVirtual(req.hashtagList(),jwtMember,file,req.mateName());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
-    
 
+    @Operation(summary = "가상 연인 프로필 API", description = "AT 필요")
+    @GetMapping("/virtual")
+    public VirtualRes virtualHashtag(){
 
+        Member jwtMember = memberAdvice.findJwtMember();
+        List<HashTag> virtualTag = memberService.getVirtualTag(jwtMember);
+
+        ArrayList<HashtagRes> hashtagRes = new ArrayList<>();
+        for (HashTag hashTag : virtualTag) {
+            hashtagRes.add(new HashtagRes(
+                    hashTag.getId(),
+                    hashTag.getName()
+            ));
+        }
+
+        return new VirtualRes(
+                jwtMember.getVirtualMateName(),
+                hashtagRes,
+                jwtMember.getVirtualPhoto() == null ? null : jwtMember.getVirtualPhoto().getS3Path()
+        );
+    }
 
     @Operation(summary = "프로필 사진 변경 API", description = "이전 사진이 있을 경우 삭제되고 교체됨",
     parameters = @Parameter(name = "photo", description = "multipart/form-data 형식으로 보내야 함"))
@@ -74,11 +97,12 @@ public class ProfileController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @Operation(summary = "프로필 변경 API", description = "현재 닉네임만 교체 가능")
+    @Operation(summary = "프로필 변경 API", description = "닉네임과 프로필 태그 수정")
     @PostMapping("/update")
     public ResponseEntity<?> updateProfile(@RequestBody UpdateProfileReq req){
-        Member jwtMember = memberAdvice.findJwtMember();
-        memberService.changeProfile(jwtMember, req.nickName());
+        log.info("req.name = {}",req.nickName());
+        String username = memberAdvice.findUsername();
+        memberService.changeProfile(username, req.nickName(), req.profileTag());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

@@ -27,5 +27,9 @@ public class MemberAdvice {
 
     }
 
+    public String findUsername() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
 
 }
