@@ -16,7 +16,6 @@ import towssome.server.repository.PhotoRepository;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -262,4 +261,25 @@ public class PhotoService {
         return originalFilename.substring(pos + 1);
     }
 
+    public Photo saveVirtualPhoto(MultipartFile file) {
+        if (file == null) {
+            return null;
+        }
+        Photo photo = null;
+        try {
+            UploadPhoto uploadPhoto = uploadPhoto(file);
+            photo = new Photo(
+                    uploadPhoto.originalFileName(),
+                    uploadPhoto.saveFileName(),
+                    uploadPhoto.s3path(),
+                    PhotoType.VIRTUAL,
+                    null,
+                    null
+            );
+            photoRepository.save(photo);
+        } catch (IOException e) {
+            throw new RuntimeException();
+        }
+        return photo;
+    }
 }

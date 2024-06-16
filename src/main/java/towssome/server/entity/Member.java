@@ -23,6 +23,12 @@ public class Member extends BaseEntity{
     @JoinColumn(name = "photo_id")
     private Photo profilePhoto;
 
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "virtual_photo_id")
+    private Photo virtualPhoto;
+
+    private String virtualMateName;
+
     private String role;
 
     public Member(String username, String password, String nickName, int point, Photo profilePhoto, String role) {
@@ -45,6 +51,14 @@ public class Member extends BaseEntity{
 
     public void addRankPoint(int point) {
         this.rankPoint += point;
+    }
+
+    public void changeVirtualPhoto(Photo photo) {
+        this.virtualPhoto = photo;
+    }
+
+    public void changeVirtualMateName(String name) {
+        this.virtualMateName = name;
     }
 
 }

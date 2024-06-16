@@ -50,7 +50,7 @@ public class ReviewPostService {
                 reviewReq.price(),
                 reviewType,
                 reviewReq.whereBuy(),
-                reviewReq.starPoint(),
+                0,
                 reviewReq.category(),
                 member
         );

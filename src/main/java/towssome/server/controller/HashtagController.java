@@ -8,6 +8,7 @@ import towssome.server.advice.MemberAdvice;
 import towssome.server.dto.CursorResult;
 import towssome.server.dto.HashtagDeleteReq;
 import towssome.server.dto.HashtagRes;
+import towssome.server.dto.VirtualRes;
 import towssome.server.entity.HashTag;
 import towssome.server.entity.Member;
 import towssome.server.exception.PageException;
@@ -43,22 +44,7 @@ public class HashtagController {
         return new ResponseEntity<>(hashtagClassificationService.getAllHashtags(), HttpStatus.OK);
     }
 
-    @GetMapping("/virtual")
-    public List<HashtagRes> virtualHashtag(){
 
-        Member jwtMember = memberAdvice.findJwtMember();
-        List<HashTag> virtualTag = memberService.getVirtualTag(jwtMember);
-
-        ArrayList<HashtagRes> hashtagRes = new ArrayList<>();
-        for (HashTag hashTag : virtualTag) {
-            hashtagRes.add(new HashtagRes(
-                    hashTag.getId(),
-                    hashTag.getName()
-            ));
-        }
-
-        return hashtagRes;
-    }
 
     @GetMapping("/search")
     public CursorResult<HashtagRes> searchHashtag(
