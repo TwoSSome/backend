@@ -12,7 +12,6 @@ import towssome.server.entity.Comment;
 import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
 import towssome.server.exception.NotFoundCommentException;
-import towssome.server.exception.NotFoundMemberException;
 import towssome.server.exception.NotFoundReviewPostException;
 import towssome.server.repository.CommentRepository;
 import towssome.server.repository.ReviewPostRepository;
@@ -31,7 +30,7 @@ public class CommentService {
     private final MemberAdvice memberAdvice;
 
     @Transactional
-    public void createComment(Long reviewId, String body, String username) {
+    public Comment createComment(Long reviewId, String body, String username) {
         Member member = memberService.getMember(username);
         // reviewId로 ReviewPost 조회
         ReviewPost reviewPost = reviewPostRepository.findById(reviewId)
@@ -41,8 +40,9 @@ public class CommentService {
                 member,
                 reviewPost
         );
-        commentRepository.save(comment);
+        Comment savedComment = commentRepository.save(comment);
         reviewPost.getMember().addRankPoint(5);
+        return savedComment;
     }
 
     public Comment getComment(Long commentId) {
