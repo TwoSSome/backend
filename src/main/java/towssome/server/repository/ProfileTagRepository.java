@@ -10,4 +10,6 @@ public interface ProfileTagRepository extends JpaRepository<ProfileTag,Long> {
 
     List<ProfileTag> findAllByMember(Member member);
 
+    void deleteAllByMember(Member member);
+
 }
