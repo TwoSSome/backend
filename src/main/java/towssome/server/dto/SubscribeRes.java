@@ -10,7 +10,7 @@ public record SubscribeRes(
         Long id,
         Long followingMemberId,
         LocalDateTime subscribeDate,
-        List<String> hashtagList
+        List<HashtagRes> hashtagList
 
 ) {
 }
