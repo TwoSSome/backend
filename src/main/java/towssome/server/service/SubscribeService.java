@@ -1,14 +1,15 @@
 package towssome.server.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import towssome.server.dto.PageResult;
-import towssome.server.dto.*;
+import towssome.server.dto.CursorResult;
+import towssome.server.dto.HashtagRes;
+import towssome.server.dto.SubscribeDTO;
+import towssome.server.dto.SubscribeRes;
 import towssome.server.entity.Member;
 import towssome.server.entity.ProfileTag;
 import towssome.server.entity.Subscribe;
@@ -68,9 +69,12 @@ public class SubscribeService {
                             subscribe.getFollowed().getProfilePhoto().getS3Path();
 
             List<ProfileTag> list = profileTagRepository.findAllByMember(subscribe.getFollowed());
-            ArrayList<String> hashtags = new ArrayList<>();
+            ArrayList<HashtagRes> hashtags = new ArrayList<>();
             for (ProfileTag profileTag : list) {
-                hashtags.add(profileTag.getHashTag().getName());
+                hashtags.add(new HashtagRes(
+                        profileTag.getHashTag().getId(),
+                        profileTag.getHashTag().getName())
+                );
             }
 
             subscribeRes.add(new SubscribeRes(
