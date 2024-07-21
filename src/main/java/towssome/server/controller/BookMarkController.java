@@ -58,6 +58,7 @@ public class BookMarkController {
      * @param id
      * @return
      */
+    @Operation(summary = "북마크 삭제 API", description = "북마크 id로 삭제, AT 불필요")
     @PostMapping("/delete/{id}")
     public ResponseEntity<?> deleteBookmark(@PathVariable Long id){
 
@@ -73,8 +74,8 @@ public class BookMarkController {
      * @param size
      * @return
      */
-    @Operation(summary = "카테고리별 북마크 조회 API", parameters = {
-            @Parameter(name = "id", description = "조회할 카테고리"),
+    @Operation(summary = "카테고리별 북마크 조회 API", description = "무한스크롤, AT 불필요", parameters = {
+            @Parameter(name = "id", description = "조회할 카테고리 id"),
             @Parameter(name = "page", description = "조회 페이지, >= 1")})
     @GetMapping("/{id}")
     public CursorResult<BookmarkReq> getBookmark(

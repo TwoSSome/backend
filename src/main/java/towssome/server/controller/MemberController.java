@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +18,7 @@ import towssome.server.dto.EmailCheckReq;
 import towssome.server.dto.ErrorResult;
 import towssome.server.entity.Member;
 import towssome.server.jwt.JoinDTO;
-import towssome.server.jwt.JoinService;
+import towssome.server.service.JoinService;
 import towssome.server.service.MemberService;
 
 @Tag(name = "회원")

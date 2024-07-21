@@ -1,4 +1,4 @@
-package towssome.server.jwt;
+package towssome.server.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -7,9 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.entity.*;
 import towssome.server.exception.DuplicateIdException;
+import towssome.server.jwt.JoinDTO;
 import towssome.server.repository.*;
-import towssome.server.service.MailSendService;
-import towssome.server.service.PhotoService;
 
 import java.io.IOException;
 import java.util.ArrayList;

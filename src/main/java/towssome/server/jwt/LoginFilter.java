@@ -17,6 +17,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import towssome.server.dto.ErrorResult;
+import towssome.server.entity.Member;
 import towssome.server.entity.RefreshToken;
 import towssome.server.repository.MemberRepository;
 
@@ -78,6 +79,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
 
+        Member member = memberRepository.findByUsername(username).orElseThrow();
+
         // 토큰 생성
         String access = jwtUtil.createJwt("access", username, role, ACCESS_EXPIRE_MS);
         String refresh = jwtUtil.createJwt("refresh", username, role, REFRESH_EXPIRE_MS);
@@ -91,7 +94,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         // JSON 형식으로 반환
         PrintWriter out = response.getWriter();
-        out.print("{\"access\":\"" + access + "\", \"refresh\":\"" + refresh + "\"}");
+        out.print("{\"access\":\"" + access + "\", \"refresh\":\"" + refresh + "\", \"memberId\":" + member.getId() + "}");
         out.flush();
 
         response.setStatus(HttpStatus.OK.value());
