@@ -2,6 +2,7 @@ package towssome.server.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import towssome.server.entity.HashTag;
 import towssome.server.entity.Mating;
@@ -18,6 +19,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MatingService {
 
     private final MatingRepository matingRepository;
@@ -47,13 +49,14 @@ public class MatingService {
     }
 
     /**
-     * 요청을 수락, mating의 상태를 OFFER 로 변경
+     * 요청을 수락, mating의 상태를 MATING 으로 변경
      * @param mating
      * @return
      */
     @Transactional
     public Mating acceptOffer(Mating mating) {
         if(mating.getStatus() != MatingStatus.OFFER) return null;
+        log.info("accept ser");
         mating.acceptOffer();
         return mating;
     }

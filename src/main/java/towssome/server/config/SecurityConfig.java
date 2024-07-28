@@ -76,7 +76,7 @@ public class SecurityConfig {
                         .requestMatchers("/reissue").permitAll()
                         .requestMatchers("/auth","/subscribe/*",
                                 "/community/create","/community/delete/*","/community/update/*",
-                                "/profile/*","/mating/*","/hashtag/virtual","/bookmark/*",
+                                "/profile/*","/hashtag/virtual","/bookmark/*",
                                 "/category/*","/reply/create","reply/adopt", "review/create","review/delete/","review/update/").authenticated() //인증 필요
                         .anyRequest().permitAll()); //나머지 모든 요청에 대해서 인가
 

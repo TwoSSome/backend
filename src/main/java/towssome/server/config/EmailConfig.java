@@ -25,6 +25,14 @@ public class EmailConfig {
         mailSender.setUsername(sender);//구글계정을 넣습니다.
         mailSender.setPassword(password);//구글 앱 비밀번호를 넣습니다.
 
+        Properties javaMailProperties = getProperties();
+
+        mailSender.setJavaMailProperties(javaMailProperties);//mailSender에 우리가 만든 properties 넣고
+
+        return mailSender;//빈으로 등록한다.
+    }
+
+    private Properties getProperties() {
         Properties javaMailProperties = new Properties();//JavaMail의 속성을 설정하기 위해 Properties 객체를 생성
         javaMailProperties.put("mail.transport.protocol", "smtp");//프로토콜로 smtp 사용
         javaMailProperties.put("mail.smtp.auth", "true");//smtp 서버에 인증이 필요
@@ -33,10 +41,7 @@ public class EmailConfig {
         javaMailProperties.put("mail.debug", "true");//디버깅 정보 출력
         javaMailProperties.put("mail.smtp.ssl.trust", "smtp.naver.com");//smtp 서버의 ssl 인증서를 신뢰
         javaMailProperties.put("mail.smtp.ssl.protocols", "TLSv1.2");//사용할 ssl 프로토콜 버젼
-
-        mailSender.setJavaMailProperties(javaMailProperties);//mailSender에 우리가 만든 properties 넣고
-
-        return mailSender;//빈으로 등록한다.
+        return javaMailProperties;
     }
 
 }
