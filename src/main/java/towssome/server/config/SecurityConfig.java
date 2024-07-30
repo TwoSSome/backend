@@ -51,7 +51,7 @@ public class SecurityConfig {
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 
                         CorsConfiguration configuration = new CorsConfiguration();
-                        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                        configuration.setAllowedOrigins(Collections.singletonList("http://3.38.94.25:3000"));
                         configuration.setAllowedMethods(Collections.singletonList("*"));
                         configuration.setAllowCredentials(true);
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
@@ -62,6 +62,7 @@ public class SecurityConfig {
                         return configuration;
                     }
                 }));
+//        http.cors(AbstractHttpConfigurer::disable);
 
         //csrf disable
         http.csrf(AbstractHttpConfigurer::disable);

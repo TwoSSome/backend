@@ -16,7 +16,9 @@ import towssome.server.advice.MemberAdvice;
 import towssome.server.dto.CreateRes;
 import towssome.server.dto.EmailCheckReq;
 import towssome.server.dto.ErrorResult;
+import towssome.server.dto.IdDupCheckReq;
 import towssome.server.entity.Member;
+import towssome.server.exception.DuplicateIdException;
 import towssome.server.jwt.JoinDTO;
 import towssome.server.service.JoinService;
 import towssome.server.service.MemberService;
@@ -72,6 +74,18 @@ public class MemberController {
         return new ResponseEntity<>(new CreateRes(
                 member.getId()
         ),HttpStatus.OK);
+    }
+
+    @Operation(summary = "아이디 중복체크 API", description = "중복되지 않으면 200 코드 반환, 중복되어있으면 DuplicateIdException 반환")
+    @PostMapping("/member/dupidcheck")
+    public ResponseEntity<?> duplicateIdCheck(@RequestBody IdDupCheckReq req){
+
+        if (memberService.dupIdCheck(req.username())) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            throw new DuplicateIdException("이미 가입된 아이디입니다");
+        }
+
     }
 
     @Operation(summary = "테스트용 API")

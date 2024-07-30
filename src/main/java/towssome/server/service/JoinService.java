@@ -29,7 +29,7 @@ public class JoinService {
 
     @Transactional
     public int sendEmailVerification(String email) {
-        if (memberRepository.existsByUsername(email)) {
+        if (memberRepository.existsByEmail(email)) {
             throw new DuplicateIdException("이미 가입되어 있는 이메일 입니다");
         }
         if (emailVerificationRepository.existsByEmail(email)) {
@@ -45,9 +45,9 @@ public class JoinService {
     public Member joinProcess(JoinDTO joinDTO, MultipartFile multipartFile)  {
 
         String username = joinDTO.username();
-
         String password = joinDTO.password();
         String nickname = joinDTO.nickname();
+        String email = joinDTO.email();
 
         Boolean isExist = memberRepository.existsByUsername(username);
 
@@ -69,7 +69,8 @@ public class JoinService {
                 nickname,
                 0,
                 profilePhoto, // 프로필 사진 설정을 가능케 할 것인가?
-                "ROLE_USER"
+                "ROLE_USER",
+                email
         );
 
         memberRepository.save(member);

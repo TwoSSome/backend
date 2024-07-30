@@ -179,4 +179,7 @@ public class MemberService {
     }
 
 
+    public boolean dupIdCheck(String username) {
+        return !memberRepository.existsByUsername(username);
+    }
 }

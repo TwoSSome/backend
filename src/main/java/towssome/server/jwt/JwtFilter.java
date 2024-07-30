@@ -93,7 +93,8 @@ public class JwtFilter extends OncePerRequestFilter {
                 "temp_nickname",
                 0,
                 null,
-                role
+                role,
+                null
         );
         CustomUserDetails customUserDetails = new CustomUserDetails(userEntity);
 
