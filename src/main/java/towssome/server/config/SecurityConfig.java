@@ -16,10 +16,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import towssome.server.advice.UtilAdvice;
 import towssome.server.jwt.*;
 import towssome.server.repository.MemberRepository;
 
+import java.util.Arrays;
 import java.util.Collections;
+
+import static towssome.server.advice.UtilAdvice.*;
 
 @Configuration
 @EnableWebSecurity
@@ -51,7 +55,7 @@ public class SecurityConfig {
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 
                         CorsConfiguration configuration = new CorsConfiguration();
-                        configuration.setAllowedOrigins(Collections.singletonList("http://3.38.94.25:3000"));
+                        configuration.setAllowedOrigins(Arrays.asList(SERVER_IP,"http://localhost:3000"));
                         configuration.setAllowedMethods(Collections.singletonList("*"));
                         configuration.setAllowCredentials(true);
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
