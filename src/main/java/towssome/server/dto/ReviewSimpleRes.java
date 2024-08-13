@@ -1,6 +1,8 @@
 package towssome.server.dto;
 
 
+import towssome.server.enumrated.ReviewType;
+
 import java.util.List;
 
 public record ReviewSimpleRes(
@@ -9,6 +11,7 @@ public record ReviewSimpleRes(
         String profilePhoto,
         String nickname,
         String bodyPhoto,
+        ReviewType reviewType,
         List<HashtagRes> hashTags
 ) {
 }

@@ -51,6 +51,7 @@ public class HashtagClassificationService{
                     profilePhoto,
                     review.getMember().getNickName(),
                     bodyPhoto,
+                    review.getReviewType(),
                     hashtags
             ));
         }

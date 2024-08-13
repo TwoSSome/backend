@@ -150,6 +150,7 @@ public class ViewlikeService {
                     profilePhoto,
                     member.getNickName(),
                     bodyPhoto,
+                    review.getReviewType(),
                     hashtags
             ));
         }

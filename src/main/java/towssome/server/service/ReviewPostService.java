@@ -186,6 +186,7 @@ public class ReviewPostService {
                     profilePhoto,
                     review.getMember().getNickName(),
                     bodyPhoto,
+                    review.getReviewType(),
                     hashtags
             ));
         }
@@ -252,6 +253,7 @@ public class ReviewPostService {
                     profilePhotoPath,
                     value.getMember().getNickName(),
                     bodyPhoto,
+                    value.getReviewType(),
                     hashtags
             ));
         }
