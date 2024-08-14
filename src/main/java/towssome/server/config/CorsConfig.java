@@ -1,13 +1,11 @@
 package towssome.server.config;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import towssome.server.advice.UtilAdvice;
 
-import static towssome.server.advice.UtilAdvice.*;
+import static towssome.server.advice.URLAdvice.*;
 
 @Configuration
 @EnableWebMvc

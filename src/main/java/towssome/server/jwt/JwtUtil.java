@@ -1,6 +1,7 @@
 package towssome.server.jwt;
 
 import io.jsonwebtoken.Jwts;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,7 @@ import java.util.Date;
 public class JwtUtil {
 
     private SecretKey secretKey;
+    private RefreshTokenRepository refreshTokenRepository;
 
     public JwtUtil(@Value("${jwt.secret}") String secret) {
         secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
@@ -49,5 +51,7 @@ public class JwtUtil {
                 .signWith(secretKey)
                 .compact();
     }
+
+
 
 }
