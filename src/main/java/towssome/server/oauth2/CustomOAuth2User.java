@@ -42,7 +42,7 @@ public class CustomOAuth2User implements OAuth2User {
 
     @Override
     public String getName() {
-        return member.getUsername();
+        return member.getSocialId();
     }
 
     public String getNickname() {
@@ -51,6 +51,10 @@ public class CustomOAuth2User implements OAuth2User {
 
     public String getEmail() {
         return member.getEmail();
+    }
+
+    public String getUsername() {
+        return member.getUsername();
     }
 
 }

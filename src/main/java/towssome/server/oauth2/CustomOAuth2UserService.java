@@ -59,7 +59,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
             //가입되어 있지 않은 유저일 경우
             Member member = new Member(
-                    username,
+                    "",
                     "",
                     "",
                     0,
@@ -67,6 +67,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     ROLE_TEMP,
                     email
             );
+            member.setSocialId(username);
 
             memberRepository.save(member);
 
@@ -74,7 +75,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         } else {
 
-            Member member = memberRepository.findByUsername(username).orElseThrow();
+            Member member = memberRepository.findBySocialId(username).orElseThrow();
 
             //가입된 유저의 경우
 

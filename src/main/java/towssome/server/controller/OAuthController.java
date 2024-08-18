@@ -41,7 +41,7 @@ public class OAuthController {
     public ResponseEntity<?> oauthJwt(@RequestParam String jwt){
 
         String category = jwtUtil.getCategory(jwt);
-        String username = jwtUtil.getUsername(jwt);
+        String socialId = jwtUtil.getUsername(jwt);
         String role = jwtUtil.getRole(jwt);
 
         // 올바르지 않은 jwt일 경우
@@ -49,10 +49,10 @@ public class OAuthController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        String access = jwtUtil.createJwt("access", username, role, JwtStatic.ACCESS_EXPIRE_MS);
-        String refresh = jwtUtil.createJwt("refresh", username, role, JwtStatic.REFRESH_EXPIRE_MS);
+        String access = jwtUtil.createJwt("access", socialId, role, JwtStatic.ACCESS_EXPIRE_MS);
+        String refresh = jwtUtil.createJwt("refresh", socialId, role, JwtStatic.REFRESH_EXPIRE_MS);
 
-        Member member = memberRepository.findByUsername(username).orElseThrow(() -> new NotFoundMemberException("해당 멤버가 없습니다"));
+        Member member = memberRepository.findBySocialId(socialId).orElseThrow(() -> new NotFoundMemberException("해당 멤버가 없습니다"));
 
         return new ResponseEntity<JwtRes>(
                 new JwtRes(
@@ -69,10 +69,26 @@ public class OAuthController {
             @RequestPart OAuthInitialConfigReq req,
             @RequestPart(required = false) MultipartFile profileImage){
 
+        String jwt = req.jwt();
 
+        String category = jwtUtil.getCategory(jwt);
+        String socialId = jwtUtil.getUsername(jwt);
+        String role = jwtUtil.getRole(jwt);
 
+        // 올바르지 않은 jwt일 경우
+        if (!category.equals("social") || jwtUtil.isExpired(jwt) ) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
-        return null;
+        Member member = memberRepository.findBySocialId(socialId).orElseThrow(() -> new NotFoundMemberException("존재하지 않는 회원입니다"));
+
+        if (!profileImage.isEmpty()) {
+            memberService.changeProfilePhoto(member,profileImage);
+        }
+
+        memberService.initialSocialProfile(member, req.username(), req.nickname());
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }

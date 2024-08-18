@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import towssome.server.advice.RoleAdvice;
 import towssome.server.dto.ProfileRes;
 import towssome.server.dto.RankerRes;
 import towssome.server.entity.*;
@@ -203,5 +204,19 @@ public class MemberService {
 
     public boolean dupIdCheck(String username) {
         return !memberRepository.existsByUsername(username);
+    }
+
+    /**
+     * 소셜 프로필 초기 설정
+     * @param member
+     * @param username
+     * @param nickname
+     * @return
+     */
+    @Transactional
+    public Member initialSocialProfile(Member member, String username, String nickname) {
+        member.initialSocialProfile(username,nickname);
+        member.changeRole(RoleAdvice.ROLE_USER);
+        return member;
     }
 }

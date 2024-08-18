@@ -3,6 +3,7 @@ package towssome.server.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @NoArgsConstructor
@@ -19,6 +20,8 @@ public class Member extends BaseEntity{
     private int point;
     private int rankPoint;
     private String email;
+    @Setter
+    private String socialId;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "photo_id")
@@ -59,6 +62,14 @@ public class Member extends BaseEntity{
 
     public void changeRole(String role) {
         this.role = role;
+    }
+
+    /**
+     * 소셜 프로필 초기 설정
+     */
+    public void initialSocialProfile(String username, String nickname) {
+        this.username = username;
+        this.nickName = nickname;
     }
 
     // -----deprecated-----
