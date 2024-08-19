@@ -81,6 +81,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         Member member = memberRepository.findByUsername(username).orElseThrow();
 
+        tokenResponse(response, username, role, member);
+    }
+
+    private void tokenResponse(HttpServletResponse response, String username, String role, Member member) throws IOException {
         // 토큰 생성
         String access = jwtUtil.createJwt("access", username, role, ACCESS_EXPIRE_MS);
         String refresh = jwtUtil.createJwt("refresh", username, role, REFRESH_EXPIRE_MS);
@@ -99,7 +103,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         response.setStatus(HttpStatus.OK.value());
     }
-
 
 
     //로그인 실패시 실행하는 메소드

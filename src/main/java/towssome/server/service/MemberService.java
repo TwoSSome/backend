@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import towssome.server.advice.RoleAdvice;
 import towssome.server.dto.ProfileRes;
 import towssome.server.dto.RankerRes;
 import towssome.server.entity.*;
@@ -35,54 +36,62 @@ public class MemberService {
                 new NotFoundMemberException("해당 멤버가 없습니다"));
     }
 
+    // -----deprecated-----
+    // 종설 4 백엔드 페이지 7
+//    /**
+//     * 가상 연인 프로필 태그 생성
+//     * @param hashtags
+//     * @param member
+//     */
+//    @Transactional
+//    public void createVirtual(List<String> hashtags, Member member, MultipartFile file, String mateName) {
+//
+//        Photo photo = photoService.saveVirtualPhoto(file);
+//        member.changeVirtualPhoto(photo);
+//        member.changeVirtualMateName(mateName);
+//
+//        for (String hashtag : hashtags) {
+//            if (hashTagRepository.existsByName(hashtag)) {
+//                HashTag hashTag = hashTagRepository.findHashTagByName(hashtag).orElseThrow();
+//                virtualMateHashtagRepository.save(new VirtualMateHashtag(
+//                        member,
+//                        hashTag
+//                ));
+//            }else{
+//                HashTag save = hashTagRepository.save(new HashTag(
+//                        hashtag,
+//                        0L
+//                ));
+//                virtualMateHashtagRepository.save(new VirtualMateHashtag(
+//                        member,
+//                        save
+//                ));
+//            }
+//        }
+//
+//    }
+//
+//    /**
+//     * 가상 연인 프로필 태그 가져오기
+//     * @param member
+//     * @return
+//     */
+//    @Transactional
+//    public List<HashTag> getVirtualTag(Member member) {
+//        List<VirtualMateHashtag> list = virtualMateHashtagRepository.findAllByMember(member);
+//        ArrayList<HashTag> hashTags = new ArrayList<>();
+//        for (VirtualMateHashtag v : list) {
+//            hashTags.add(v.getHashTag());
+//        }
+//        return hashTags;
+//    }
+//
+
     /**
-     * 가상 연인 프로필 태그 생성
-     * @param hashtags
+     * 프로필 사진 변경
      * @param member
+     * @param photo
      */
-    @Transactional
-    public void createVirtual(List<String> hashtags, Member member, MultipartFile file, String mateName) {
-
-        Photo photo = photoService.saveVirtualPhoto(file);
-        member.changeVirtualPhoto(photo);
-        member.changeVirtualMateName(mateName);
-
-        for (String hashtag : hashtags) {
-            if (hashTagRepository.existsByName(hashtag)) {
-                HashTag hashTag = hashTagRepository.findHashTagByName(hashtag).orElseThrow();
-                virtualMateHashtagRepository.save(new VirtualMateHashtag(
-                        member,
-                        hashTag
-                ));
-            }else{
-                HashTag save = hashTagRepository.save(new HashTag(
-                        hashtag,
-                        0L
-                ));
-                virtualMateHashtagRepository.save(new VirtualMateHashtag(
-                        member,
-                        save
-                ));
-            }
-        }
-
-    }
-
-    /**
-     * 가상 연인 프로필 태그 가져오기
-     * @param member
-     * @return
-     */
-    @Transactional
-    public List<HashTag> getVirtualTag(Member member) {
-        List<VirtualMateHashtag> list = virtualMateHashtagRepository.findAllByMember(member);
-        ArrayList<HashTag> hashTags = new ArrayList<>();
-        for (VirtualMateHashtag v : list) {
-            hashTags.add(v.getHashTag());
-        }
-        return hashTags;
-    }
-
     @Transactional
     public void changeProfilePhoto(Member member, MultipartFile photo) {
         Photo previousPhoto = member.getProfilePhoto();
@@ -100,6 +109,12 @@ public class MemberService {
         member.changeProfilePhoto(photo1);
     }
 
+    /**
+     * 프로필 변경
+     * @param username
+     * @param nickName
+     * @param tagList
+     */
     @Transactional
     public void changeProfile(String username, String nickName, List<String> tagList) {
 
@@ -148,6 +163,11 @@ public class MemberService {
         return result;
     }
 
+    /**
+     * 프로필 태그들을 String 형식으로 리턴
+     * @param member
+     * @return
+     */
     @Transactional
     public List<String> getProfileTagString(Member member) {
         ArrayList<String > result = new ArrayList<>();
@@ -160,6 +180,9 @@ public class MemberService {
         return result;
     }
 
+    /**
+     * 랭킹에 있는 멤버 프로필 10개 리턴
+     */
     @Transactional
     public List<RankerRes> getRanker() {
         List<Member> ranker = memberRepository.findRanker(10);
@@ -181,5 +204,19 @@ public class MemberService {
 
     public boolean dupIdCheck(String username) {
         return !memberRepository.existsByUsername(username);
+    }
+
+    /**
+     * 소셜 프로필 초기 설정
+     * @param member
+     * @param username
+     * @param nickname
+     * @return
+     */
+    @Transactional
+    public Member initialSocialProfile(Member member, String username, String nickname) {
+        member.initialSocialProfile(username,nickname);
+        member.changeRole(RoleAdvice.ROLE_USER);
+        return member;
     }
 }

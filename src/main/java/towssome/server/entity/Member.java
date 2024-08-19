@@ -3,6 +3,7 @@ package towssome.server.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @NoArgsConstructor
@@ -19,16 +20,20 @@ public class Member extends BaseEntity{
     private int point;
     private int rankPoint;
     private String email;
+    @Setter
+    private String socialId;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "photo_id")
     private Photo profilePhoto;
 
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "virtual_photo_id")
-    private Photo virtualPhoto;
-
-    private String virtualMateName;
+    // -----deprecated-----
+    // 종설 4 백엔드 페이지 7
+//    @OneToOne(fetch = FetchType.EAGER)
+//    @JoinColumn(name = "virtual_photo_id")
+//    private Photo virtualPhoto;
+//
+//    private String virtualMateName;
 
     private String role;
 
@@ -55,12 +60,22 @@ public class Member extends BaseEntity{
         this.rankPoint += point;
     }
 
-    public void changeVirtualPhoto(Photo photo) {
-        this.virtualPhoto = photo;
+    public void changeRole(String role) {
+        this.role = role;
     }
 
-    public void changeVirtualMateName(String name) {
-        this.virtualMateName = name;
+    /**
+     * 소셜 프로필 초기 설정
+     */
+    public void initialSocialProfile(String username, String nickname) {
+        this.username = username;
+        this.nickName = nickname;
     }
+
+    // -----deprecated-----
+    // 종설 4 백엔드 페이지 7
+//    public void changeVirtualMateName(String name) {
+//        this.virtualMateName = name;
+//    }
 
 }

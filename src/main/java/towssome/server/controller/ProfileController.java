@@ -54,39 +54,39 @@ public class ProfileController {
         );
     }
 
-    @Operation(summary = "가상 연인 프로필 생성 API", description = "해시태그 리스트를 받아서 생성, AT 필요")
-    @PostMapping("/createVirtual")
-    public ResponseEntity<?> createVirtual(
-            @RequestPart CreateVirtualRes req,
-            @RequestPart MultipartFile file){
-
-        Member jwtMember = memberAdvice.findJwtMember();
-        memberService.createVirtual(req.hashtagList(),jwtMember,file,req.mateName());
-
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @Operation(summary = "가상 연인 프로필 API", description = "AT 필요")
-    @GetMapping("/virtual")
-    public VirtualRes virtualHashtag(){
-
-        Member jwtMember = memberAdvice.findJwtMember();
-        List<HashTag> virtualTag = memberService.getVirtualTag(jwtMember);
-
-        ArrayList<HashtagRes> hashtagRes = new ArrayList<>();
-        for (HashTag hashTag : virtualTag) {
-            hashtagRes.add(new HashtagRes(
-                    hashTag.getId(),
-                    hashTag.getName()
-            ));
-        }
-
-        return new VirtualRes(
-                jwtMember.getVirtualMateName(),
-                hashtagRes,
-                jwtMember.getVirtualPhoto() == null ? null : jwtMember.getVirtualPhoto().getS3Path()
-        );
-    }
+//    @Operation(summary = "가상 연인 프로필 생성 API", description = "해시태그 리스트를 받아서 생성, AT 필요")
+//    @PostMapping("/createVirtual")
+//    public ResponseEntity<?> createVirtual(
+//            @RequestPart CreateVirtualRes req,
+//            @RequestPart MultipartFile file){
+//
+//        Member jwtMember = memberAdvice.findJwtMember();
+//        memberService.createVirtual(req.hashtagList(),jwtMember,file,req.mateName());
+//
+//        return new ResponseEntity<>(HttpStatus.OK);
+//    }
+//
+//    @Operation(summary = "가상 연인 프로필 API", description = "AT 필요")
+//    @GetMapping("/virtual")
+//    public VirtualRes virtualHashtag(){
+//
+//        Member jwtMember = memberAdvice.findJwtMember();
+//        List<HashTag> virtualTag = memberService.getVirtualTag(jwtMember);
+//
+//        ArrayList<HashtagRes> hashtagRes = new ArrayList<>();
+//        for (HashTag hashTag : virtualTag) {
+//            hashtagRes.add(new HashtagRes(
+//                    hashTag.getId(),
+//                    hashTag.getName()
+//            ));
+//        }
+//
+//        return new VirtualRes(
+//                jwtMember.getVirtualMateName(),
+//                hashtagRes,
+//                jwtMember.getVirtualPhoto() == null ? null : jwtMember.getVirtualPhoto().getS3Path()
+//        );
+//    }
 
     @Operation(summary = "프로필 사진 변경 API", description = "이전 사진이 있을 경우 삭제되고 교체됨",
     parameters = @Parameter(name = "photo", description = "multipart/form-data 형식으로 보내야 함"))
