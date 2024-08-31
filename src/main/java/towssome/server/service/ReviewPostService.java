@@ -130,6 +130,7 @@ public class ReviewPostService {
     public void deleteReview(ReviewPost review) {
         photoService.deletePhotos(review);
         hashtagService.deleteHashtagByReviewPost(review);
+        viewlikeService.deleteCascadeForReview(review);
         reviewPostRepository.delete(review);
     }
 

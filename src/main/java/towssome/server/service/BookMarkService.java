@@ -126,6 +126,7 @@ public class BookMarkService {
                 category,
                 reviewPost
         );
+        reviewPost.addBookMarks(bookMark);
         return bookMarkRepository.save(bookMark);
     }
 
@@ -153,6 +154,8 @@ public class BookMarkService {
      * @param bookMark
      */
     public void deleteBookMark(BookMark bookMark) {
+        ReviewPost reviewPost = bookMark.getReviewPost();
+        reviewPost.removeBookMarks(bookMark);
         bookMarkRepository.delete(bookMark);
     }
 
