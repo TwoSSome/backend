@@ -61,6 +61,17 @@ public class ViewLikeRepositoryImpl implements ViewLikeRepositoryCustom {
         }
     }
 
+    @Override
+    public Long findLikeAmountByReviewPost(Long reviewId) {
+        return queryFactory
+                .select(viewLike.count())
+                .from(viewLike)
+                .where(viewLike.reviewPost.id.eq(reviewId)
+                        .and(viewLike.likeFlag.eq(Boolean.TRUE)))
+                .fetchOne();
+    }
+
+
 
     private JPAQuery<ReviewPost> buildQuery(Long memberId, String sort, int size, Long offset, boolean viewFlag) {
         JPAQuery<ReviewPost> query = queryFactory

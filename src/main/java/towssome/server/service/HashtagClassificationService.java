@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import towssome.server.dto.*;
 import towssome.server.entity.ReviewPost;
 import towssome.server.repository.HashtagClassificationRepository;
+import towssome.server.repository.ViewLikeRepositoryCustom;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ public class HashtagClassificationService{
 
     private final HashtagClassificationRepository hashtagClassificationRepository;
     private final PhotoService photoService;
+    private final ViewLikeRepositoryCustom viewLikeRepositoryCustom;
 
     public CursorResult<ReviewSimpleRes> getReviewPageByHashtag(String keyword, Long cursorId, String sort, Pageable page) {
         List<ReviewSimpleRes> reviewSimpleRes = new ArrayList<>();
@@ -52,7 +54,8 @@ public class HashtagClassificationService{
                     review.getMember().getNickName(),
                     bodyPhoto,
                     review.getReviewType(),
-                    hashtags
+                    hashtags,
+                    viewLikeRepositoryCustom.findLikeAmountByReviewPost(review.getId())
             ));
         }
         cursorId = reviewPosts.isEmpty() ?

@@ -98,7 +98,8 @@ public class ReviewPostService {
                     review.getReviewType(),
                     review.getStarPoint(),
                     review.getWhereBuy(),
-                    postMember.getNickName()
+                    postMember.getNickName(),
+                    viewlikeService.getLikeAmountInReviewPost(reviewId)
             );
         }else {
             //회원 조회
@@ -120,7 +121,8 @@ public class ReviewPostService {
                     review.getReviewType(),
                     review.getStarPoint(),
                     review.getWhereBuy(),
-                    member.getNickName()
+                    member.getNickName(),
+                    viewlikeService.getLikeAmountInReviewPost(reviewId)
             );
         }
         return reviewRes;
@@ -147,7 +149,10 @@ public class ReviewPostService {
         ReviewPostUpdateDto dto = new ReviewPostUpdateDto(
                 reviewId,
                 req.body(),
-                req.price()
+                req.price(),
+                req.whereBuy(),
+                req.category(),
+                req.reviewType()
         );
         reviewPostRepository.updateReview(dto);
     }
@@ -188,7 +193,8 @@ public class ReviewPostService {
                     review.getMember().getNickName(),
                     bodyPhoto,
                     review.getReviewType(),
-                    hashtags
+                    hashtags,
+                    viewlikeService.getLikeAmountInReviewPost(review.getId())
             ));
         }
         cursorId = reviewPosts.isEmpty() ?
@@ -255,7 +261,8 @@ public class ReviewPostService {
                     value.getMember().getNickName(),
                     bodyPhoto,
                     value.getReviewType(),
-                    hashtags
+                    hashtags,
+                    viewlikeService.getLikeAmountInReviewPost(value.getId())
             ));
         }
 

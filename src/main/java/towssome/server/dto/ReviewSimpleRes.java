@@ -12,6 +12,7 @@ public record ReviewSimpleRes(
         String nickname,
         String bodyPhoto,
         ReviewType reviewType,
-        List<HashtagRes> hashTags
+        List<HashtagRes> hashTags,
+        Long likeAmount
 ) {
 }

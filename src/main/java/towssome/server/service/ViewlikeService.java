@@ -151,7 +151,8 @@ public class ViewlikeService {
                     member.getNickName(),
                     bodyPhoto,
                     review.getReviewType(),
-                    hashtags
+                    hashtags,
+                    getLikeAmountInReviewPost(review.getId())
             ));
         }
         return new CursorResult<>(reviewPostRes, result.nextPageId(), result.hasNext());
@@ -162,5 +163,10 @@ public class ViewlikeService {
     public void deleteCascadeForReview(ReviewPost review) {
         List<ViewLike> byReviewPost = viewLikeRepository.findAllByReviewPost(review);
         viewLikeRepository.deleteAllInBatch(byReviewPost);
+    }
+
+    /** 게시글의 좋아요 수 반환*/
+    public Long getLikeAmountInReviewPost(Long reviewId){
+        return viewLikeRepositoryCustom.findLikeAmountByReviewPost(reviewId);
     }
 }
