@@ -42,6 +42,7 @@ public class CommentService {
         );
         Comment savedComment = commentRepository.save(comment);
         reviewPost.getMember().addRankPoint(5);
+        reviewPost.addComments(comment); // 일대다 연관관계 추가
         return savedComment;
     }
 
@@ -58,6 +59,7 @@ public class CommentService {
     @Transactional
     public void deleteComment(Comment comment) {
         comment.getMember().addRankPoint(-3);
+        comment.getReviewPost().removeComments(comment); //일대다 연관관계 삭제
         commentRepository.delete(comment);
     }
 

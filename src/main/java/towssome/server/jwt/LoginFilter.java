@@ -98,7 +98,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         // JSON 형식으로 반환
         PrintWriter out = response.getWriter();
-        out.print("{\"access\":\"" + access + "\", \"refresh\":\"" + refresh + "\", \"memberId\":" + member.getId() + "}");
+        out.print("{\"access\":\"" + access +
+                "\", \"refresh\":\"" + refresh +
+                "\", \"memberId\":" + member.getId() +
+                        ", \"username\":\"" + member.getUsername() +
+                        "\", \"nickname\":\"" + member.getNickName() +
+                "\"}");
         out.flush();
 
         response.setStatus(HttpStatus.OK.value());

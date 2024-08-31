@@ -42,12 +42,12 @@ public class ViewlikeService {
             );
             viewLikeRepository.save(viewLike);
             review.getMember().addRankPoint(1);//랭크포인트 추가
+            review.addViewLikes(viewLike);
         } else {
             viewLike = viewLikeRepository.findByReviewPostAndMember(review, member);
             viewLike.addViewAmount(); //조회수 추가
             review.getMember().addRankPoint(1); //랭크포인트 추가
         }
-
 
     }
 
@@ -154,5 +154,12 @@ public class ViewlikeService {
             ));
         }
         return new CursorResult<>(reviewPostRes, result.nextPageId(), result.hasNext());
+    }
+
+    //특정 리뷰에 대한 조회, 좋아요 전부 삭제
+    @Transactional
+    public void deleteCascadeForReview(ReviewPost review) {
+        List<ViewLike> byReviewPost = viewLikeRepository.findAllByReviewPost(review);
+        viewLikeRepository.deleteAllInBatch(byReviewPost);
     }
 }

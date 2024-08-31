@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import towssome.server.enumrated.ReviewType;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -31,6 +34,15 @@ public class ReviewPost extends BaseEntity{
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @OneToMany(mappedBy = "reviewPost", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BookMark> bookMarks = new ArrayList<>();
+
+    @OneToMany(mappedBy = "reviewPost", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ViewLike> viewLikes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "reviewPost", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
     public ReviewPost(String body, int price, ReviewType reviewType, String whereBuy, int starPoint, String category, Member member) {
         this.body = body;
         this.price = price;
@@ -45,5 +57,29 @@ public class ReviewPost extends BaseEntity{
         this.body = body;
         this.price = price;
         this.member = member;
+    }
+
+    public void addBookMarks(BookMark bookMark) {
+        bookMarks.add(bookMark);
+    }
+
+    public void removeBookMarks(BookMark bookMark) {
+        bookMarks.remove(bookMark);
+    }
+
+    public void addViewLikes(ViewLike viewLike) {
+        viewLikes.add(viewLike);
+    }
+
+    public void removeViewLikes(ViewLike viewLike) {
+        viewLikes.remove(viewLike);
+    }
+
+    public void addComments(Comment comment) {
+        comments.add(comment);
+    }
+
+    public void removeComments(Comment comment) {
+        comments.remove(comment);
     }
 }
