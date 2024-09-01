@@ -12,7 +12,8 @@ import java.util.List;
 
 public interface ReviewPostRepository extends JpaRepository<ReviewPost,Long>, ReviewPostRepositoryCustom {
     @Modifying
-    @Query(value = "update ReviewPost r set r.body = :#{#dto.body}, r.price = :#{#dto.price} where r.id = :#{#dto.id}")
+    @Query(value = "update ReviewPost r set r.body = :#{#dto.body}, r.price = :#{#dto.price}, r.category = :#{#dto.category}" +
+            ", r.whereBuy = :#{#dto.whereBuy}, r.reviewType = :#{#dto.reviewType} where r.id = :#{#dto.id}")
     void updateReview(@Param("dto") ReviewPostUpdateDto dto);
 
     List<ReviewPost> findAllByMember(Member member);

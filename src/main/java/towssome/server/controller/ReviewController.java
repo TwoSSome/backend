@@ -61,8 +61,8 @@ public class ReviewController {
     @Parameter(name = "photos", description = "새로 추가할 사진")})
     @PostMapping("/update/{reviewId}")
     public ResponseEntity<?> updateReview(@PathVariable Long reviewId,
-                                          @RequestPart(value = "body") ReviewPostUpdateReq req,
-                                          @RequestPart(value = "photos") List<MultipartFile> addPhotos) throws IOException { // update review by reviewId
+                                          @RequestPart(value = "body", required = false) ReviewPostUpdateReq req,
+                                          @RequestPart(value = "photos", required = false) List<MultipartFile> addPhotos) throws IOException { // update review by reviewId
         Member member = memberAdvice.findJwtMember();
         if(!(reviewPostService.getReview(reviewId).getMember() == member)){
             return new ResponseEntity<>("You are not the author of this review", HttpStatus.FORBIDDEN);

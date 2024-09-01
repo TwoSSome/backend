@@ -9,4 +9,7 @@ public interface ViewLikeRepositoryCustom {
     CursorResult<ReviewPost> findLikeByMemberIdOrderByIdDesc(Long memberId, Long pageId, String sort, int size);
 
     CursorResult<ReviewPost> findRecentByMemberIdOrderByIdDesc(Long memberId, Long pageId, String sort, int size);
+
+    Long findLikeAmountByReviewPost(Long reviewId);
+
 }
