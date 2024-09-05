@@ -42,6 +42,8 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private String ec2URL;
     @Value("${social.tempuser}")
     private String tempURL;
+    @Value("${social.user}")
+    private String userURL;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -67,7 +69,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         if (role.equals(RoleAdvice.ROLE_TEMP)) { // 처음 로그인 했을 때
             redirectUrl = localURL + tempURL; // 초기 설정 페이지로 리다이렉트
         } else { // 처음 로그인이 아닐 때
-            redirectUrl = localURL;
+            redirectUrl = localURL + userURL;
         }
         String redirectUrlWithToken = String.format("%s?token=%s", redirectUrl, token); // jwt 토큰 포함
         response.sendRedirect(redirectUrlWithToken);
