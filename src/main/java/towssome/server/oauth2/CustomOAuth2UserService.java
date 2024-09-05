@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import towssome.server.entity.Member;
+import towssome.server.exception.NotFoundMemberException;
 import towssome.server.repository.MemberRepository;
 
 import static towssome.server.advice.RoleAdvice.*;
@@ -49,7 +50,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         log.info("oAuth2Response.getProvider() = {}",oAuth2Response.getProvider());
         log.info("oAuth2Response.getProviderId() = {}",oAuth2Response.getProviderId());
-        String username = oAuth2Response.getProvider() + " " + oAuth2Response.getProviderId();
+        String socialId = oAuth2Response.getProvider() + " " + oAuth2Response.getProviderId();
         String email = oAuth2Response.getEmail();
         log.info("email = {}",email);
 
@@ -67,7 +68,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     ROLE_TEMP,
                     email
             );
-            member.setSocialId(username);
+            member.setSocialId(socialId);
 
             memberRepository.save(member);
 
@@ -75,7 +76,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         } else {
 
-            Member member = memberRepository.findBySocialId(username).orElseThrow();
+            Member member = null;
+            try {
+                member = memberRepository.findBySocialId(socialId)
+                        .orElseThrow(() -> new NotFoundMemberException("이 소셜id를 가진 멤버 없음"));
+            } catch (NotFoundMemberException e) {
+                member = memberRepository.findByEmail(email)
+                        .orElseThrow(() -> new NotFoundMemberException("이 이메일을 가진 멤버 없음"));
+                member.setSocialId(socialId);
+            }
 
             //가입된 유저의 경우
 
