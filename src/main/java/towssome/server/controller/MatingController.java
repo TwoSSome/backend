@@ -1,5 +1,7 @@
 package towssome.server.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,12 +20,14 @@ import towssome.server.service.MemberService;
 @RequiredArgsConstructor
 @RequestMapping("/mating")
 @Slf4j
+@Tag(name = "연인",description = "연인 관계 신청, 수락, 거절 등을 사용하는 API")
 public class MatingController {
 
     private final MatingService matingService;
     private final MemberAdvice memberAdvice;
     private final MemberService memberService;
 
+    @Operation(summary = "연인 신청 확인 API", description = "내가 전송한 연인 신청이나 받은 연인 요청을 확인합니다, AT 필요")
     @GetMapping
     public MatingRes getMate(){
 
@@ -36,6 +40,7 @@ public class MatingController {
         );
     }
 
+    @Operation(summary = "연인 신청 API", description = "상대방에게 연인 신청을 보냅니다, AT 필요")
     @PostMapping("/create")
     public ResponseEntity<?> createOffer(@RequestBody MemberNameReq req){
 
@@ -45,6 +50,7 @@ public class MatingController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Operation(summary = "연인 수락 API", description = "연인 신청을 수락합니다")
     @PostMapping("/accept")
     public ResponseEntity<?> acceptOffer(@RequestBody MatingIdReq req){
 
@@ -54,6 +60,7 @@ public class MatingController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Operation(summary = "연인 거절 API", description = "연인 신청을 거절합니다")
     @PostMapping("/reject")
     public ResponseEntity<?> rejectOffer(@RequestBody MatingIdReq req){
 
