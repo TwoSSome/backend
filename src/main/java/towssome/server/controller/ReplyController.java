@@ -1,5 +1,6 @@
 package towssome.server.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import towssome.server.service.ReviewPostService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/reply")
+@Tag(name = "****DEPRECATED****", description = "답글 기능")
 public class ReplyController {
 
     private final ReplyService replyService;

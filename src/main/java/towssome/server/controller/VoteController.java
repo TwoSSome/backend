@@ -1,5 +1,6 @@
 package towssome.server.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import towssome.server.service.VoteService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/vote")
+@Tag(name = "****DEPRECATED****", description = "투표 기능")
 public class VoteController {
 
     private final VoteService voteService;

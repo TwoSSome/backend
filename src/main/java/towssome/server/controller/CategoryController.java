@@ -28,7 +28,7 @@ public class CategoryController {
      * 멤버 카테고리 조회
      * @return
      */
-    @Operation(summary = "내 카테고리 조회 API")
+    @Operation(summary = "내 카테고리 조회 API", description = "내 카테고리 목록을 조회합니다, jwt가 필요합니다")
     @GetMapping
     public List<CategoryRes_> getCategoryBookmark(){
         Member jwtMember = memberAdvice.findJwtMember();
@@ -48,7 +48,7 @@ public class CategoryController {
      * @param req
      * @return
      */
-    @Operation(summary = "카테고리 생성 API")
+    @Operation(summary = "카테고리 생성 API", description = "카테고리를 생성합니다, jwt가 필요합니다")
     @PostMapping("/create")
     public ResponseEntity<CreateRes> createCategory(@RequestBody CreateCategoryReq req ){
 
@@ -69,7 +69,7 @@ public class CategoryController {
      * @param id
      * @return
      */
-    @Operation(summary = "카테고리 삭제 API")
+    @Operation(summary = "카테고리 삭제 API", description = "카테고리를 삭제합니다")
     @PostMapping("/delete/{id}")
     public ResponseEntity<?> deleteCategory(@PathVariable Long id){
         Category category = bookMarkService.getCategory(id);

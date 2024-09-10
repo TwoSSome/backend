@@ -83,7 +83,8 @@ public class JoinService {
         categoryRepository.save(category);
 
         //프로필태그 생성
-        profileTageSave(joinDTO.profileTagNames(),member);
+        if(!(joinDTO.profileTagNames() == null) && !joinDTO.profileTagNames().isEmpty())
+            profileTageSave(joinDTO.profileTagNames(),member);
 
         return member;
     }
