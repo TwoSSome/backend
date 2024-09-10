@@ -21,7 +21,7 @@ import towssome.server.service.ReviewPostService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/reply")
-@Tag(name = "****DEPRECATED****", description = "답글 기능")
+@Tag(name = "****DEPRECATED****(답변)", description = "답글 기능")
 public class ReplyController {
 
     private final ReplyService replyService;
