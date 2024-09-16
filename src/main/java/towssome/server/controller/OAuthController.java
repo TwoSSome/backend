@@ -86,7 +86,7 @@ public class OAuthController {
             memberService.changeProfilePhoto(member,profileImage);
         }
 
-        memberService.initialSocialProfile(member, req.username(), req.nickname());
+        memberService.initialSocialProfile(member, req.username(), req.nickname(), req.profileTags());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

@@ -201,7 +201,6 @@ public class MemberService {
         return profileRes;
     }
 
-
     public boolean dupIdCheck(String username) {
         return !memberRepository.existsByUsername(username);
     }
@@ -214,9 +213,16 @@ public class MemberService {
      * @return
      */
     @Transactional
-    public Member initialSocialProfile(Member member, String username, String nickname) {
+    public Member initialSocialProfile(Member member, String username, String nickname, List<String> profileTags) {
         member.initialSocialProfile(username,nickname);
         member.changeRole(RoleAdvice.ROLE_USER);
+        for (String profileTag : profileTags) {
+            profileTagRepository.save(new ProfileTag(
+                    member,
+
+
+            ))
+        }
         return member;
     }
 }

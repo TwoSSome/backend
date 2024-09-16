@@ -158,8 +158,8 @@ public class PhotoService {
     public void deletePhotos(ReviewPost reviewPost) {
         List<Photo> photoList = photoRepository.findAllByReviewPost(reviewPost);
         for (Photo photo : photoList) {
-            photoRepository.delete(photo);
             deleteS3Image(photo.getS3Name());
+            photoRepository.delete(photo);
         }
     }
 
@@ -167,16 +167,16 @@ public class PhotoService {
     public void deletePhotos(CommunityPost communityPost) {
         List<Photo> photoList = photoRepository.findAllByCommunityPost(communityPost);
         for (Photo photo : photoList) {
-            photoRepository.delete(photo);
             deleteS3Image(photo.getS3Name());
+            photoRepository.delete(photo);
         }
     }
 
     //오버로딩된 함수
     public void deletePhotos(List<Photo> photoList) {
         for (Photo photo : photoList) {
-            photoRepository.delete(photo);
             deleteS3Image(photo.getS3Name());
+            photoRepository.delete(photo);
         }
     }
 

@@ -89,6 +89,20 @@ public class JoinService {
         return member;
     }
 
+    @Transactional
+    public Member socialJoinProcess(Member member, String username, String nickname, List<String> profileTags) {
+        member.initialSocialProfile(username,nickname);
+        if(profileTags != null && !profileTags.isEmpty())
+            profileTageSave(profileTags,member);
+        //마스터 카테고리 생성
+        Category category = new Category(
+                "북마크",
+                member
+        );
+        categoryRepository.save(category);
+        return member;
+    }
+
     private void profileTageSave(List<String> list, Member member) {
 
         ArrayList<HashTag> hashTags = new ArrayList<>();
