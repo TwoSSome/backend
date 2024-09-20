@@ -4,8 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import towssome.server.advice.RoleAdvice;
-import towssome.server.dto.ProfileRes;
+import towssome.server.advice.ServiceAdvice;
 import towssome.server.dto.RankerRes;
 import towssome.server.entity.*;
 import towssome.server.exception.NotFoundMemberException;
@@ -14,7 +13,6 @@ import towssome.server.repository.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,9 +20,8 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final PhotoService photoService;
-    private final VirtualMateHashtagRepository virtualMateHashtagRepository;
-    private final HashTagRepository hashTagRepository;
     private final ProfileTagRepository profileTagRepository;
+    private final ServiceAdvice serviceAdvice;
 
     public Member getMember(Long memberId) {
         return memberRepository.findById(memberId).orElseThrow(() ->
@@ -123,26 +120,7 @@ public class MemberService {
         member.changeProfile(nickName);
         profileTagRepository.deleteAllByMember(member);
 
-        ArrayList<HashTag> hashTags = new ArrayList<>();
-
-        for (String name : tagList) {
-            if (hashTagRepository.existsByName(name)) {
-                hashTags.add(hashTagRepository.findByName(name));
-            }else{
-                HashTag save = hashTagRepository.save(new HashTag(
-                        name,
-                        0L
-                ));
-                hashTags.add(save);
-            }
-        }
-
-        for (HashTag hashTag : hashTags) {
-            profileTagRepository.save(new ProfileTag(
-                    member,
-                    hashTag
-            ));
-        }
+        serviceAdvice.storeHashtag(tagList,member);
 
     }
 
@@ -205,24 +183,4 @@ public class MemberService {
         return !memberRepository.existsByUsername(username);
     }
 
-    /**
-     * 소셜 프로필 초기 설정
-     * @param member
-     * @param username
-     * @param nickname
-     * @return
-     */
-    @Transactional
-    public Member initialSocialProfile(Member member, String username, String nickname, List<String> profileTags) {
-        member.initialSocialProfile(username,nickname);
-        member.changeRole(RoleAdvice.ROLE_USER);
-        for (String profileTag : profileTags) {
-            profileTagRepository.save(new ProfileTag(
-                    member,
-
-
-            ))
-        }
-        return member;
-    }
 }

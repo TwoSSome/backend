@@ -20,6 +20,7 @@ import towssome.server.exception.NotFoundMemberException;
 import towssome.server.jwt.JwtStatic;
 import towssome.server.jwt.JwtUtil;
 import towssome.server.repository.MemberRepository;
+import towssome.server.service.JoinService;
 import towssome.server.service.MemberService;
 
 @Tag(name = "소셜 로그인")
@@ -30,6 +31,7 @@ public class OAuthController {
     private final JwtUtil jwtUtil;
     private final MemberRepository memberRepository;
     private final MemberService memberService;
+    private final JoinService joinService;
 
     @Operation(summary = "소셜 로그인 API", description = "소셜 로그인 후 받은 jwt를 이 API로 보내 AT와 RT를 획득할 수 있습니다",
     parameters = @Parameter(name = "jwt", description = "소셜로그인 시 전달받은 jwt"),
@@ -73,7 +75,6 @@ public class OAuthController {
 
         String category = jwtUtil.getCategory(jwt);
         String socialId = jwtUtil.getUsername(jwt);
-        String role = jwtUtil.getRole(jwt);
 
         // 올바르지 않은 jwt일 경우
         if (!category.equals("social") || jwtUtil.isExpired(jwt) ) {
@@ -82,11 +83,11 @@ public class OAuthController {
 
         Member member = memberRepository.findBySocialId(socialId).orElseThrow(() -> new NotFoundMemberException("존재하지 않는 회원입니다"));
 
-        if (!profileImage.isEmpty()) {
+        if (profileImage != null && !profileImage.isEmpty()) {
             memberService.changeProfilePhoto(member,profileImage);
         }
 
-        memberService.initialSocialProfile(member, req.username(), req.nickname(), req.profileTags());
+        joinService.socialJoinProcess(member, req.username(), req.nickname(), req.profileTags());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
