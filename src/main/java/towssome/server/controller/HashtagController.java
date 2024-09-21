@@ -1,5 +1,7 @@
 package towssome.server.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,7 @@ import towssome.server.service.MemberService;
 import java.util.ArrayList;
 import java.util.List;
 
+@Tag(name = "해시태그")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/hashtag")
@@ -28,17 +31,20 @@ public class HashtagController {
     private final MemberAdvice memberAdvice;
     private final MemberService memberService;
 
+    @Operation(summary = "리뷰글 해시태그 삭제 API", description = "리뷰글에서 해시태그를 삭제합니다")
     @PostMapping("/delete")
     public ResponseEntity<?> deleteHashtag(@RequestPart(value = "req") HashtagDeleteReq req) {
         hashtagService.deleteHashtag(req.reviewId(), req.hashtagId());
         return new ResponseEntity<>("Hashtag Delete Complete", HttpStatus.OK);
     }
 
+    @Operation(summary = "리뷰글의 해시태그 API", description = "해당 리뷰글이 가지고 있는 해시태그를 가져옵니다")
     @GetMapping("/{reviewId}")
     public ResponseEntity<?> getHashtags(@PathVariable Long reviewId) {
         return new ResponseEntity<>(hashtagClassificationService.getHashtags(reviewId), HttpStatus.OK);
     }
 
+    @Operation(summary = "모든 해시태그 API", description = "존재하는 모든 해시태그를 가져옵니다")
     @GetMapping
     public ResponseEntity<?> getAllHashtags() {
         return new ResponseEntity<>(hashtagClassificationService.getAllHashtags(), HttpStatus.OK);
@@ -72,6 +78,7 @@ public class HashtagController {
         );
     }
 
+    @Operation(summary = "해시태그 사용 순위 API", description = "가장 많이 사용된 해시태그를 15개까지 가져옵니다")
     @GetMapping("/rank")
     public List<HashtagRes> getHashtagRank(){
 

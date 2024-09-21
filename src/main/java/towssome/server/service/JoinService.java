@@ -5,13 +5,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import towssome.server.advice.ServiceAdvice;
 import towssome.server.entity.*;
 import towssome.server.exception.DuplicateIdException;
 import towssome.server.jwt.JoinDTO;
 import towssome.server.repository.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -22,10 +22,9 @@ public class JoinService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final CategoryRepository categoryRepository;
     private final PhotoService photoService;
-    private final HashTagRepository hashTagRepository;
-    private final ProfileTagRepository profileTagRepository;
     private final MailSendService mailSendService;
     private final EmailVerificationRepository emailVerificationRepository;
+    private final ServiceAdvice serviceAdvice;
 
     @Transactional
     public int sendEmailVerification(String email) {
@@ -84,34 +83,23 @@ public class JoinService {
 
         //프로필태그 생성
         if(!(joinDTO.profileTagNames() == null) && !joinDTO.profileTagNames().isEmpty())
-            profileTageSave(joinDTO.profileTagNames(),member);
+            serviceAdvice.storeHashtag(joinDTO.profileTagNames(),member);
 
         return member;
     }
 
-    private void profileTageSave(List<String> list, Member member) {
-
-        ArrayList<HashTag> hashTags = new ArrayList<>();
-
-        for (String name : list) {
-            if (hashTagRepository.existsByName(name)) {
-                hashTags.add(hashTagRepository.findByName(name));
-            }else{
-                HashTag save = hashTagRepository.save(new HashTag(
-                        name,
-                        0L
-                ));
-                hashTags.add(save);
-            }
-        }
-
-        for (HashTag hashTag : hashTags) {
-            profileTagRepository.save(new ProfileTag(
-                    member,
-                    hashTag
-            ));
-        }
-
+    @Transactional
+    public Member socialJoinProcess(Member member, String username, String nickname, List<String> profileTags) {
+        member.initialSocialProfile(username,nickname);
+        if(profileTags != null && !profileTags.isEmpty())
+            serviceAdvice.storeHashtag(profileTags,member);
+        //마스터 카테고리 생성
+        Category category = new Category(
+                "북마크",
+                member
+        );
+        categoryRepository.save(category);
+        return member;
     }
 
 

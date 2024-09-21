@@ -1,5 +1,6 @@
 package towssome.server.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -15,6 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/recommend")
+@Tag(name = "빠른 추천")
 public class QuickRecommendController {
     private static final int DEFAULT_SIZE = 5;
     private final HashtagClassificationService hashtagClassificationService;

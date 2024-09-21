@@ -22,7 +22,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/community")
-@Tag(name = "****DEPRECATED****", description = "커뮤니티 기능")
+@Tag(name = "****DEPRECATED****(커뮤니티)", description = "커뮤니티 기능")
 public class CommunityController {
 
     private final CommunityService communityService;

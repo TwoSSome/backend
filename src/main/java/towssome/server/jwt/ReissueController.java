@@ -1,6 +1,8 @@
 package towssome.server.jwt;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,6 +20,7 @@ import java.util.Date;
 
 import static towssome.server.jwt.JwtStatic.*;
 
+@Tag(name = "AT 재발급")
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -26,6 +29,9 @@ public class ReissueController {
     private final JwtUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
 
+    @Operation(summary = "AT 재발급 API",
+            description = "AT가 만료되었을 경우 여기로 리프레시 토큰을 보내 ATd와 RT를 재발급 받을 수 있습니다," +
+                    "refresh 헤더에 RT를 추가해 이 API에 보내 주세요")
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(HttpServletResponse response, HttpServletRequest request) throws IOException {
 
@@ -62,14 +68,6 @@ public class ReissueController {
         // 새 JWT 발급
         String newAccess = jwtUtil.createJwt("access", username, role, ACCESS_EXPIRE_MS);
         String newRefresh = jwtUtil.createJwt("refresh", username, role, REFRESH_EXPIRE_MS);
-
-        if (refresh.equals(newRefresh)) {
-            System.out.println("리프레쉬 값이 같습니다");
-        } else {
-            System.out.println("리프레쉬 값이 다릅니다");
-            log.info("refresh = {}", refresh);
-            log.info("new refresh = {}", newRefresh);
-        }
 
         // Refresh 토큰 저장 DB에 기존의 Refresh 토큰 삭제 후 새 Refresh 토큰 저장
         refreshTokenRepository.deleteByRefresh(refresh);

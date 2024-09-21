@@ -5,6 +5,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import towssome.server.entity.EmailVerification;
 import towssome.server.entity.QMember;
 import towssome.server.entity.QRefreshToken;
@@ -26,6 +27,7 @@ public class UtilScheduler {
     /**
      * 매주 월요일 오전 1시에 랭크포인트 초기화
      */
+    @Transactional
     @Scheduled(cron = "0 0 1 ? * MON")
     public void initializationRank() {
 
@@ -37,6 +39,7 @@ public class UtilScheduler {
     /**
      * 리프레쉬 토큰 삭제
      */
+    @Transactional
     @Scheduled(cron = "0 0 1 ? * MON")
     public void deleteRefreshToken() {
 

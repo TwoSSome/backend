@@ -14,7 +14,7 @@ import towssome.server.service.VoteService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/vote")
-@Tag(name = "****DEPRECATED****", description = "투표 기능")
+@Tag(name = "****DEPRECATED****(투표)", description = "투표 기능")
 public class VoteController {
 
     private final VoteService voteService;
