@@ -17,8 +17,8 @@ import towssome.server.dto.HashtagRes;
 import towssome.server.entity.HashTag;
 import towssome.server.entity.HashtagClassification;
 import towssome.server.entity.ReviewPost;
-import towssome.server.repository.HashTagRepository;
-import towssome.server.repository.HashtagClassificationRepository;
+import towssome.server.repository.hashtag.HashTagRepository;
+import towssome.server.repository.hashtag_classification.HashtagClassificationRepository;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

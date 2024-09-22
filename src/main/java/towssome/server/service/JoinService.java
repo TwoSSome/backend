@@ -10,6 +10,7 @@ import towssome.server.entity.*;
 import towssome.server.exception.DuplicateIdException;
 import towssome.server.jwt.JoinDTO;
 import towssome.server.repository.*;
+import towssome.server.repository.member.MemberRepository;
 
 import java.io.IOException;
 import java.util.List;

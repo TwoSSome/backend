@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import towssome.server.entity.Comment;
 import towssome.server.entity.CommentLike;
 import towssome.server.entity.Member;
-import towssome.server.repository.CommentLikeRepository;
+import towssome.server.repository.comment_like.CommentLikeRepository;
 
 @Service
 @RequiredArgsConstructor

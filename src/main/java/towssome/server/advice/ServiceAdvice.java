@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import towssome.server.entity.HashTag;
 import towssome.server.entity.Member;
 import towssome.server.entity.ProfileTag;
-import towssome.server.repository.HashTagRepository;
+import towssome.server.repository.hashtag.HashTagRepository;
 import towssome.server.repository.ProfileTagRepository;
 
 import java.util.ArrayList;

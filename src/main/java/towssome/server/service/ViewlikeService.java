@@ -12,9 +12,9 @@ import towssome.server.entity.BookMark;
 import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
 import towssome.server.entity.ViewLike;
-import towssome.server.repository.BookMarkRepository;
-import towssome.server.repository.ViewLikeRepository;
-import towssome.server.repository.ViewLikeRepositoryCustom;
+import towssome.server.repository.bookmark.BookMarkRepository;
+import towssome.server.repository.viewlike.ViewLikeRepository;
+import towssome.server.repository.viewlike.ViewLikeRepositoryCustom;
 
 import java.util.ArrayList;
 import java.util.List;

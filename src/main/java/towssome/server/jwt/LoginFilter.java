@@ -19,7 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import towssome.server.dto.ErrorResult;
 import towssome.server.entity.Member;
 import towssome.server.entity.RefreshToken;
-import towssome.server.repository.MemberRepository;
+import towssome.server.repository.member.MemberRepository;
 
 import java.io.IOException;
 import java.io.PrintWriter;

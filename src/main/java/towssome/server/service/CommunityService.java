@@ -13,7 +13,7 @@ import towssome.server.entity.Photo;
 import towssome.server.entity.Vote;
 import towssome.server.entity.VoteAttribute;
 import towssome.server.exception.NotFoundCommunityPostException;
-import towssome.server.repository.CommunityPostRepository;
+import towssome.server.repository.community_post.CommunityPostRepository;
 
 import java.util.ArrayList;
 import java.util.List;

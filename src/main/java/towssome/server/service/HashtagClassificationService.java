@@ -8,8 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import towssome.server.dto.*;
 import towssome.server.entity.ReviewPost;
-import towssome.server.repository.HashtagClassificationRepository;
-import towssome.server.repository.ViewLikeRepositoryCustom;
+import towssome.server.repository.hashtag_classification.HashtagClassificationRepository;
+import towssome.server.repository.viewlike.ViewLikeRepositoryCustom;
 
 import java.util.ArrayList;
 import java.util.List;

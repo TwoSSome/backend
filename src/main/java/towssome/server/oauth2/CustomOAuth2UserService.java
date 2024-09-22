@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import towssome.server.entity.Member;
 import towssome.server.exception.NotFoundMemberException;
-import towssome.server.repository.MemberRepository;
+import towssome.server.repository.member.MemberRepository;
 
 import static towssome.server.advice.RoleAdvice.*;
 

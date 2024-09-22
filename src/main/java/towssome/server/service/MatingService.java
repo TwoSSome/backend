@@ -4,13 +4,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import towssome.server.entity.HashTag;
-import towssome.server.entity.Mating;
-import towssome.server.entity.Member;
-import towssome.server.entity.ProfileTag;
+import towssome.server.entity.*;
 import towssome.server.enumrated.MatingStatus;
 import towssome.server.exception.AlreadyExistMatingException;
 import towssome.server.exception.NotFoundMatingException;
+import towssome.server.repository.CalendarRepository;
 import towssome.server.repository.MatingRepository;
 import towssome.server.repository.ProfileTagRepository;
 
@@ -24,6 +22,7 @@ public class MatingService {
 
     private final MatingRepository matingRepository;
     private final ProfileTagRepository profileTagRepository;
+    private final CalendarRepository calendarRepository;
 
     public Mating findById(Long id) {
         return matingRepository.findById(id).orElseThrow();
@@ -49,22 +48,38 @@ public class MatingService {
     }
 
     /**
-     * 요청을 수락, mating의 상태를 MATING 으로 변경
+     * 요청을 수락, mating의 상태를 MATING 으로 변경, 둘 사이의 calendar 생성
      * @param mating
      * @return
      */
     @Transactional
     public Mating acceptOffer(Mating mating) {
         if(mating.getStatus() != MatingStatus.OFFER) return null;
-        log.info("accept ser");
         mating.acceptOffer();
+        // Calendar 엔티티 id = Mating 엔티티의 두 멤버의 username
+        String calendarId = mating.getOfferMember().getUsername() + "-" + mating.getObtainMember().getUsername();
+        calendarRepository.save(new Calendar(
+                calendarId,
+                mating.getOfferMember(),
+                mating.getObtainMember()
+        ));
         return mating;
     }
 
+    /**
+     * 요청 거절, mating 삭제
+     * @param mating
+     */
+    @Transactional
     public void rejectOffer(Mating mating) {
         matingRepository.delete(mating);
     }
 
+    /**
+     * 내가 한 연인 신청이나 내가 받은 연인 요청을 받아옵니다
+     * @param member
+     * @return
+     */
     public Mating findMyMating(Member member) {
         return matingRepository.findByObtainMemberOrOfferMember(member, member)
                 .orElseThrow(() -> new NotFoundMatingException("메이팅 신청이나 요청이 없습니다"));

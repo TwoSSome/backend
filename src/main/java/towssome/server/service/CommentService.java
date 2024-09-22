@@ -13,8 +13,8 @@ import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
 import towssome.server.exception.NotFoundCommentException;
 import towssome.server.exception.NotFoundReviewPostException;
-import towssome.server.repository.CommentRepository;
-import towssome.server.repository.ReviewPostRepository;
+import towssome.server.repository.comment.CommentRepository;
+import towssome.server.repository.reviewpost.ReviewPostRepository;
 
 import java.util.ArrayList;
 import java.util.List;
