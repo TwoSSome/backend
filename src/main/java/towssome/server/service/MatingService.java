@@ -38,7 +38,7 @@ public class MatingService {
     public Mating createOffer(Member offerMember, Member obtainMember) {
 
         if(matingRepository.existsByOfferMember(offerMember))
-            throw new AlreadyExistMatingException("이미 메이트가 존재합니다");
+            throw new AlreadyExistMatingException("이미 연인이 존재합니다");
 
         return matingRepository.save(new Mating(
                 offerMember,
@@ -81,7 +81,7 @@ public class MatingService {
      * @return
      */
     public Mating findMyMating(Member member) {
-        return matingRepository.findByObtainMemberOrOfferMember(member, member)
+        return matingRepository.findMatingByMember(member)
                 .orElseThrow(() -> new NotFoundMatingException("메이팅 신청이나 요청이 없습니다"));
     }
 
@@ -93,7 +93,7 @@ public class MatingService {
     @Transactional
     public List<HashTag> findMateHashTags(Member member) {
         Mating mating = matingRepository.
-                findByObtainMemberOrOfferMember(member, member)
+                findMatingByMember(member)
                 .orElseThrow(() -> new NotFoundMatingException("메이트가 없습니다"));
         if(mating.getStatus() == MatingStatus.OFFER) return null;
         ArrayList<HashTag> result = new ArrayList<>();
