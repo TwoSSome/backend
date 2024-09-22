@@ -1,12 +1,10 @@
 package towssome.server.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springdoc.webmvc.core.service.RequestService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import towssome.server.dto.CalendarCommentRes;
-import towssome.server.dto.CalendarInDayReq;
-import towssome.server.dto.CalendarInMonthReq;
-import towssome.server.dto.CalendarExistInMonth;
+import towssome.server.dto.*;
 import towssome.server.entity.Calendar;
 import towssome.server.entity.CalendarComment;
 import towssome.server.entity.Member;
@@ -27,14 +25,15 @@ public class CalendarService {
     private final CalendarCommentRepository calendarCommentRepository;
     private final CalendarRepository calendarRepository;
     private final ReviewPostRepository reviewPostRepository;
+    private final RequestService requestBuilder;
 
-    public CalendarComment createComment(Member member, String body) {
+    public CalendarComment createComment(Member member, CreateCalendarCommentReq req) {
 
         //캘린더는 연인 신청을 받으면 자동으로 생성
         Calendar calendar = getCalendar(member);
 
         return calendarCommentRepository.save(new CalendarComment(
-                member, body, calendar
+                member, req.body(), calendar, req.year(), req.month(), req.day()
         ));
     }
 
@@ -78,14 +77,27 @@ public class CalendarService {
                         calendar);
 
         ArrayList<CalendarCommentRes> result = new ArrayList<>();
+
         for (CalendarComment comment : comments) {
             result.add(new CalendarCommentRes(
                     comment.getBody(),
+                    comment.getId(),
                     comment.getCreateDate()
             ));
         }
 
         return result;
+    }
+
+    //캘린더 코멘트 업데이트
+    @Transactional
+    public void updateComment(CalendarCommentUpdateReq req) {
+
+        CalendarComment comment = calendarCommentRepository.findById(req.id()).orElseThrow(
+                () -> new NotFoundCalendarException("해당 캘린더 코멘트가 없습니다!")
+        );
+
+        comment.update(req.body());
     }
 
     //해당 멤버의 캘린더 가져오기
@@ -95,7 +107,5 @@ public class CalendarService {
         );
         return calendar;
     }
-
-
 
 }
