@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import towssome.server.advice.RoleAdvice;
 
 @Entity
 @NoArgsConstructor
@@ -60,16 +61,13 @@ public class Member extends BaseEntity{
         this.rankPoint += point;
     }
 
-    public void changeRole(String role) {
-        this.role = role;
-    }
-
     /**
      * 소셜 프로필 초기 설정
      */
     public void initialSocialProfile(String username, String nickname) {
         this.username = username;
         this.nickName = nickname;
+        this.role = RoleAdvice.ROLE_USER;
     }
 
     // -----deprecated-----
