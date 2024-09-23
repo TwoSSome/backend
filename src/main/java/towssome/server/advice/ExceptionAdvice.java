@@ -71,4 +71,10 @@ public class ExceptionAdvice {
         return new ResponseEntity<>(errorResult, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler
+    public ResponseEntity<ErrorResult> notFoundCalendarException(NotFoundCalendarException e) {
+        ErrorResult errorResult = new ErrorResult("NotFoundCalendarException", e.getMessage());
+        return new ResponseEntity<>(errorResult, HttpStatus.NOT_FOUND);
+    }
+
 }

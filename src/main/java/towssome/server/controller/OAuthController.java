@@ -11,15 +11,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import towssome.server.advice.RoleAdvice;
 import towssome.server.dto.JwtRes;
 import towssome.server.dto.OAuthInitialConfigReq;
-import towssome.server.dto.SocialJwtReq;
 import towssome.server.entity.Member;
 import towssome.server.exception.NotFoundMemberException;
 import towssome.server.jwt.JwtStatic;
 import towssome.server.jwt.JwtUtil;
-import towssome.server.repository.MemberRepository;
+import towssome.server.repository.member.MemberRepository;
 import towssome.server.service.JoinService;
 import towssome.server.service.MemberService;
 

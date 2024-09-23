@@ -15,8 +15,8 @@ import towssome.server.entity.ReviewPost;
 import towssome.server.enumrated.ReviewType;
 import towssome.server.exception.NotFoundReviewPostException;
 import towssome.server.exception.NotMatchReviewTypeException;
-import towssome.server.repository.ReviewPostRepository;
-import towssome.server.repository.SubscribeRepository;
+import towssome.server.repository.reviewpost.ReviewPostRepository;
+import towssome.server.repository.subscribe.SubscribeRepository;
 
 import java.io.IOException;
 import java.util.ArrayList;

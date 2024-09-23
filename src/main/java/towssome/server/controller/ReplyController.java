@@ -2,7 +2,6 @@ package towssome.server.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,9 +10,7 @@ import towssome.server.dto.*;
 import towssome.server.entity.CommunityPost;
 import towssome.server.entity.Member;
 import towssome.server.entity.Reply;
-import towssome.server.entity.ReviewPost;
 import towssome.server.exception.PageException;
-import towssome.server.repository.ReviewPostRepository;
 import towssome.server.service.CommunityService;
 import towssome.server.service.ReplyService;
 import towssome.server.service.ReviewPostService;

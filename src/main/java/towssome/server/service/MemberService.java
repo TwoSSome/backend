@@ -9,6 +9,7 @@ import towssome.server.dto.RankerRes;
 import towssome.server.entity.*;
 import towssome.server.exception.NotFoundMemberException;
 import towssome.server.repository.*;
+import towssome.server.repository.member.MemberRepository;
 
 import java.io.IOException;
 import java.util.ArrayList;

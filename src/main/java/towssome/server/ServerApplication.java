@@ -12,7 +12,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import towssome.server.config.S3Config;
 
-@EnableJpaAuditing
 @EnableScheduling
 @SpringBootApplication
 @Import(S3Config.class)
@@ -20,7 +19,6 @@ public class ServerApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ServerApplication.class, args);
-		//hello world
 	}
 
 	//Querydsl 사용을 위한 JPAQueryFactory 빈 등록

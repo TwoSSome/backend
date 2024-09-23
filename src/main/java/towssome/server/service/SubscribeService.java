@@ -14,7 +14,7 @@ import towssome.server.entity.Member;
 import towssome.server.entity.ProfileTag;
 import towssome.server.entity.Subscribe;
 import towssome.server.repository.ProfileTagRepository;
-import towssome.server.repository.SubscribeRepository;
+import towssome.server.repository.subscribe.SubscribeRepository;
 
 import java.util.ArrayList;
 import java.util.List;

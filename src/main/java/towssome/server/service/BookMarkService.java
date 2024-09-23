@@ -15,7 +15,7 @@ import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
 import towssome.server.exception.NotFoundBookMarkException;
 import towssome.server.exception.NotFoundCategoryException;
-import towssome.server.repository.BookMarkRepository;
+import towssome.server.repository.bookmark.BookMarkRepository;
 import towssome.server.repository.CategoryRepository;
 
 import java.util.ArrayList;

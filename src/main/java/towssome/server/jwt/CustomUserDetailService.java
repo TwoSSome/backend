@@ -6,8 +6,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import towssome.server.entity.Member;
-import towssome.server.exception.NotFoundMemberException;
-import towssome.server.repository.MemberRepository;
+import towssome.server.repository.member.MemberRepository;
 
 @Service
 @RequiredArgsConstructor
