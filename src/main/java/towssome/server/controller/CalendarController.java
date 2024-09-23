@@ -22,7 +22,7 @@ public class CalendarController {
     private final CalendarService calendarService;
     private final MemberAdvice memberAdvice;
 
-    @Operation(summary = "캘린더 월별 정보 출력 API", description = "")
+    @Operation(summary = "캘린더 월별 정보 출력 API", description = "jwt 필요")
     @GetMapping("/month")
     public CalendarExistInMonth getMonthInfo(
             @RequestParam int year,
@@ -33,7 +33,7 @@ public class CalendarController {
         return calendarService.calendarInMonth(new CalendarInMonthReq(year, month),member);
     }
 
-    @Operation(summary = "캘린더 일별 코멘트 API", description = "해당 일자의 코멘트 리스트를 반환합니다")
+    @Operation(summary = "캘린더 일별 코멘트 API", description = "해당 일자의 코멘트 리스트를 반환합니다, jwt 필요")
     @GetMapping("/comment")
     public List<CalendarCommentRes> getComments(
             @RequestParam int year,
@@ -45,7 +45,7 @@ public class CalendarController {
         return calendarService.findCalendarCommentInDay(new CalendarInDayReq(year,month,day),member);
     }
 
-    @Operation(summary = "캘린더 코멘트 생성 API", description = "캘린더의 코멘트를 생성합니다")
+    @Operation(summary = "캘린더 코멘트 생성 API", description = "캘린더의 코멘트를 생성합니다, jwt 필요")
     @PostMapping("/create")
     public ResponseEntity<?> createComment(CreateCalendarCommentReq req){
 
