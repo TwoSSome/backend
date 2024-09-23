@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import towssome.server.advice.RoleAdvice;
+import towssome.server.enumrated.SocialType;
 
 @Entity
 @NoArgsConstructor
@@ -37,6 +38,10 @@ public class Member extends BaseEntity{
 //    private String virtualMateName;
 
     private String role;
+
+    @Enumerated(EnumType.STRING)
+    @Setter
+    private SocialType socialType;
 
     public Member(String username, String password, String nickName, int point, Photo profilePhoto, String role, String email) {
         this.username = username;
