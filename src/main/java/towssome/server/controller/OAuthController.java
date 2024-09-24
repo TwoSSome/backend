@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,7 @@ import towssome.server.service.MemberService;
 @Tag(name = "소셜 로그인")
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class OAuthController {
 
     private final JwtUtil jwtUtil;
@@ -73,13 +75,14 @@ public class OAuthController {
 
         String category = jwtUtil.getCategory(jwt);
         String socialId = jwtUtil.getUsername(jwt);
+        log.info("socialId = {}",socialId);
 
         // 올바르지 않은 jwt일 경우
         if (!category.equals("social") || jwtUtil.isExpired(jwt) ) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        Member member = memberRepository.findBySocialId(socialId).orElseThrow(() -> new NotFoundMemberException("존재하지 않는 회원입니다"));
+        Member member = memberRepository.findBySocialId(socialId).orElseThrow(() -> new NotFoundMemberException("존재하지 않는 social 회원입니다"));
 
         if (profileImage != null && !profileImage.isEmpty()) {
             memberService.changeProfilePhoto(member,profileImage);

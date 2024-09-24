@@ -35,13 +35,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         OAuth2Res oAuth2Response = null;
 
         if (registrationId.equals("naver")) {
-
+            //네이버
             oAuth2Response = new NaverRes(oAuth2User.getAttributes());
-
         } else if (registrationId.equals("google")) {
-
+            //구글
             oAuth2Response = new GoogleRes(oAuth2User.getAttributes());
-
+        } else if (registrationId.equals("kakao")) {
+            //카카오
+            oAuth2Response = new KakaoRes(oAuth2User.getAttributes());
         } else {
             return null;
         }
