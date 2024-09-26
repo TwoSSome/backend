@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import towssome.server.advice.PhotoAdvice;
 import towssome.server.advice.ServiceAdvice;
 import towssome.server.dto.RankerRes;
 import towssome.server.entity.*;
@@ -20,7 +21,7 @@ import java.util.List;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final PhotoService photoService;
+    private final PhotoAdvice photoAdvice;
     private final ProfileTagRepository profileTagRepository;
     private final ServiceAdvice serviceAdvice;
 
@@ -96,13 +97,13 @@ public class MemberService {
 
         Photo photo1 = null;
         try {
-            photo1 = photoService.saveProfilePhoto(photo);
+            photo1 = photoAdvice.saveProfilePhoto(photo);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         if (previousPhoto != null) {
-            photoService.deletePhoto(previousPhoto.getId());
+            photoAdvice.deletePhoto(previousPhoto.getId());
         }
         member.changeProfilePhoto(photo1);
     }

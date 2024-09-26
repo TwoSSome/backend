@@ -15,7 +15,15 @@ import java.io.IOException;
 @Slf4j
 public class ImageMetaDataAdvice {
 
+    //사진 안의 GPS 정보 추출
     public GpsInformationDTO extract(MultipartFile multipartFile) {
+
+        if (multipartFile == null || multipartFile.isEmpty()) {
+            return new GpsInformationDTO(
+                    null, null
+            );
+        }
+
         File file = fileConverter(multipartFile);
         Metadata metadata = null;
         try {
@@ -41,6 +49,7 @@ public class ImageMetaDataAdvice {
         return result;
     }
 
+    //MultipartFile -> File
     private File fileConverter(MultipartFile multipartFile) {
 
         File file = null;
@@ -57,6 +66,7 @@ public class ImageMetaDataAdvice {
         return file;
     }
 
+    //임시 파일 삭제
     private void deleteFile(File file) {
         if (file != null && file.exists()) {
             boolean isDeleted = file.delete();
@@ -68,6 +78,7 @@ public class ImageMetaDataAdvice {
         }
     }
 
+    //GPS 정보가 있는지 검사
     private boolean hasGpsInformation(GpsDirectory gpsDirectory) {
         return gpsDirectory.containsTag(GpsDirectory.TAG_LATITUDE)
                 && gpsDirectory.containsTag(GpsDirectory.TAG_LONGITUDE);

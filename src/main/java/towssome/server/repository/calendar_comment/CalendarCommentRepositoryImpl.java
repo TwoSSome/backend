@@ -37,15 +37,16 @@ public class CalendarCommentRepositoryImpl implements CalendarCommentRepositoryC
     @Override
     public List<Integer> findCommentsInCalendarOfMonth(int year, int month, Calendar calendar) {
         return queryFactory
-                .select(calendarComment.day)
+                .select(calendarComment.date.registrationDay)
                 .distinct()
                 .from(calendarComment)
                 .where(
-                        calendarComment.year.eq(year),
-                        calendarComment.month.eq(month),
+                        calendarComment.date.registrationYear.eq(year),
+                        calendarComment.date.registrationMonth.eq(month),
                         calendarComment.calendar.eq(calendar)
                 )
                 .fetch();
+//        return null;
     }
 
 }

@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import towssome.server.advice.MemberAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.BookMark;
 import towssome.server.entity.Category;
@@ -17,7 +16,7 @@ import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
 import towssome.server.service.BookMarkService;
 import towssome.server.service.MemberService;
-import towssome.server.service.PhotoService;
+import towssome.server.advice.PhotoAdvice;
 import towssome.server.service.ReviewPostService;
 
 import java.util.ArrayList;
@@ -32,7 +31,7 @@ public class BookMarkController {
     private final BookMarkService bookMarkService;
     private final MemberService memberService;
     private final ReviewPostService reviewPostService;
-    private final PhotoService photoService;
+    private final PhotoAdvice photoAdvice;
 
     /**
      * 북마크 추가
@@ -84,7 +83,7 @@ public class BookMarkController {
         ArrayList<BookmarkReq> bookmarkReqs = new ArrayList<>();
         Slice<BookMark> bookMarks = bookMarkService.getCategoryBookMarks(bookMarkService.getCategory(id), page, 20);
         for (BookMark bookMark : bookMarks) {
-            List<PhotoInPost> photos = photoService.getPhotoS3Path(bookMark.getReviewPost());
+            List<PhotoInPost> photos = photoAdvice.getPhotoS3Path(bookMark.getReviewPost());
             String photoPath = (photos != null && !photos.isEmpty()) ? photos.get(0).photoPath() : null;
             bookmarkReqs.add(new BookmarkReq(
                     bookMark.getId(),
