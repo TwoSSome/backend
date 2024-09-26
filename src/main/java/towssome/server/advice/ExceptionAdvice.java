@@ -88,6 +88,12 @@ public class ExceptionAdvice {
         return new ResponseEntity<>(errorResult, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler
+    public ResponseEntity<ErrorResult> bodyTooLongException(BodyOverException e) {
+        ErrorResult errorResult = new ErrorResult("BodyOverException", e.getMessage());
+        return new ResponseEntity<>(errorResult, HttpStatus.NOT_FOUND);
+    }
+
     // 데이터 무결성 위반 예외 처리 (예: 문자열 길이 초과, 외래 키 제약 위반 등)
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<String> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {

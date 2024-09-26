@@ -2,7 +2,10 @@ package towssome.server.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
+import jakarta.validation.ValidationException;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,10 +16,12 @@ import towssome.server.dto.*;
 import towssome.server.entity.CalendarComment;
 import towssome.server.entity.DateCourse;
 import towssome.server.entity.Member;
+import towssome.server.exception.BodyOverException;
 import towssome.server.service.CalendarService;
 import towssome.server.service.DateCourseByDateReq;
 
 import java.util.List;
+import java.util.Set;
 
 @Tag(name = "캘린더")
 @RestController
@@ -100,8 +105,12 @@ public class CalendarController {
             description = "날짜와 사진을 받아 데이트코스를 생성합니다, AT 필요, 본문은 100자 이내")
     @PostMapping("/dateCourse/create")
     public ResponseEntity<?> createDateCourse(
-            @RequestPart @Valid CreateDateCourseReq req,
-            @RequestPart MultipartFile photo){
+            @RequestPart CreateDateCourseReq req,
+            @RequestPart(required = false) MultipartFile photo){
+
+        if (req.body().length() > 100) {
+            throw new BodyOverException("본문은 100자 이내여야 합니다");
+        }
 
         Member author = memberAdvice.findJwtMember();
 

@@ -15,8 +15,8 @@ public class DateCourse {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(length = 100)
-    @Size(max = 100)
+    @Column(length = 300)
+    @Size(max = 100, message = "100자 이내로 입력하세요")
     private String body;
 
     @ManyToOne(fetch = FetchType.LAZY)
