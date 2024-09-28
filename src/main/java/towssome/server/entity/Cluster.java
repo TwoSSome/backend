@@ -9,13 +9,15 @@ public class Cluster extends BaseEntity{
     @Column(name = "cluster_id")
     private Long id;
 
+    @Column(name = "cluster_num")
+    private Long clusterNum;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hashtag_id")
-    private HashTag hashTag;
-
+    private HashTag hashtag;
 
 }
