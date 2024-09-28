@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Optional;
+
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -16,7 +18,6 @@ public class DateCourse {
     private long id;
 
     @Column(length = 300)
-    @Size(max = 100, message = "100자 이내로 입력하세요")
     private String body;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -47,4 +48,5 @@ public class DateCourse {
     public void update(String body) {
         this.body = body;
     }
+
 }

@@ -9,6 +9,10 @@ public record DateCourseRes(
         int year,
         int month,
         int day,
+        @Schema(name = "사진의 위도")
+        Double longitude,
+        @Schema(name = "사진의 경도")
+        Double latitude,
         @Schema(name = "본문")
         String body,
         @Schema(name = "데이트 코스의 사진")

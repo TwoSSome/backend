@@ -15,6 +15,7 @@ import towssome.server.exception.NotFoundPhotoException;
 import towssome.server.exception.PhotoSaveException;
 import towssome.server.repository.PhotoRepository;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +62,7 @@ public class PhotoAdvice {
         UploadPhoto uploadPhoto = null;
         try {
             uploadPhoto = uploadPhoto(file);
-        } catch (IOException e) {
+        } catch (RuntimeException e) {
             throw new PhotoSaveException("사진을 저장하던 중 오류가 발생했습니다");
         }
         Photo photo = new Photo(
@@ -225,7 +226,7 @@ public class PhotoAdvice {
      * @param file -> 업로드될 사진
      * @return 해당 파일의 S3 URL, 파일 이름, s3에 저장될 파일 이름이 담긴 UploadPhoto 반환
      */
-    private UploadPhoto uploadPhoto(MultipartFile file) throws IOException {
+    private UploadPhoto uploadPhoto(MultipartFile file) {
 
         String originalFilename = file.getOriginalFilename();
         String uploadPhotoName = createUploadPhotoName(originalFilename);
@@ -234,7 +235,12 @@ public class PhotoAdvice {
         metadata.setContentLength(file.getSize());
         metadata.setContentType(file.getContentType());
 
-        amazonS3.putObject(bucket, uploadPhotoName, file.getInputStream(), metadata);
+        try {
+            amazonS3.putObject(bucket, uploadPhotoName, file.getInputStream(), metadata);
+        } catch (IOException e) {
+            log.error("uploadPhoto error = ",e);
+            throw new RuntimeException(e);
+        }
         String fileURL = amazonS3.getUrl(bucket, uploadPhotoName).toString();
 
         UploadPhoto uploadPhoto = new UploadPhoto(
@@ -298,7 +304,7 @@ public class PhotoAdvice {
                     null
             );
             photoRepository.save(photo);
-        } catch (IOException e) {
+        } catch (RuntimeException e) {
             throw new RuntimeException();
         }
         return photo;

@@ -34,6 +34,12 @@ public class ImageMetaDataAdvice {
 
         GpsDirectory gpsDirectory = metadata.getFirstDirectoryOfType(GpsDirectory.class);
 
+        if (gpsDirectory == null) {
+            return new GpsInformationDTO(
+                    null, null
+            );
+        }
+
         GpsInformationDTO result = null;
 
         if (hasGpsInformation(gpsDirectory)) {

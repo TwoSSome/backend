@@ -115,9 +115,7 @@ public class CalendarService {
      * @param member
      * @return
      */
-    public DateCourse createDateCourse(CreateDateCourseReq req, MultipartFile file, Member member) {
-        GpsInformationDTO extract = imageMetaDataAdvice.extract(file);
-        Photo photo = photoAdvice.savePhoto(file, PhotoType.DATE_COURSE);
+    public DateCourse createDateCourse(CreateDateCourseReq req, Photo photo, Member member, GpsInformationDTO extract) {
         Calendar calendar = calendarRepository.findByAuth(member).orElseThrow(
                 () -> new NotFoundCalendarException("아직 캘린더가 없습니다")
         );
@@ -157,9 +155,18 @@ public class CalendarService {
      * @param member
      * @return 날짜, 사진, 작성자 닉네임, 작성자 프로필사진
      */
-    public List<DateCourseRes> getDateCourseListByDate(DateCourseByDateReq req, Member member) {
+    public List<DateCourseRes> getDateCourseListByDate(LocalDate start, LocalDate end, Member member) {
         Calendar calendar = calendarRepository.findByAuth(member).orElseThrow(
                 () -> new NotFoundCalendarException("아직 캘린더가 없습니다")
+        );
+
+        DateCourseByDateReq req = new DateCourseByDateReq(
+                start.getYear(),
+                end.getYear(),
+                start.getMonthValue(),
+                end.getMonthValue(),
+                start.getDayOfMonth(),
+                end.getDayOfMonth()
         );
 
         List<DateCourse> dateCourseByDate = dateCourseRepository.findDateCourseByDate(req, calendar);
@@ -171,10 +178,12 @@ public class CalendarService {
                     item.getDate().getRegistrationYear(),
                     item.getDate().getRegistrationMonth(),
                     item.getDate().getRegistrationDay(),
+                    item.getGps() == null ? null : item.getGps().getLongitude(),
+                    item.getGps() == null? null : item.getGps().getLatitude(),
                     item.getBody(),
                     item.getPhoto().getS3Path(),
                     item.getAuthor().getNickName(),
-                    item.getAuthor().getProfilePhoto().getS3Path()
+                    item.getAuthor().getProfilePhoto() == null ? null : item.getAuthor().getProfilePhoto().getS3Path()
             ));
         }
 

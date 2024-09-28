@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 import java.util.Optional;
 
 @Embeddable
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class GPS {
 
     //위도
@@ -23,4 +23,5 @@ public class GPS {
         this.longitude = longitude;
         this.latitude = latitude;
     }
+
 }

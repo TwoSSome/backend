@@ -2,26 +2,28 @@ package towssome.server.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
-import jakarta.validation.ValidationException;
-import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import towssome.server.advice.ImageMetaDataAdvice;
 import towssome.server.advice.MemberAdvice;
+import towssome.server.advice.PhotoAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.CalendarComment;
 import towssome.server.entity.DateCourse;
 import towssome.server.entity.Member;
+import towssome.server.entity.Photo;
+import towssome.server.enumrated.PhotoType;
 import towssome.server.exception.BodyOverException;
+import towssome.server.exception.IllegalDateException;
 import towssome.server.service.CalendarService;
-import towssome.server.service.DateCourseByDateReq;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 @Tag(name = "캘린더")
 @RestController
@@ -31,6 +33,8 @@ public class CalendarController {
 
     private final CalendarService calendarService;
     private final MemberAdvice memberAdvice;
+    private final ImageMetaDataAdvice imageMetaDataAdvice;
+    private final PhotoAdvice photoAdvice;
 
     @Operation(summary = "캘린더 월별 정보 출력 API", description = "AT 필요")
     @GetMapping("/month")
@@ -90,11 +94,17 @@ public class CalendarController {
     @Operation(summary = "데이트코스 가져오기 API",
             description = "요청한 날짜 사이의 데이트코스 리스트를 반환합니다, AT 필요")
     @GetMapping("/dateCource")
-    public ListResultRes<List<DateCourseRes>> getDateCourse(DateCourseByDateReq req){
+    public ListResultRes<List<DateCourseRes>> getDateCourse(
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate start,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end){
+
+        if (start.isAfter(end)) {
+            throw new IllegalDateException("시작 날짜는 항상 끝 날짜 이전이어야 합니다");
+        }
 
         Member author = memberAdvice.findJwtMember();
 
-        List<DateCourseRes> result = calendarService.getDateCourseListByDate(req, author);
+        List<DateCourseRes> result = calendarService.getDateCourseListByDate(start, end, author);
 
         return new ListResultRes<>(
                 result
@@ -114,7 +124,9 @@ public class CalendarController {
 
         Member author = memberAdvice.findJwtMember();
 
-        DateCourse dateCourse = calendarService.createDateCourse(req, photo, author);
+        Photo savePhoto = photoAdvice.savePhoto(photo, PhotoType.DATE_COURSE);
+        GpsInformationDTO extract = imageMetaDataAdvice.extract(photo);
+        DateCourse dateCourse = calendarService.createDateCourse(req, savePhoto, author, extract);
 
         return new ResponseEntity<>(new CreateRes(
                 dateCourse.getId()
@@ -135,6 +147,10 @@ public class CalendarController {
             description = "수정할 본문을 100자 이내로 작성하여 업데이트합니다")
     @PostMapping("/dateCourse/update")
     public ResponseEntity<?> updateDateCourse(@RequestBody @Valid UpdateDateCourseReq req){
+
+        if (req.body().length() > 100) {
+            throw new BodyOverException("본문은 100자 이내여야 합니다");
+        }
 
         calendarService.updateDateCourse(req);
 
