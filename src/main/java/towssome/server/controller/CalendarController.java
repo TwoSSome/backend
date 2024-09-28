@@ -1,6 +1,7 @@
 package towssome.server.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -92,7 +93,9 @@ public class CalendarController {
     }
 
     @Operation(summary = "데이트코스 가져오기 API",
-            description = "요청한 날짜 사이의 데이트코스 리스트를 반환합니다, AT 필요")
+            description = "요청한 날짜 사이의 데이트코스 리스트를 반환합니다, AT 필요",
+    parameters = {@Parameter(name = "start", description = "검색을 시작할 날짜, yyyy-MM-DD 형식으로 전송"),
+    @Parameter(name = "end", description = "검색 끝 날짜, yyyy-MM-DD 형식으로 전송")})
     @GetMapping("/dateCource")
     public ListResultRes<List<DateCourseRes>> getDateCourse(
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate start,
@@ -112,11 +115,11 @@ public class CalendarController {
     }
 
     @Operation(summary = "데이트코스 생성 API",
-            description = "날짜와 사진을 받아 데이트코스를 생성합니다, AT 필요, 본문은 100자 이내")
+            description = "날짜와 사진을 받아 데이트코스를 생성합니다, AT 필요, 본문은 100자 이내, 사진은 필수입니다")
     @PostMapping("/dateCourse/create")
     public ResponseEntity<?> createDateCourse(
             @RequestPart CreateDateCourseReq req,
-            @RequestPart(required = false) MultipartFile photo){
+            @RequestPart MultipartFile photo){
 
         if (req.body().length() > 100) {
             throw new BodyOverException("본문은 100자 이내여야 합니다");
