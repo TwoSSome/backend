@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Size;
 
 @Schema(name = "데이트코스 생성 dto")
 public record CreateDateCourseReq(
-        @Schema(name = "100자 제한")
+        @Schema(description = "100자 제한")
         String body,
         int year,
         int month,
