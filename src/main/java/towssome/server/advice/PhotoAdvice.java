@@ -1,4 +1,4 @@
-package towssome.server.service;
+package towssome.server.advice;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -12,8 +12,10 @@ import towssome.server.dto.UploadPhoto;
 import towssome.server.entity.*;
 import towssome.server.enumrated.PhotoType;
 import towssome.server.exception.NotFoundPhotoException;
+import towssome.server.exception.PhotoSaveException;
 import towssome.server.repository.PhotoRepository;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +24,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PhotoService {
+public class PhotoAdvice {
 
     private final AmazonS3 amazonS3;
     private final PhotoRepository photoRepository;
@@ -53,8 +55,29 @@ public class PhotoService {
         }
     }
 
+    public Photo savePhoto(MultipartFile file, PhotoType type) {
+        if (file == null || file.isEmpty()) {
+            return null;
+        }
+        UploadPhoto uploadPhoto = null;
+        try {
+            uploadPhoto = uploadPhoto(file);
+        } catch (RuntimeException e) {
+            throw new PhotoSaveException("사진을 저장하던 중 오류가 발생했습니다");
+        }
+        Photo photo = new Photo(
+                uploadPhoto.originalFileName(),
+                uploadPhoto.saveFileName(),
+                uploadPhoto.s3path(),
+                type,
+                null,
+                null
+        );
+        return photoRepository.save(photo);
+    }
+
     /**
-     * 커뮤니티글에 사용되는 사진을 저장하는 함수
+     * 커뮤니티글에 사용되는 사진을 저장하는 함수, DEPRECATED
      * @param files 저장될 사진
      * @param communityPost
      */
@@ -99,7 +122,7 @@ public class PhotoService {
     }
 
     /**
-     * 투표에 사용되는 사진을 저장하는 함수
+     * 투표에 사용되는 사진을 저장하는 함수, DEPRECATED
      * @param file
      * @return
      * @throws IOException
@@ -137,7 +160,7 @@ public class PhotoService {
     }
 
     /**
-     * 해당 커뮤니티 글의 사진들의 URL을 반환하는 함수, 오버로딩되었음
+     * 해당 커뮤니티 글의 사진들의 URL을 반환하는 함수, 오버로딩되었음, DEPRECATED
      * @param communityPost
      * @return 사진의 URL 리스트
      */
@@ -203,7 +226,7 @@ public class PhotoService {
      * @param file -> 업로드될 사진
      * @return 해당 파일의 S3 URL, 파일 이름, s3에 저장될 파일 이름이 담긴 UploadPhoto 반환
      */
-    private UploadPhoto uploadPhoto(MultipartFile file) throws IOException {
+    private UploadPhoto uploadPhoto(MultipartFile file) {
 
         String originalFilename = file.getOriginalFilename();
         String uploadPhotoName = createUploadPhotoName(originalFilename);
@@ -212,9 +235,13 @@ public class PhotoService {
         metadata.setContentLength(file.getSize());
         metadata.setContentType(file.getContentType());
 
-        amazonS3.putObject(bucket, uploadPhotoName, file.getInputStream(), metadata);
+        try {
+            amazonS3.putObject(bucket, uploadPhotoName, file.getInputStream(), metadata);
+        } catch (IOException e) {
+            log.error("uploadPhoto error = ",e);
+            throw new RuntimeException(e);
+        }
         String fileURL = amazonS3.getUrl(bucket, uploadPhotoName).toString();
-
 
         UploadPhoto uploadPhoto = new UploadPhoto(
                 originalFilename,
@@ -277,7 +304,7 @@ public class PhotoService {
                     null
             );
             photoRepository.save(photo);
-        } catch (IOException e) {
+        } catch (RuntimeException e) {
             throw new RuntimeException();
         }
         return photo;
