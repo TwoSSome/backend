@@ -5,6 +5,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import towssome.server.advice.PhotoAdvice;
 import towssome.server.advice.ServiceAdvice;
 import towssome.server.entity.*;
 import towssome.server.exception.DuplicateIdException;
@@ -22,7 +23,7 @@ public class JoinService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final CategoryRepository categoryRepository;
-    private final PhotoService photoService;
+    private final PhotoAdvice photoAdvice;
     private final MailSendService mailSendService;
     private final EmailVerificationRepository emailVerificationRepository;
     private final ServiceAdvice serviceAdvice;
@@ -58,7 +59,7 @@ public class JoinService {
         Photo profilePhoto = null;
 
         try {
-            profilePhoto = photoService.saveProfilePhoto(multipartFile);
+            profilePhoto = photoAdvice.saveProfilePhoto(multipartFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

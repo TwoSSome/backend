@@ -4,6 +4,7 @@ import java.util.List;
 
 public record CalendarExistInMonth(
         List<Integer> reviewExistDay,
-        List<Integer> commentExistDay
+        List<Integer> commentExistDay,
+        List<Integer> dateCourseExistDay
 ) {
 }

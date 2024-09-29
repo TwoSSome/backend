@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.advice.MemberAdvice;
+import towssome.server.advice.PhotoAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.CommunityPost;
 import towssome.server.entity.Member;
@@ -27,7 +28,7 @@ public class CommunityController {
 
     private final CommunityService communityService;
     private final ReviewPostService reviewPostService;
-    private final PhotoService photoService;
+    private final PhotoAdvice photoAdvice;
     private final VoteService voteService;
     private final MemberAdvice memberAdvice;
     private static final int DEFAULT_SIZE = 10;
@@ -92,7 +93,7 @@ public class CommunityController {
         );
         CommunityPost post = communityService.findPost(createdPost);
         //커뮤니티글의 사진 저장
-        photoService.saveCommunityPhoto(bodyPhoto,post);
+        photoAdvice.saveCommunityPhoto(bodyPhoto,post);
 
         //커뮤니티글의 투표 저장, 투표 내의 속성의 사진들도 저장
         if (req.voteSaveReq() != null) { // 투표가 없는 커뮤니티글이 있을수도 있으니까 null 체크
@@ -100,7 +101,7 @@ public class CommunityController {
             List<VoteAttributeReq> voteAttributeReqs = req.voteSaveReq().voteAttributeReqs();
             for(int i = 0; i< voteAttributeReqs.size(); i++){
                 Photo photo;
-                if(votePhoto.get(i) != null) photo = photoService.saveVotePhoto(votePhoto.get(i));
+                if(votePhoto.get(i) != null) photo = photoAdvice.saveVotePhoto(votePhoto.get(i));
                 else photo = null;
                 voteAttributeDTOS.add(new VoteAttributeDTO(
                         voteAttributeReqs.get(i).title(),
@@ -130,10 +131,10 @@ public class CommunityController {
             @RequestPart List<MultipartFile> newFiles) throws IOException {
         List<Long> deletedPhotoIds = req.deletedPhotoId();
         for (Long deletedPhotoId : deletedPhotoIds) {
-            photoService.deletePhoto(deletedPhotoId);
+            photoAdvice.deletePhoto(deletedPhotoId);
         }
         CommunityPost post = communityService.findPost(id);
-        photoService.saveCommunityPhoto(newFiles, post);
+        photoAdvice.saveCommunityPhoto(newFiles, post);
 
         ReviewPost quotation = null;
         if (req.reviewPostId() != null) {
@@ -180,7 +181,7 @@ public class CommunityController {
             quotationId = quotation.getId();
         }
 
-        List<PhotoInPost> photoS3Paths = photoService.getPhotoS3Path(post);
+        List<PhotoInPost> photoS3Paths = photoAdvice.getPhotoS3Path(post);
         return new CommunityPostRes(
                 post.getTitle(),
                 post.getBody(),

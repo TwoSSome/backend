@@ -4,6 +4,7 @@ import com.querydsl.core.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import towssome.server.advice.PhotoAdvice;
 import towssome.server.dto.CursorResult;
 import towssome.server.dto.HashtagRes;
 import towssome.server.dto.PhotoInPost;
@@ -25,7 +26,7 @@ public class ViewlikeService {
 
     private final BookMarkRepository bookMarkRepository;
     private final ViewLikeRepository viewLikeRepository;
-    private final PhotoService photoService;
+    private final PhotoAdvice photoAdvice;
     private final HashtagClassificationService hashtagClassificationService;
     private final ViewLikeRepositoryCustom viewLikeRepositoryCustom;
 
@@ -130,7 +131,7 @@ public class ViewlikeService {
     private CursorResult<ReviewSimpleRes> getReviewSimpleResCursorResult(Member member, CursorResult<ReviewPost> result) {
         List<ReviewSimpleRes> reviewPostRes = new ArrayList<>();
         for(ReviewPost review : result.values()) {
-            List<PhotoInPost> bodyPhotos = photoService.getPhotoS3Path(review);
+            List<PhotoInPost> bodyPhotos = photoAdvice.getPhotoS3Path(review);
             String bodyPhoto = bodyPhotos.isEmpty() ? null : bodyPhotos.get(0).photoPath();
 
             String profilePhoto = member.getProfilePhoto() != null ?

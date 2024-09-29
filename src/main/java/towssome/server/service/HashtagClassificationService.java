@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import towssome.server.advice.PhotoAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.ReviewPost;
 import towssome.server.repository.hashtag_classification.HashtagClassificationRepository;
@@ -20,7 +21,7 @@ import java.util.List;
 public class HashtagClassificationService{
 
     private final HashtagClassificationRepository hashtagClassificationRepository;
-    private final PhotoService photoService;
+    private final PhotoAdvice photoAdvice;
     private final ViewLikeRepositoryCustom viewLikeRepositoryCustom;
 
     public CursorResult<ReviewSimpleRes> getReviewPageByHashtag(String keyword, Long cursorId, String sort, Pageable page) {
@@ -33,7 +34,7 @@ public class HashtagClassificationService{
                                                                          Page<ReviewPost> reviewPosts) {
         Long cursorId;
         for(ReviewPost review : reviewPosts) {
-            List<PhotoInPost> bodyPhotos = photoService.getPhotoS3Path(review);
+            List<PhotoInPost> bodyPhotos = photoAdvice.getPhotoS3Path(review);
             String bodyPhoto = bodyPhotos.isEmpty() ? null : bodyPhotos.get(0).photoPath();
             String profilePhoto = review.getMember().getProfilePhoto() != null ?
                     review.getMember().getProfilePhoto().getS3Path() :

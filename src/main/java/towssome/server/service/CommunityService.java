@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import towssome.server.advice.PhotoAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.CommunityPost;
 import towssome.server.entity.Photo;
@@ -24,7 +25,7 @@ import java.util.List;
 public class CommunityService {
 
     private final CommunityPostRepository communityPostRepository;
-    private final PhotoService photoService;
+    private final PhotoAdvice photoAdvice;
     private final VoteService voteService;
 
     public Long create(CommunityPostSaveDTO dto) {
@@ -65,9 +66,9 @@ public class CommunityService {
                     deletePhotoList.add(voteAttribute.getPhoto());
             }
         }
-        photoService.deletePhotos(post);
+        photoAdvice.deletePhotos(post);
         communityPostRepository.delete(post);
-        photoService.deletePhotos(deletePhotoList);
+        photoAdvice.deletePhotos(deletePhotoList);
     }
 
 

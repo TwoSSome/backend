@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import towssome.server.advice.PhotoAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
@@ -29,7 +30,7 @@ public class ReviewPostService {
 
     private final ReviewPostRepository reviewPostRepository;
     private final ViewlikeService viewlikeService;
-    private final PhotoService photoService;
+    private final PhotoAdvice photoAdvice;
     private final HashtagService hashtagService;
     private final HashtagClassificationService hashtagClassificationService;
     private final SubscribeRepository subscribeRepository;
@@ -57,7 +58,7 @@ public class ReviewPostService {
         reviewPostRepository.save(reviewPost);
         hashtagService.saveCategoryInHashtag(reviewPost, reviewReq.category());
         hashtagService.createHashtag(reviewPost);
-        photoService.saveReviewPhoto(photos, reviewPost);
+        photoAdvice.saveReviewPhoto(photos, reviewPost);
         return reviewPost;
     }
 
@@ -68,7 +69,7 @@ public class ReviewPostService {
 
     public ReviewPostRes getReview(Long reviewId, Member member){
         ReviewPost review = getReview(reviewId);
-        List<PhotoInPost> photo = photoService.getPhotoS3Path(review);
+        List<PhotoInPost> photo = photoAdvice.getPhotoS3Path(review);
         ReviewPostRes reviewRes;
 
         List<HashtagRes> hashtags = new ArrayList<>();
@@ -130,7 +131,7 @@ public class ReviewPostService {
 
     @Transactional
     public void deleteReview(ReviewPost review) {
-        photoService.deletePhotos(review);
+        photoAdvice.deletePhotos(review);
         hashtagService.deleteHashtagByReviewPost(review);
         viewlikeService.deleteCascadeForReview(review);
         reviewPostRepository.delete(review);
@@ -141,11 +142,11 @@ public class ReviewPostService {
         if(!req.willDeletePhoto().isEmpty()) {
             List<Long> deletedPhotoIds = req.willDeletePhoto();
             for (Long deletedPhotoId : deletedPhotoIds)
-                photoService.deletePhoto(deletedPhotoId);
+                photoAdvice.deletePhoto(deletedPhotoId);
         }
 
         ReviewPost reviewPost = getReview(reviewId);
-        photoService.saveReviewPhoto(addPhotos, reviewPost);
+        photoAdvice.saveReviewPhoto(addPhotos, reviewPost);
         ReviewPostUpdateDto dto = new ReviewPostUpdateDto(
                 reviewId,
                 req.body(),
@@ -172,7 +173,7 @@ public class ReviewPostService {
     private CursorResult<ReviewSimpleRes> getReviewSimpleResCursorResult(List<ReviewSimpleRes> reviewSimpleRes, Page<ReviewPost> reviewPosts) {
         Long cursorId;
         for(ReviewPost review : reviewPosts) {
-            List<PhotoInPost> bodyPhotos = photoService.getPhotoS3Path(review);
+            List<PhotoInPost> bodyPhotos = photoAdvice.getPhotoS3Path(review);
             String bodyPhoto = bodyPhotos.isEmpty() ? null : bodyPhotos.get(0).photoPath();
             String profilePhoto = review.getMember().getProfilePhoto() != null ?
                     review.getMember().getProfilePhoto().getS3Path() :
@@ -244,7 +245,7 @@ public class ReviewPostService {
                     value.getMember().getProfilePhoto().getS3Path() :
                     null;
 
-            List<PhotoInPost> photoS3Path = photoService.getPhotoS3Path(value);
+            List<PhotoInPost> photoS3Path = photoAdvice.getPhotoS3Path(value);
             String bodyPhoto = photoS3Path.isEmpty() ? null : photoS3Path.get(0).photoPath();
 
             List<HashtagRes> hashtags = new ArrayList<>();
