@@ -1,8 +1,12 @@
 package towssome.server.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
+@NoArgsConstructor
 public class Cluster extends BaseEntity{
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,8 +20,8 @@ public class Cluster extends BaseEntity{
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "hashtag_id")
-    private HashTag hashtag;
-
+    public Cluster(Long clusterNum, Member member) {
+        this.clusterNum = clusterNum;
+        this.member = member;
+    }
 }
