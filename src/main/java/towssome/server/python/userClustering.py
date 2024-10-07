@@ -29,7 +29,6 @@ from flask import Flask, jsonify
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 
-app = Flask(__name__)
 
 def fetch_user_tags():
     response = requests.get("http://localhost:8080/allmemberprofiletag")
@@ -154,21 +153,3 @@ def cluster_users(user_vectors):
     return clustered_users
 
 """
-
-@app.route('/userClustering', methods=['GET'])
-def user_clustering():
-    user_tags = fetch_user_tags()
-    if user_tags:
-        user_vectors = vectorize_tags(user_tags)
-        clustered_users = cluster_users(user_vectors)
-
-        # numpy.int64 키를 기본 int로 변환
-        clustered_users = {int(k): v for k, v in clustered_users.items()}
-
-        return jsonify(clustered_users)
-    else:
-        return jsonify({"error": "사용자 태그를 가져오는 데 실패했습니다."}), 500
-
-
-if __name__ == "__main__":
-    app.run(port=5000)
