@@ -1,5 +1,6 @@
 import subprocess
 import sys
+from userClustering import fetch_user_tags, vectorize_tags, cluster_users
 
 try:
     # 없는 모듈 import시 에러 발생
@@ -223,5 +224,20 @@ items = [
     "스파", "힐링", "마사지", "명상",
     "커스텀", "핸드메이드"
 ]
+
+@app.route('/userClustering', methods=['GET'])
+def user_clustering():
+    user_tags = fetch_user_tags()
+    if user_tags:
+        user_vectors = vectorize_tags(user_tags)
+        clustered_users = cluster_users(user_vectors)
+
+        # numpy.int64 키를 기본 int로 변환
+        clustered_users = {int(k): v for k, v in clustered_users.items()}
+
+        return jsonify(clustered_users)
+    else:
+        return jsonify({"error": "사용자 태그를 가져오는 데 실패했습니다."}), 500
+
 if __name__ == "__main__":
     app.run(debug=True, port=5000, host="0.0.0.0")
