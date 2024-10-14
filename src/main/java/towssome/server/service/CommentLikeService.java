@@ -24,13 +24,15 @@ public class CommentLikeService {
         return commentLikeRepository.countByCommentId(comment.getId());
     }
 
-    public void likeProcess(Member member, Comment comment){
+    public Boolean likeProcess(Member member, Comment comment){
         CommentLike commentLike = commentLikeRepository.findByMemberIdAndCommentId(member.getId(), comment.getId());
         if(commentLike == null){
             commentLikeRepository.save(new CommentLike(member,comment));
+            return true;
         }
         else {
             commentLikeRepository.delete(commentLike);
+            return false;
         }
     }
 }
