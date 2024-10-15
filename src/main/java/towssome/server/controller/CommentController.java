@@ -88,11 +88,13 @@ public class CommentController {
             @Parameter(name = "commentId", description = "좋아요/취소할 댓글의 id")
     })
     @PostMapping("/{reviewId}/commentLike/{commentId}")
-    public ResponseEntity<?> changeLike(@PathVariable Long reviewId, @PathVariable Long commentId){
+    public ResponseEntity<ChangeLikeRes> changeLike(@PathVariable Long reviewId, @PathVariable Long commentId){
         Member user = memberAdvice.findJwtMember();
         Comment comment = commentService.getComment(commentId);
-        commentLikeService.likeProcess(user, comment);
-        return new ResponseEntity<>(HttpStatus.OK);
+        Boolean likeStatus = commentLikeService.likeProcess(user, comment);
+        ChangeLikeRes changeLikeRes;
+        changeLikeRes = new ChangeLikeRes(likeStatus);
+        return new ResponseEntity<>(changeLikeRes,HttpStatus.OK);
     }
 
     @Operation(summary = "고정 댓글 조회 API", description = "선택한 리뷰글의 고정 댓글을 조회", parameters = {
