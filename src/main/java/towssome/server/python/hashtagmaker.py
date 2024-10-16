@@ -45,6 +45,7 @@ except:
 import torch
 from torch import nn
 import re
+import os
 
 app = Flask(__name__)
 
@@ -143,7 +144,9 @@ def main():
     hashtags = hashtag_extractor(keywords)
     return jsonify({"hashtags": hashtags})
 
-model = torch.load('model.pt', map_location=torch.device('cpu'))
+current_dir = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(current_dir, 'model.pt')
+model = torch.load(model_path, map_location=torch.device('cpu'))
 model.eval()
 tokenizer = KoBERTTokenizer.from_pretrained('skt/kobert-base-v1')
 bert_model = BertModel.from_pretrained('skt/kobert-base-v1')
