@@ -102,6 +102,11 @@ public class ReissueController {
 
         Date date = new Date(System.currentTimeMillis() + expiredMs);
 
+        if (refreshTokenRepository.existsByUsername(username)) {
+            RefreshToken byUsername = refreshTokenRepository.findByUsername(username);
+            refreshTokenRepository.delete(byUsername);
+        }
+
         RefreshToken refreshEntity = new RefreshToken(username,refresh,date.toString());
 
         refreshTokenRepository.save(refreshEntity);
