@@ -1,5 +1,7 @@
 import subprocess
 import sys
+import json
+import urllib.request
 
 from userClustering import fetch_user_tags, vectorize_tags, cluster_users
 
@@ -218,6 +220,31 @@ stop_words = [
     "맞이", "완전", "그녀", "그", "고급", "모습", "감사", "하루", "배송", "제조일자", "추천", "포장", "신경", "후회", "소비", "그날", "기쁨", "이야기", "기억", "처음",
     "눈물", "행복", "기분", "모양", "리본", "하나하나", "순간", "선물", "사랑"
 ]
+
+
+@app.route('/itemurls', methods=['POST'])
+def item_urls():
+    client_id = "ovm97v0c2KPfFCAFfbQH"
+    client_secret = "TFcAihT6V_"
+    encText = urllib.parse.quote("반지")
+    url = "https://openapi.naver.com/v1/search/shop.json?query=" + encText # JSON 결과
+    request = urllib.request.Request(url)
+    request.add_header("X-Naver-Client-Id",client_id)
+    request.add_header("X-Naver-Client-Secret",client_secret)
+    response = urllib.request.urlopen(request)
+    rescode = response.getcode()
+    if rescode == 200:
+        response_body = response.read()
+        data = response_body.decode('utf-8')
+
+        # Parse the JSON response
+        json_data = json.loads(data)
+
+        # Collect all links from the items
+        links = [item['link'] for item in json_data.get('items', [])]
+        return jsonify(links)
+    else:
+        return jsonify({"error": "상품 URL을 가져오는 데 실패했습니다."}), 500
 
 @app.route('/userClustering', methods=['GET'])
 def user_clustering():
