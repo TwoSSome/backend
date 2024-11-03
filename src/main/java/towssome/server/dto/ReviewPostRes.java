@@ -21,6 +21,8 @@ public record ReviewPostRes(
         int startPoint,
         String whereBuy,
         String nickname,
-        Long likeAmount
+        Long likeAmount,
+        String item,
+        String item_url
 ) {
 }

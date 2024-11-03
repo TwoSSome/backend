@@ -4,10 +4,16 @@ import com.querydsl.core.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.advice.PhotoAdvice;
 import towssome.server.dto.*;
@@ -20,8 +26,11 @@ import towssome.server.repository.reviewpost.ReviewPostRepository;
 import towssome.server.repository.subscribe.SubscribeRepository;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -53,7 +62,9 @@ public class ReviewPostService {
                 reviewReq.whereBuy(),
                 0,
                 reviewReq.category(),
-                member
+                member,
+                reviewReq.item(),
+                createLinkString(reviewReq.item())
         );
         reviewPostRepository.save(reviewPost);
         hashtagService.saveCategoryInHashtag(reviewPost, reviewReq.category());
@@ -100,7 +111,9 @@ public class ReviewPostService {
                     review.getStarPoint(),
                     review.getWhereBuy(),
                     postMember.getNickName(),
-                    viewlikeService.getLikeAmountInReviewPost(reviewId)
+                    viewlikeService.getLikeAmountInReviewPost(reviewId),
+                    review.getItem(),
+                    getRandomLink(review.getItem_url())
             );
         }else {
             //회원 조회
@@ -123,7 +136,9 @@ public class ReviewPostService {
                     review.getStarPoint(),
                     review.getWhereBuy(),
                     member.getNickName(),
-                    viewlikeService.getLikeAmountInReviewPost(reviewId)
+                    viewlikeService.getLikeAmountInReviewPost(reviewId),
+                    review.getItem(),
+                    getRandomLink(review.getItem_url())
             );
         }
         return reviewRes;
@@ -278,5 +293,51 @@ public class ReviewPostService {
         return cursorId == null ?
                 reviewPostRepository.findMyPostFirstPageByMemberId(memberId, sort, page) :
                 reviewPostRepository.findByMemberIdLessThanOrderByIdDesc(memberId, cursorId, sort, page);
+    }
+
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    private String createLinkString(String inputText) {
+        // Flask 서버 URL
+        String url = "http://localhost:5000/itemurls";
+
+        // HTTP 헤더 설정
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
+
+        // HTTP 엔티티 생성
+        HttpEntity<String> entity = new HttpEntity<>(inputText, headers);
+
+        // Flask 서버로 POST 요청 보내기
+        ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+
+        // Flask 서버 응답 처리
+        String responseBody = response.getBody();
+        System.out.println("Response from Flask: " + responseBody);
+
+        // JSON 응답 파싱
+        JSONArray jsonArray = new JSONArray(responseBody);
+
+        // JSON 배열을 "링크1, 링크2, 링크3..." 형식으로 변환
+        StringBuilder formattedLinks = new StringBuilder();
+        for (int i = 0; i < jsonArray.length(); i++) {
+            formattedLinks.append(jsonArray.getString(i));
+            if (i < jsonArray.length() - 1) {
+                formattedLinks.append(", ");
+            }
+        }
+
+        // 포맷된 문자열 반환
+        return formattedLinks.toString();
+    }
+
+    private String getRandomLink(String url) {
+        // 문자열을 쉼표로 구분하여 리스트로 변환
+        List<String> linkList = Arrays.asList(url.split(",\\s*"));
+
+        // 무작위로 리스트에서 하나의 링크 선택
+        Random random = new Random();
+        int randomIndex = random.nextInt(linkList.size());
+        return linkList.get(randomIndex);
     }
 }

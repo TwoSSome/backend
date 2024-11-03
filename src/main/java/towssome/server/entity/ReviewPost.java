@@ -30,6 +30,10 @@ public class ReviewPost extends BaseEntity{
 
     private String category;
 
+    private String item;
+
+    private String item_url;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
@@ -43,7 +47,8 @@ public class ReviewPost extends BaseEntity{
     @OneToMany(mappedBy = "reviewPost", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
-    public ReviewPost(String body, int price, ReviewType reviewType, String whereBuy, int starPoint, String category, Member member) {
+
+    public ReviewPost(String body, int price, ReviewType reviewType, String whereBuy, int starPoint, String category, Member member, String item) {
         this.body = body;
         this.price = price;
         this.reviewType = reviewType;
@@ -51,6 +56,19 @@ public class ReviewPost extends BaseEntity{
         this.starPoint = starPoint;
         this.category = category;
         this.member = member;
+        this.item = item;
+    }
+
+    public ReviewPost(String body, int price, ReviewType reviewType, String whereBuy, int starPoint, String category, Member member, String item, String item_url) {
+        this.body = body;
+        this.price = price;
+        this.reviewType = reviewType;
+        this.whereBuy = whereBuy;
+        this.starPoint = starPoint;
+        this.category = category;
+        this.member = member;
+        this.item = item;
+        this.item_url = item_url;
     }
 
     public ReviewPost(String body, int price, Member member){
