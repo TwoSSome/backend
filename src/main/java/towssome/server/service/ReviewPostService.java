@@ -43,6 +43,8 @@ public class ReviewPostService {
     private final HashtagService hashtagService;
     private final HashtagClassificationService hashtagClassificationService;
     private final SubscribeRepository subscribeRepository;
+    private final RestTemplate restTemplate = new RestTemplate();
+
 
     public ReviewPost createReview(
             ReviewPostReq reviewReq,
@@ -55,6 +57,14 @@ public class ReviewPostService {
             default -> throw new NotMatchReviewTypeException("정해진 타입이 아닙니다");
         };
 
+        String itemUrl;
+        if (reviewReq.item_url() == null) {
+            itemUrl = createLinkString(reviewReq.item());
+        }
+        else {
+            itemUrl = reviewReq.item_url();
+        }
+
         ReviewPost reviewPost = new ReviewPost(
                 reviewReq.body(),
                 reviewReq.price(),
@@ -64,7 +74,7 @@ public class ReviewPostService {
                 reviewReq.category(),
                 member,
                 reviewReq.item(),
-                createLinkString(reviewReq.item())
+                itemUrl
         );
         reviewPostRepository.save(reviewPost);
         hashtagService.saveCategoryInHashtag(reviewPost, reviewReq.category());
@@ -159,8 +169,19 @@ public class ReviewPostService {
             for (Long deletedPhotoId : deletedPhotoIds)
                 photoAdvice.deletePhoto(deletedPhotoId);
         }
-
         ReviewPost reviewPost = getReview(reviewId);
+
+        String itemUrl;
+        if (reviewPost.getItem() == null || reviewPost.getItem_url() == null || !reviewPost.getItem().equals(req.item()) ) {
+            itemUrl = createLinkString(req.item());
+        }
+        else if(req.item_url() != null) {
+            itemUrl = req.item_url();
+        }
+        else {
+            itemUrl = reviewPost.getItem_url();
+        }
+
         photoAdvice.saveReviewPhoto(addPhotos, reviewPost);
         ReviewPostUpdateDto dto = new ReviewPostUpdateDto(
                 reviewId,
@@ -168,7 +189,9 @@ public class ReviewPostService {
                 req.price(),
                 req.whereBuy(),
                 req.category(),
-                req.reviewType()
+                req.reviewType(),
+                req.item(),
+                itemUrl
         );
         reviewPostRepository.updateReview(dto);
     }
@@ -295,30 +318,23 @@ public class ReviewPostService {
                 reviewPostRepository.findByMemberIdLessThanOrderByIdDesc(memberId, cursorId, sort, page);
     }
 
-    private final RestTemplate restTemplate = new RestTemplate();
 
-    private String createLinkString(String inputText) {
-        // Flask 서버 URL
+    private String createLinkString(String item) {
+        if(item == null) return null;
         String url = "http://localhost:5000/itemurls";
 
-        // HTTP 헤더 설정
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
 
-        // HTTP 엔티티 생성
-        HttpEntity<String> entity = new HttpEntity<>(inputText, headers);
+        HttpEntity<String> entity = new HttpEntity<>(item, headers);
 
-        // Flask 서버로 POST 요청 보내기
         ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
 
-        // Flask 서버 응답 처리
         String responseBody = response.getBody();
         System.out.println("Response from Flask: " + responseBody);
 
-        // JSON 응답 파싱
         JSONArray jsonArray = new JSONArray(responseBody);
 
-        // JSON 배열을 "링크1, 링크2, 링크3..." 형식으로 변환
         StringBuilder formattedLinks = new StringBuilder();
         for (int i = 0; i < jsonArray.length(); i++) {
             formattedLinks.append(jsonArray.getString(i));
@@ -327,11 +343,12 @@ public class ReviewPostService {
             }
         }
 
-        // 포맷된 문자열 반환
         return formattedLinks.toString();
     }
 
     private String getRandomLink(String url) {
+        if(url == null) return null;
+
         // 문자열을 쉼표로 구분하여 리스트로 변환
         List<String> linkList = Arrays.asList(url.split(",\\s*"));
 

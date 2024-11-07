@@ -9,6 +9,8 @@ public record ReviewPostUpdateDto(
         int price,
         String whereBuy,
         String category,
-        ReviewType reviewType
+        ReviewType reviewType,
+        String item,
+        String item_url
 ) {
 }
