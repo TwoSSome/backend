@@ -1,6 +1,6 @@
+import json
 import subprocess
 import sys
-import json
 import urllib.request
 
 from userClustering import fetch_user_tags, vectorize_tags, cluster_users
@@ -224,14 +224,15 @@ stop_words = [
 
 @app.route('/itemurls', methods=['POST'])
 def item_urls():
+    item = request.data.decode()  # JSON 데이터를 받습니다.
     client_id = "ovm97v0c2KPfFCAFfbQH"
     client_secret = "TFcAihT6V_"
-    encText = urllib.parse.quote("반지")
+    encText = urllib.parse.quote(item)
     url = "https://openapi.naver.com/v1/search/shop.json?query=" + encText # JSON 결과
-    request = urllib.request.Request(url)
-    request.add_header("X-Naver-Client-Id",client_id)
-    request.add_header("X-Naver-Client-Secret",client_secret)
-    response = urllib.request.urlopen(request)
+    data = urllib.request.Request(url)
+    data.add_header("X-Naver-Client-Id",client_id)
+    data.add_header("X-Naver-Client-Secret",client_secret)
+    response = urllib.request.urlopen(data)
     rescode = response.getcode()
     if rescode == 200:
         response_body = response.read()

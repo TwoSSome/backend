@@ -15,7 +15,9 @@ public record ReviewPostReq(
         @Schema(description = "리뷰 타입, 반드시 GIVEN or RECEIVED 둘 중 하나일 것")
         String reviewType,
         @Schema(description = "품목")
-        String item
+        String item,
+        @Schema(description = "품목 url")
+        String itemUrl
 ) {
 
 }

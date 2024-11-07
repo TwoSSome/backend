@@ -18,6 +18,10 @@ public record ReviewPostUpdateReq(
         @Schema(description = "수정 카테고리")
         String category,
         @Schema(description = "수정 리뷰 타입, GIVEN or RECEIVED")
-        ReviewType reviewType
+        ReviewType reviewType,
+        @Schema(description = "수정 품목")
+        String item,
+        @Schema(description = "수정 품목 url")
+        String item_url
 ) {
 }
