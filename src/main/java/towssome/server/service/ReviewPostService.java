@@ -58,11 +58,11 @@ public class ReviewPostService {
         };
 
         String itemUrl;
-        if (reviewReq.itemUrl() == null) {
+        if (reviewReq.item_url() == null) {
             itemUrl = createLinkString(reviewReq.item());
         }
         else {
-            itemUrl = reviewReq.itemUrl();
+            itemUrl = reviewReq.item_url();
         }
 
         ReviewPost reviewPost = new ReviewPost(

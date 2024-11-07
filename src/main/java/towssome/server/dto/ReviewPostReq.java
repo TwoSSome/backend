@@ -17,7 +17,7 @@ public record ReviewPostReq(
         @Schema(description = "품목")
         String item,
         @Schema(description = "품목 url")
-        String itemUrl
+        String item_url
 ) {
 
 }
