@@ -15,9 +15,9 @@ public class CommentLikeService {
     private final CommentLikeRepository commentLikeRepository;
 
     public Boolean isLikedComment(Member member, Comment comment){
+        if(member == null) return false;
         CommentLike commentLike = commentLikeRepository.findByMemberIdAndCommentId(member.getId(), comment.getId());
-        if(commentLike == null) return false;
-        else return true;
+        return commentLike != null;
     }
 
     public Long countLike(Comment comment){
