@@ -9,6 +9,7 @@ import towssome.server.advice.MailSendAdvice;
 import towssome.server.advice.PhotoAdvice;
 import towssome.server.advice.ServiceAdvice;
 import towssome.server.entity.*;
+import towssome.server.enumrated.EmailType;
 import towssome.server.exception.DuplicateIdException;
 import towssome.server.jwt.JoinDTO;
 import towssome.server.repository.*;
@@ -40,8 +41,8 @@ public class JoinService {
         return mailSendAdvice.joinEmail(email);
     }
 
-    public boolean verificationEmail(String email,int authNum) {
-       return mailSendAdvice.CheckAuthNum(email, authNum);
+    public boolean verificationJoinEmail(String email, int authNum) {
+       return mailSendAdvice.CheckAuthNum(email, authNum, EmailType.JOIN);
     }
 
     public Member joinProcess(JoinDTO joinDTO, MultipartFile multipartFile)  {

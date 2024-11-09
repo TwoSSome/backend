@@ -1,5 +1,6 @@
 package towssome.server.service;
 
+import jakarta.servlet.MultipartConfigElement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +10,7 @@ import towssome.server.advice.PhotoAdvice;
 import towssome.server.advice.ServiceAdvice;
 import towssome.server.dto.RankerRes;
 import towssome.server.entity.*;
+import towssome.server.enumrated.EmailType;
 import towssome.server.exception.NotFoundMemberException;
 import towssome.server.repository.*;
 import towssome.server.repository.member.MemberRepository;
@@ -26,6 +28,7 @@ public class MemberService {
     private final ProfileTagRepository profileTagRepository;
     private final ServiceAdvice serviceAdvice;
     private final MailSendAdvice mailSendAdvice;
+    private final MultipartConfigElement multipartConfigElement;
 
     public Member getMember(Long memberId) {
         return memberRepository.findById(memberId).orElseThrow(() ->
@@ -141,6 +144,20 @@ public class MemberService {
                 () -> new NotFoundMemberException("해당 이메일을 가진 멤버가 없습니다.")
         );
         mailSendAdvice.sendFindUsername(email,member.getUsername());
+    }
+
+    public void reconfigPassword(String email, String username) {
+        Member member = memberRepository.findByEmail(email).orElseThrow(
+                () -> new NotFoundMemberException("해당 이메일을 가진 멤버가 없습니다.")
+        );
+        if (member.getUsername().equals(username)) {
+            mailSendAdvice.sendReconfigPassword(email);
+        }else
+            throw new NotFoundMemberException("이메일과 아이디가 일치하지 않습니다");
+    }
+
+    public boolean checkReconfigPasswordAuthNum(int authNum, String email) {
+        return mailSendAdvice.CheckAuthNum(email, authNum, EmailType.RECONFIG_PASSWORD);
     }
 
     // -----deprecated-----
