@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import towssome.server.entity.EmailVerification;
 import towssome.server.enumrated.EmailType;
 import towssome.server.exception.EmailSendException;
@@ -38,6 +39,7 @@ public class MailSendAdvice {
         return Integer.parseInt(randomNumber);
     }
 
+    @Transactional
     public int joinEmail(String email) {
         int authNum = makeRandomNumber();
         String setFrom = "goochul175465@gmail.com"; // email-config에 설정한 자신의 이메일 주소를 입력
@@ -67,6 +69,7 @@ public class MailSendAdvice {
         mailSend(setFrom, toMail, title, content);
     }
 
+    @Transactional
     public int sendReconfigPassword(String email) {
         int authNum = makeRandomNumber();
         String setFrom = "goochul175465@gmail.com"; // email-config에 설정한 자신의 이메일 주소를 입력
