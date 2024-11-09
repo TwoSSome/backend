@@ -50,11 +50,7 @@ public class MailSendAdvice {
                         "<br>" +
                         "인증번호를 제대로 입력해주세요"; //이메일 내용 삽입
         mailSend(setFrom, toMail, title, content);
-        emailVerificationRepository.save(new EmailVerification(
-                email,
-                authNum,
-                EmailType.JOIN
-        ));
+        saveAuthNum(email,authNum,EmailType.JOIN);
         return authNum;
     }
 
@@ -83,12 +79,17 @@ public class MailSendAdvice {
                         "<br>" +
                         "인증번호를 제대로 입력해주세요"; //이메일 내용 삽입
         mailSend(setFrom, toMail, title, content);
+        saveAuthNum(email,authNum,EmailType.RECONFIG_PASSWORD);
+        return authNum;
+    }
+
+    private void saveAuthNum(String email, int authNum, EmailType emailType) {
+        emailVerificationRepository.deleteAllByEmailAndAndEmailType(email,emailType);
         emailVerificationRepository.save(new EmailVerification(
                 email,
                 authNum,
-                EmailType.RECONFIG_PASSWORD
+                emailType
         ));
-        return authNum;
     }
 
     private void mailSend(String setFrom, String toMail, String title, String content) {
