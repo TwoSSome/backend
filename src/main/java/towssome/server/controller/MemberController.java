@@ -94,8 +94,8 @@ public class MemberController {
 
     @Operation(summary = "비밀번호 재설정 요청 API", description = "이메일이 정상 발송되면 200 코드 반환")
     @PostMapping("/member/reconfig_password/req")
-    public ResponseEntity<?> ReconfigMyPassword(@RequestBody EmailUsernameReq req){
-        memberService.reconfigPassword(req.email(),req.username());
+    public ResponseEntity<?> ReconfigMyPasswordRequest(@RequestBody EmailUsernameReq req){
+        memberService.reconfigPasswordRequest(req.email(),req.username());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -107,7 +107,14 @@ public class MemberController {
         if (checked) {
             return new ResponseEntity<>(HttpStatus.OK);
         }
-        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(new UsernameRes(req.email()),HttpStatus.UNAUTHORIZED);
+    }
+
+    @Operation(summary = "비밀번호 재설정 API", description = "재설정할 회원의 이메일과 재설정할 비밀번호를 같이 보내야 합니다")
+    @PostMapping("/member/reconfig_password/execute")
+    public ResponseEntity<?> ReconfigPassword(@RequestBody PasswordReq req){
+        memberService.reconfigPassword(req.reconfigPassword(), req.email());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Operation(summary = "테스트용 API")

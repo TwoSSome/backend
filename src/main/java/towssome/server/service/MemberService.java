@@ -1,7 +1,7 @@
 package towssome.server.service;
 
-import jakarta.servlet.MultipartConfigElement;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,7 +28,7 @@ public class MemberService {
     private final ProfileTagRepository profileTagRepository;
     private final ServiceAdvice serviceAdvice;
     private final MailSendAdvice mailSendAdvice;
-    private final MultipartConfigElement multipartConfigElement;
+    private final BCryptPasswordEncoder encoder;
 
     public Member getMember(Long memberId) {
         return memberRepository.findById(memberId).orElseThrow(() ->
@@ -146,7 +146,7 @@ public class MemberService {
         mailSendAdvice.sendFindUsername(email,member.getUsername());
     }
 
-    public void reconfigPassword(String email, String username) {
+    public void reconfigPasswordRequest(String email, String username) {
         Member member = memberRepository.findByEmail(email).orElseThrow(
                 () -> new NotFoundMemberException("해당 이메일을 가진 멤버가 없습니다.")
         );
@@ -158,6 +158,11 @@ public class MemberService {
 
     public boolean checkReconfigPasswordAuthNum(int authNum, String email) {
         return mailSendAdvice.CheckAuthNum(email, authNum, EmailType.RECONFIG_PASSWORD);
+    }
+
+    @Transactional
+    public void reconfigPassword(String password, String email) {
+        memberRepository.reconfigPassword(encoder.encode(password),email);
     }
 
     // -----deprecated-----
