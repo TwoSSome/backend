@@ -1,9 +1,9 @@
-package towssome.server.service;
+package towssome.server.advice;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import towssome.server.entity.EmailVerification;
 import towssome.server.exception.EmailSendException;
 import towssome.server.exception.ExpirationEmailException;
@@ -13,9 +13,9 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.util.Random;
 
-@Service
+@Component
 @RequiredArgsConstructor
-public class MailSendService {
+public class MailSendAdvice {
 
     private final JavaMailSender mailSender;
     private final EmailVerificationRepository emailVerificationRepository;
@@ -54,6 +54,19 @@ public class MailSendService {
                 authNum
         ));
         return authNum;
+    }
+
+    public void sendFindUsername(String email, String username) {
+        String setFrom = "goochul175465@gmail.com"; // email-config에 설정한 자신의 이메일 주소를 입력
+        String toMail = email;
+        String title = "[품품] 아이디 찾기 이메일 입니다."; // 이메일 제목
+        String content =
+                "<h1>안녕하세요. 품품을 이용해 주셔서 감사합니다</h1>" + 	//html 형식으로 작성 !
+                        "<hr>" +
+                        "회원님의 아이디는 <strong>" + username + "</strong> 입니다." +
+                        "<br>" +
+                        "감사합니다."; //이메일 내용 삽입
+        mailSend(setFrom, toMail, title, content);
     }
 
     private void mailSend(String setFrom, String toMail, String title, String content) {

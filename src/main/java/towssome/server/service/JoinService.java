@@ -5,6 +5,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import towssome.server.advice.MailSendAdvice;
 import towssome.server.advice.PhotoAdvice;
 import towssome.server.advice.ServiceAdvice;
 import towssome.server.entity.*;
@@ -24,7 +25,7 @@ public class JoinService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final CategoryRepository categoryRepository;
     private final PhotoAdvice photoAdvice;
-    private final MailSendService mailSendService;
+    private final MailSendAdvice mailSendAdvice;
     private final EmailVerificationRepository emailVerificationRepository;
     private final ServiceAdvice serviceAdvice;
 
@@ -36,11 +37,11 @@ public class JoinService {
         if (emailVerificationRepository.existsByEmail(email)) {
             emailVerificationRepository.deleteByEmail(email);
         }
-        return mailSendService.joinEmail(email);
+        return mailSendAdvice.joinEmail(email);
     }
 
     public boolean verificationEmail(String email,int authNum) {
-       return mailSendService.CheckAuthNum(email, authNum);
+       return mailSendAdvice.CheckAuthNum(email, authNum);
     }
 
     public Member joinProcess(JoinDTO joinDTO, MultipartFile multipartFile)  {

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import towssome.server.advice.MailSendAdvice;
 import towssome.server.advice.PhotoAdvice;
 import towssome.server.advice.ServiceAdvice;
 import towssome.server.dto.RankerRes;
@@ -24,6 +25,7 @@ public class MemberService {
     private final PhotoAdvice photoAdvice;
     private final ProfileTagRepository profileTagRepository;
     private final ServiceAdvice serviceAdvice;
+    private final MailSendAdvice mailSendAdvice;
 
     public Member getMember(Long memberId) {
         return memberRepository.findById(memberId).orElseThrow(() ->
@@ -34,57 +36,6 @@ public class MemberService {
         return memberRepository.findByUsername(username).orElseThrow(() ->
                 new NotFoundMemberException("해당 멤버가 없습니다"));
     }
-
-    // -----deprecated-----
-    // 종설 4 백엔드 페이지 7
-//    /**
-//     * 가상 연인 프로필 태그 생성
-//     * @param hashtags
-//     * @param member
-//     */
-//    @Transactional
-//    public void createVirtual(List<String> hashtags, Member member, MultipartFile file, String mateName) {
-//
-//        Photo photo = photoService.saveVirtualPhoto(file);
-//        member.changeVirtualPhoto(photo);
-//        member.changeVirtualMateName(mateName);
-//
-//        for (String hashtag : hashtags) {
-//            if (hashTagRepository.existsByName(hashtag)) {
-//                HashTag hashTag = hashTagRepository.findHashTagByName(hashtag).orElseThrow();
-//                virtualMateHashtagRepository.save(new VirtualMateHashtag(
-//                        member,
-//                        hashTag
-//                ));
-//            }else{
-//                HashTag save = hashTagRepository.save(new HashTag(
-//                        hashtag,
-//                        0L
-//                ));
-//                virtualMateHashtagRepository.save(new VirtualMateHashtag(
-//                        member,
-//                        save
-//                ));
-//            }
-//        }
-//
-//    }
-//
-//    /**
-//     * 가상 연인 프로필 태그 가져오기
-//     * @param member
-//     * @return
-//     */
-//    @Transactional
-//    public List<HashTag> getVirtualTag(Member member) {
-//        List<VirtualMateHashtag> list = virtualMateHashtagRepository.findAllByMember(member);
-//        ArrayList<HashTag> hashTags = new ArrayList<>();
-//        for (VirtualMateHashtag v : list) {
-//            hashTags.add(v.getHashTag());
-//        }
-//        return hashTags;
-//    }
-//
 
     /**
      * 프로필 사진 변경
@@ -185,4 +136,61 @@ public class MemberService {
         return !memberRepository.existsByUsername(username);
     }
 
+    public void findMyUsername(String email) {
+        Member member = memberRepository.findByEmail(email).orElseThrow(
+                () -> new NotFoundMemberException("해당 이메일을 가진 멤버가 없습니다.")
+        );
+        mailSendAdvice.sendFindUsername(email,member.getUsername());
+    }
+
+    // -----deprecated-----
+    // 종설 4 백엔드 페이지 7
+//    /**
+//     * 가상 연인 프로필 태그 생성
+//     * @param hashtags
+//     * @param member
+//     */
+//    @Transactional
+//    public void createVirtual(List<String> hashtags, Member member, MultipartFile file, String mateName) {
+//
+//        Photo photo = photoService.saveVirtualPhoto(file);
+//        member.changeVirtualPhoto(photo);
+//        member.changeVirtualMateName(mateName);
+//
+//        for (String hashtag : hashtags) {
+//            if (hashTagRepository.existsByName(hashtag)) {
+//                HashTag hashTag = hashTagRepository.findHashTagByName(hashtag).orElseThrow();
+//                virtualMateHashtagRepository.save(new VirtualMateHashtag(
+//                        member,
+//                        hashTag
+//                ));
+//            }else{
+//                HashTag save = hashTagRepository.save(new HashTag(
+//                        hashtag,
+//                        0L
+//                ));
+//                virtualMateHashtagRepository.save(new VirtualMateHashtag(
+//                        member,
+//                        save
+//                ));
+//            }
+//        }
+//
+//    }
+//
+//    /**
+//     * 가상 연인 프로필 태그 가져오기
+//     * @param member
+//     * @return
+//     */
+//    @Transactional
+//    public List<HashTag> getVirtualTag(Member member) {
+//        List<VirtualMateHashtag> list = virtualMateHashtagRepository.findAllByMember(member);
+//        ArrayList<HashTag> hashTags = new ArrayList<>();
+//        for (VirtualMateHashtag v : list) {
+//            hashTags.add(v.getHashTag());
+//        }
+//        return hashTags;
+//    }
+//
 }

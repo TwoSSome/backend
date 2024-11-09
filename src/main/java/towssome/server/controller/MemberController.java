@@ -13,10 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.advice.MemberAdvice;
-import towssome.server.dto.CreateRes;
-import towssome.server.dto.EmailCheckReq;
-import towssome.server.dto.ErrorResult;
-import towssome.server.dto.IdDupCheckReq;
+import towssome.server.dto.*;
 import towssome.server.entity.Member;
 import towssome.server.exception.DuplicateIdException;
 import towssome.server.jwt.JoinDTO;
@@ -86,6 +83,13 @@ public class MemberController {
             throw new DuplicateIdException("이미 가입된 아이디입니다");
         }
 
+    }
+
+    @Operation(summary = "아이디 찾기 API", description = "이메일이 정상 발송되면 200 코드 반환, 아닐 경우 EmailSendException 반환")
+    @PostMapping("/member/findId")
+    public ResponseEntity<?> findMyUsername(@RequestBody EmailReq req){
+        memberService.findMyUsername(req.email());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Operation(summary = "테스트용 API")
