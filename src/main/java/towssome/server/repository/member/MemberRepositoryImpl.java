@@ -22,4 +22,12 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
                 .fetch();
 
     }
+
+    @Override
+    public void reconfigPassword(String password, String email) {
+        queryFactory.update(member)
+                .set(member.password, password)
+                .where(member.email.eq(email))
+                .execute();
+    }
 }

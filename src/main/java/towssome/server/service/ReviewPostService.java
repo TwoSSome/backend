@@ -123,7 +123,7 @@ public class ReviewPostService {
                     postMember.getNickName(),
                     viewlikeService.getLikeAmountInReviewPost(reviewId),
                     review.getItem(),
-                    getRandomLink(review.getItem_url())
+                    getRandomLink(review.getItem_url()) == null ? null : getRandomLink(review.getItem_url())
             );
         }else {
             //회원 조회

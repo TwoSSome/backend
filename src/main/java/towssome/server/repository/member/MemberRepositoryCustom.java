@@ -8,5 +8,6 @@ public interface MemberRepositoryCustom {
 
     List<Member> findRanker(int size);
 
+    void reconfigPassword(String password, String email);
 
 }
