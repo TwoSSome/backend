@@ -174,8 +174,6 @@ public class ReviewPostRepositoryImpl implements ReviewPostRepositoryCustom {
 
         Map<ReviewPost, Double> interactionScores = new HashMap<>();
         Map<ReviewPost, Double> trendScores = new HashMap<>();
-        Map<ReviewPost, Double> likeScores = new HashMap<>();
-        Map<ReviewPost, Double> viewScores = new HashMap<>();
         Map<ReviewPost, Double> keywordScores = new HashMap<>();
 
         List<Member> allMembers = queryFactory.select(member)
@@ -199,8 +197,6 @@ public class ReviewPostRepositoryImpl implements ReviewPostRepositoryCustom {
 
                 interactionScores.putIfAbsent(reviewPost, similarity);
                 trendScores.putIfAbsent(reviewPost, calculateTrendWeight(reviewPost));
-                likeScores.putIfAbsent(reviewPost, getLikeWeight(viewLike));
-                viewScores.putIfAbsent(reviewPost, getViewWeight(viewLike));
                 keywordScores.putIfAbsent(reviewPost, calculateKeywordBoost(jwtMember, reviewPost));
             }
         }
@@ -208,8 +204,6 @@ public class ReviewPostRepositoryImpl implements ReviewPostRepositoryCustom {
         for (ReviewPost reviewPost : interactionScores.keySet()) {
             double finalScore = interactionScores.get(reviewPost)
                     * trendScores.get(reviewPost)
-                    * likeScores.get(reviewPost)
-                    * viewScores.get(reviewPost)
                     * keywordScores.get(reviewPost);
 
             recommendationScores.merge(reviewPost, finalScore, Double::sum);
