@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import towssome.server.entity.Cluster;
 import towssome.server.entity.Member;
-import towssome.server.repository.ClusterRepository;
+import towssome.server.repository.cluster.ClusterRepository;
 import towssome.server.repository.member.MemberRepository;
 
 import java.util.List;
@@ -52,7 +52,8 @@ public class ClusterService {
                     pythonServiceUrl,
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<Map<String, List<String>>>() {}
+                    new ParameterizedTypeReference<>() {
+                    }
             );
 
             if (response.getStatusCode().is2xxSuccessful()) {
@@ -65,4 +66,11 @@ public class ClusterService {
             throw new RuntimeException("Error while fetching clustering results from Python service", e);
         }
     }
+
+    public List<Member> getClusterMembers(Long memberId) {
+        return clusterRepository.findClustersByMemberId(memberId);
+    }
+
+
+
 }

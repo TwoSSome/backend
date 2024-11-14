@@ -1,8 +1,10 @@
 package towssome.server.repository.member;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import towssome.server.entity.Member;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member,Long>, MemberRepositoryCustom {
@@ -16,4 +18,7 @@ public interface MemberRepository extends JpaRepository<Member,Long>, MemberRepo
     Optional<Member> findBySocialId(String socialId);
 
     Optional<Member> findByEmail(String email);
+
+    @Query("SELECT m FROM Member m")
+    List<Member> getAllMembers();
 }

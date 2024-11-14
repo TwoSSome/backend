@@ -12,4 +12,5 @@ public interface ViewLikeRepository extends JpaRepository<ViewLike,Long> {
     ViewLike findByReviewPostIdAndMemberId(Long reviewId, Long memberId);
     ViewLike findByReviewPostAndMember(ReviewPost reviewPost, Member member);
     List<ViewLike> findAllByReviewPost(ReviewPost reviewPost);
+    List<ViewLike> findAllByMember(Member member);
 }
