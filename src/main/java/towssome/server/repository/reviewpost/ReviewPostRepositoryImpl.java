@@ -181,11 +181,7 @@ public class ReviewPostRepositoryImpl implements ReviewPostRepositoryCustom {
                 .fetch();
 
         for (Member otherMember : allMembers) {
-            double similarity = calculateInteractionSimilarity(jwtMember, otherMember);
-
-            if (clusterMembers.contains(otherMember)) {
-                similarity *= 1.5;
-            }
+            double similarity = calculateInteractionSimilarity(jwtMember, otherMember, clusterMembers.contains(otherMember));
 
             List<ViewLike> viewLikes = queryFactory.select(viewLike)
                     .from(viewLike)
@@ -233,47 +229,29 @@ public class ReviewPostRepositoryImpl implements ReviewPostRepositoryCustom {
         return (viewCount * 0.1) + (likeCount * 0.2);
     }
 
-    private double calculateInteractionSimilarity(Member member1, Member member2) {
-        List<ViewLike> member1Activities = viewLikeRepository.findAllByMember(member1);
-        List<ViewLike> member2Activities = viewLikeRepository.findAllByMember(member2);
+    private double calculateInteractionSimilarity(Member member1, Member member2, boolean isClusterMember) {
+        Set<ReviewPost> member1LikedPosts = viewLikeRepository.findLikedPostsByMember(member1);
+        Set<ReviewPost> member2LikedPosts = viewLikeRepository.findLikedPostsByMember(member2);
 
-        int commonLikes = 0;
-        int commonViews = 0;
+        long commonLikes = member1LikedPosts.stream()
+                .filter(member2LikedPosts::contains)
+                .count();
 
-        for (ViewLike viewLike1 : member1Activities) {
-            for (ViewLike viewLike2 : member2Activities) {
-                if (viewLike1.getReviewPost().equals(viewLike2.getReviewPost())) {
-                    if (viewLike1.getLikeFlag() && viewLike2.getLikeFlag()) {
-                        commonLikes++;
-                    }
-                    if (viewLike1.getViewFlag() && viewLike2.getViewFlag()) {
-                        commonViews++;
-                    }
-                }
-            }
-        }
+        Set<ReviewPost> member1ViewedPosts = viewLikeRepository.findViewedPostsByMember(member1);
+        Set<ReviewPost> member2ViewedPosts = viewLikeRepository.findViewedPostsByMember(member2);
+
+        long commonViews = member1ViewedPosts.stream()
+                .filter(member2ViewedPosts::contains)
+                .count();
 
         double likeWeight = 0.7;
         double viewWeight = 0.3;
-        return (likeWeight * commonLikes + viewWeight * commonViews) /
-                (member1Activities.size() + member2Activities.size());
+        double similarity = (likeWeight * commonLikes + viewWeight * commonViews) /
+                (member1LikedPosts.size() + member1ViewedPosts.size() + member2LikedPosts.size() + member2ViewedPosts.size());
+
+        return isClusterMember ? similarity * 1.5 : similarity;
     }
 
-    private double getLikeWeight(ViewLike viewLike) {
-        if (viewLike.getLikeFlag()) {
-            long likeCount = viewLikeRepositoryCustom.findLikeAmountByReviewPost(viewLike.getReviewPost().getId());
-            return 1 + (likeCount * 0.15);
-        }
-        return 1.0;
-    }
-
-    private double getViewWeight(ViewLike viewLike) {
-        if (viewLike.getViewFlag()) {
-            long viewCount = viewLikeRepositoryCustom.findViewAmountByReviewPost(viewLike.getReviewPost().getId());
-            return 1 + (viewCount * 0.05);
-        }
-        return 1.0;
-    }
 
     private double calculateKeywordBoost(Member jwtMember, ReviewPost reviewPost) {
         List<String> searchedKeywords = getSearchedKeywords(jwtMember);
@@ -282,7 +260,7 @@ public class ReviewPostRepositoryImpl implements ReviewPostRepositoryCustom {
 
         long commonKeywords = searchedKeywords.stream()
                 .filter(keyword -> reviewTags.stream()
-                        .anyMatch(tag -> tag.get(1, String.class).equalsIgnoreCase(keyword)))
+                        .anyMatch(tag -> Objects.requireNonNull(tag.get(1, String.class)).equalsIgnoreCase(keyword)))
                 .count();
 
         return 1 + (commonKeywords * 0.3);
