@@ -16,6 +16,7 @@ import towssome.server.entity.Comment;
 import towssome.server.entity.Member;
 import towssome.server.service.CommentLikeService;
 import towssome.server.service.CommentService;
+import towssome.server.service.MemberService;
 
 import java.io.IOException;
 
@@ -29,6 +30,7 @@ public class CommentController {
     private final CommentLikeService commentLikeService;
     private final MemberAdvice memberAdvice;
     private static final int DEFAULT_SIZE = 20;
+    private final MemberService memberService;
 
     @Operation(summary = "댓글 생성 API", parameters = {
             @Parameter(name = "reviewId", description = "댓글이 생성될 리뷰글 id"),
@@ -103,19 +105,26 @@ public class CommentController {
     @GetMapping("{reviewId}/fixedComment")
     public ResponseEntity<CommentRes> getFixedComment(@PathVariable Long reviewId){
         Comment comment = commentService.getFixedCommentByReviewId(reviewId);
+        Member commentedMember = comment.getMember();
+        ProfileSimpleRes profileSimpleRes;
         CommentRes commentRes;
         if(comment == null) commentRes = null;
         else{
+            profileSimpleRes = new ProfileSimpleRes(
+                    commentedMember.getNickName(),
+                    commentedMember.getProfilePhoto() == null ? null : commentedMember.getProfilePhoto().getS3Path(),
+                    commentedMember.getId()
+            );
             commentRes = new CommentRes(
                     comment.getId(),
                     comment.getBody(),
                     comment.getCreateDate(),
                     comment.getLastModifiedDate(),
-                    comment.getMember().getId(),
                     comment.getReviewPost().getId(),
                     commentLikeService.isLikedComment(memberAdvice.findJwtMember(),comment),
                     commentLikeService.countLike(comment),
-                    comment.getFixFlag()
+                    comment.getFixFlag(),
+                    profileSimpleRes
             );
         }
         return new ResponseEntity<>(commentRes, HttpStatus.OK);
