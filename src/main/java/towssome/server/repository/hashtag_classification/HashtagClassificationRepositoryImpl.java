@@ -47,24 +47,24 @@ public class HashtagClassificationRepositoryImpl implements HashtagClassificatio
         JPAQuery<Long> count = queryFactory
                 .select(hashtagClassification.count())
                 .from(hashtagClassification)
-                .where(hashtagContains(keyword))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize());
+                .where(hashtagContains(keyword));
 
         return PageableExecutionUtils.getPage(results, pageable, count::fetchOne);
     }
 
     @Override
     public Page<ReviewPost> findReviewPageByCursorIdAndHashTag(String keyword, Long cursorId, String sort, Pageable pageable) {
+        Boolean asc = sort.equalsIgnoreCase("asc");
+
         JPAQuery<ReviewPost> query = queryFactory
                 .select(hashtagClassification.reviewPost)
                 .from(hashtagClassification)
                 .join(hashtagClassification.hashTag, hashTag)
-                .where(hashtagContains(keyword),nextReviewId(cursorId,true))
+                .where(hashtagContains(keyword), nextReviewId(cursorId, asc))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize());
 
-        if (sort.equalsIgnoreCase("asc")) {
+        if (asc) {
             query.orderBy(reviewPost.id.asc());
         } else {
             query.orderBy(reviewPost.id.desc());
@@ -75,12 +75,11 @@ public class HashtagClassificationRepositoryImpl implements HashtagClassificatio
         JPAQuery<Long> count = queryFactory
                 .select(hashtagClassification.count())
                 .from(hashtagClassification)
-                .where(hashtagContains(keyword),nextReviewId(cursorId,false))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize());
+                .where(hashtagContains(keyword), nextReviewId(cursorId, false));
 
         return PageableExecutionUtils.getPage(results, pageable, count::fetchOne);
     }
+
 
     @Override
     public List<Tuple> findHashtagsByReviewId(Long reviewId) {
@@ -91,83 +90,6 @@ public class HashtagClassificationRepositoryImpl implements HashtagClassificatio
                 .fetch();
     }
 
-    @Override
-    public Page<ReviewPost> findFirstRecommendPageByHashtag(QuickRecommendReq req, String sort, Pageable pageable){
-        JPAQuery<ReviewPost> query = queryFactory
-                .select(hashtagClassification.reviewPost)
-                .from(hashtagClassification)
-                .join(hashtagClassification.hashTag, hashTag)
-                .where(hashtagContainsAgeOrInterest(req))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize());
-
-        if (sort.equalsIgnoreCase("asc")) {
-            query.orderBy(reviewPost.id.asc());
-        } else {
-            query.orderBy(reviewPost.id.desc());
-        }
-
-        List<ReviewPost> results = query.fetch();
-
-        JPAQuery<Long> countQuery = queryFactory
-                .select(hashtagClassification.reviewPost.count())
-                .from(hashtagClassification)
-                .join(hashtagClassification.hashTag, hashTag)
-                .where(hashtagContainsAgeOrInterest(req));
-
-        return PageableExecutionUtils.getPage(results, pageable, countQuery::fetchOne);
-
-    }
-
-    @Override
-    public Page<ReviewPost> findRecommendPageByCursorIdAndHashTag(QuickRecommendReq req, Long cursorId, String sort, Pageable pageable){
-        JPAQuery<ReviewPost> query = queryFactory
-                .select(hashtagClassification.reviewPost)
-                .from(hashtagClassification)
-                .join(hashtagClassification.hashTag, hashTag)
-                .where(hashtagContainsAgeOrInterest(req), nextReviewId(cursorId, true))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize());
-
-        if (sort.equalsIgnoreCase("asc")) {
-            query.orderBy(reviewPost.id.asc());
-        } else {
-            query.orderBy(reviewPost.id.desc());
-        }
-
-        List<ReviewPost> results = query.fetch();
-
-        JPAQuery<Long> count = queryFactory
-                .select(hashtagClassification.count())
-                .from(hashtagClassification)
-                .where(hashtagContainsAgeOrInterest(req), nextReviewId(cursorId, false))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize());
-
-        return PageableExecutionUtils.getPage(results, pageable, count::fetchOne);
-    }
-
-
-    private BooleanExpression hashtagContainsAgeOrInterest(QuickRecommendReq req) {
-        if (req == null) {
-            return null;
-        }
-
-        BooleanExpression ageCondition = ageRangeCondition(req.ageTag());
-        BooleanExpression interestCondition = hashTag.name.containsIgnoreCase(req.interestTag());
-
-        QHashtagClassification subHashtagClassification = new QHashtagClassification("subHashtagClassification");
-
-        JPQLQuery<Long> subQuery = JPAExpressions
-                .select(subHashtagClassification.reviewPost.id)
-                .from(subHashtagClassification)
-                .join(subHashtagClassification.hashTag, hashTag)
-                .where(ageCondition.or(interestCondition))
-                .groupBy(subHashtagClassification.reviewPost.id)
-                .having(subHashtagClassification.count().goe(1L)); // 수정된 부분
-
-        return hashtagClassification.reviewPost.id.in(subQuery);
-    }
 
 
 
@@ -177,57 +99,6 @@ public class HashtagClassificationRepositoryImpl implements HashtagClassificatio
         }
         return hashtagClassification.hashTag.name.containsIgnoreCase(keyword);
     }
-
-    private BooleanExpression ageRangeCondition(String ageTag) {
-        if (ageTag == null || ageTag.isEmpty()) {
-            return null;
-        }
-
-        int midAge;
-        if (ageTag.contains("10대")) {
-            midAge = 15;
-        } else if (ageTag.contains("20대")) {
-            midAge = 25;
-        } else if (ageTag.contains("30대")) {
-            midAge = 35;
-        } else if (ageTag.contains("40대")) {
-            midAge = 45;
-        } else if (ageTag.contains("50대")) {
-            midAge = 55;
-        } else if (ageTag.contains("60대")) {
-            midAge = 65;
-        } else {
-            return hashTag.name.containsIgnoreCase(ageTag);
-        }
-
-        if (ageTag.contains("초반")) {
-            return hashTag.name.in(getAgeRange(midAge - 3));
-        } else if (ageTag.contains("중반")) {
-            return hashTag.name.in(getAgeRange(midAge));
-        } else if (ageTag.contains("후반")) {
-            return hashTag.name.in(getAgeRange(midAge + 3));
-        } else {
-            return hashTag.name.containsIgnoreCase(ageTag);
-        }
-    }
-
-    private List<String> getAgeRange(int midAge) {
-        return List.of(
-                (midAge - 5) + "살",
-                (midAge - 4) + "살",
-                (midAge - 3) + "살",
-                (midAge - 2) + "살",
-                (midAge - 1) + "살",
-                midAge + "살",
-                (midAge + 1) + "살",
-                (midAge + 2) + "살",
-                (midAge + 3) + "살",
-                (midAge + 4) + "살",
-                (midAge + 5) + "살",
-                (midAge/10)*10 +"대"
-        );
-    }
-
     private BooleanExpression nextReviewId(Long cursorId, boolean asc) {
         if (cursorId == null) {
             return null;

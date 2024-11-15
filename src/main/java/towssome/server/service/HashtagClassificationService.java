@@ -6,8 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import towssome.server.advice.MemberAdvice;
 import towssome.server.advice.PhotoAdvice;
 import towssome.server.dto.*;
+import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
 import towssome.server.repository.hashtag_classification.HashtagClassificationRepository;
 import towssome.server.repository.viewlike.ViewLikeRepositoryCustom;
@@ -19,10 +21,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class HashtagClassificationService{
-
     private final HashtagClassificationRepository hashtagClassificationRepository;
     private final PhotoAdvice photoAdvice;
     private final ViewLikeRepositoryCustom viewLikeRepositoryCustom;
+    private final SearchHistoryService searchHistoryService;
+    private final MemberAdvice memberAdvice;
 
     public CursorResult<ReviewSimpleRes> getReviewPageByHashtag(String keyword, Long cursorId, String sort, Pageable page) {
         List<ReviewSimpleRes> reviewSimpleRes = new ArrayList<>();
@@ -64,11 +67,16 @@ public class HashtagClassificationService{
         return new CursorResult<>(reviewSimpleRes, cursorId, reviewPosts.hasNext());
     }
 
-    // 해시태그로 리뷰글 검색
     public Page<ReviewPost> getReviewPostByHashtag(String keyword, Long cursorId, String sort, Pageable page){
-        return cursorId == null ?
-                hashtagClassificationRepository.findFirstReviewPageByHashtag(keyword, sort, page):
-                hashtagClassificationRepository.findReviewPageByCursorIdAndHashTag(keyword, cursorId, sort, page);
+        if (cursorId == null){
+            Member member = memberAdvice.findJwtMember();
+            if (member != null) searchHistoryService.updateSearchHistory(member, keyword);
+            return hashtagClassificationRepository.findFirstReviewPageByHashtag(keyword, sort, page);
+        }
+        else {
+            return hashtagClassificationRepository.findReviewPageByCursorIdAndHashTag(keyword, cursorId, sort, page);
+        }
+
     }
 
     public List<Tuple> getHashtags(Long reviewId) {
@@ -79,18 +87,6 @@ public class HashtagClassificationService{
         return hashtagClassificationRepository.findAll();
     }
 
-
-    public CursorResult<ReviewSimpleRes> getRecommendPageByHashtag(QuickRecommendReq req, Long cursorId, String sort, Pageable page) {
-        List<ReviewSimpleRes> reviewSimpleRes = new ArrayList<>();
-
-        final Page<ReviewPost> reviewPosts = getRecommendReviewByHashtag(req, cursorId, sort, page);
-        return getReviewSimpleResCursorResult(reviewSimpleRes, reviewPosts);
-    }
-    public Page<ReviewPost> getRecommendReviewByHashtag(QuickRecommendReq req, Long cursorId, String sort, Pageable page){
-        return cursorId == null ?
-                hashtagClassificationRepository.findFirstRecommendPageByHashtag(req, sort, page):
-                hashtagClassificationRepository.findRecommendPageByCursorIdAndHashTag(req, cursorId, sort, page);
-    }
 
 
 }

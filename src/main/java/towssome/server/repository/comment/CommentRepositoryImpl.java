@@ -3,8 +3,6 @@ package towssome.server.repository.comment;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,8 +17,6 @@ import static towssome.server.entity.QComment.comment;
 @Repository
 @RequiredArgsConstructor
 public class CommentRepositoryImpl implements CommentRepositoryCustom {
-    @PersistenceContext
-    private EntityManager entityManager;
     private final JPAQueryFactory queryFactory;
 
     @Override

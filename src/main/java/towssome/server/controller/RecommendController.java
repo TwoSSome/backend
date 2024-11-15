@@ -8,6 +8,7 @@ import towssome.server.advice.MemberAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.Member;
 import towssome.server.exception.PageException;
+import towssome.server.service.MemberService;
 import towssome.server.service.RecommendService;
 
 @RestController
@@ -21,8 +22,8 @@ public class RecommendController {
 
     @GetMapping("/profile")
     public CursorResult<ProfileRes> getRecommendProfile(
-        @RequestParam int cursorId,
-        @RequestParam(required = false) Integer size){
+        @RequestParam(value = "cursorId") int cursorId,
+        @RequestParam(value = "size" ,required = false) Integer size){
 
 
         if (cursorId < 1) {
@@ -33,4 +34,16 @@ public class RecommendController {
         Member jwtMember = memberAdvice.findJwtMember();
         return recommendService.getRecommendProfilePage(jwtMember, cursorId -1, size);
     }
+
+    @GetMapping("/review")
+    public CursorResult<ReviewSimpleRes> getRecommendedReviews(@RequestParam(value = "cursorId", defaultValue = "1") int cursorId, @RequestParam(value = "size", defaultValue = "10") Integer size){
+
+        if (cursorId <= 0) {
+            throw new PageException("페이지 번호는 0보다 커야 합니다");
+        }
+        Member jwtMember = memberAdvice.findJwtMember();
+        return recommendService.getRecommendedReview(jwtMember, cursorId, size);
+    }
+
+
 }
