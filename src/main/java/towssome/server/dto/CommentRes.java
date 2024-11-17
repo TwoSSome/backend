@@ -7,10 +7,10 @@ public record CommentRes(
         String body,
         LocalDateTime createDate,
         LocalDateTime lastModifiedDate,
-        Long memberId,
         Long reviewId,
         Boolean isLiked,
         Long likeCount,
-        Boolean isfixed
+        Boolean isfixed,
+        ProfileSimpleRes commentedMember
 ) {
 }
