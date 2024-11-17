@@ -1,10 +1,12 @@
-package towssome.server.service;
+package towssome.server.advice;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import towssome.server.entity.EmailVerification;
+import towssome.server.enumrated.EmailType;
 import towssome.server.exception.EmailSendException;
 import towssome.server.exception.ExpirationEmailException;
 import towssome.server.repository.EmailVerificationRepository;
@@ -13,18 +15,18 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.util.Random;
 
-@Service
+@Component
 @RequiredArgsConstructor
-public class MailSendService {
+public class MailSendAdvice {
 
     private final JavaMailSender mailSender;
     private final EmailVerificationRepository emailVerificationRepository;
 
-    public boolean CheckAuthNum(String email,int authNum){
+    public boolean CheckAuthNum(String email,int authNum, EmailType emailType){
         EmailVerification emailVerification = emailVerificationRepository.findByEmail(email).orElseThrow(
                 () -> new ExpirationEmailException("이메일 인증 시간이 만료되었습니다")
         );
-        return emailVerification.getAuthNum() == authNum;
+        return emailVerification.getAuthNum() == authNum && emailVerification.getEmailType() == emailType;
     }
 
     public int makeRandomNumber() {
@@ -37,6 +39,7 @@ public class MailSendService {
         return Integer.parseInt(randomNumber);
     }
 
+    @Transactional
     public int joinEmail(String email) {
         int authNum = makeRandomNumber();
         String setFrom = "goochul175465@gmail.com"; // email-config에 설정한 자신의 이메일 주소를 입력
@@ -49,11 +52,47 @@ public class MailSendService {
                         "<br>" +
                         "인증번호를 제대로 입력해주세요"; //이메일 내용 삽입
         mailSend(setFrom, toMail, title, content);
+        saveAuthNum(email,authNum,EmailType.JOIN);
+        return authNum;
+    }
+
+    public void sendFindUsername(String email, String username) {
+        String setFrom = "goochul175465@gmail.com"; // email-config에 설정한 자신의 이메일 주소를 입력
+        String toMail = email;
+        String title = "[품품] 아이디 찾기 이메일 입니다."; // 이메일 제목
+        String content =
+                "<h1>안녕하세요. 품품을 이용해 주셔서 감사합니다</h1>" + 	//html 형식으로 작성 !
+                        "<hr>" +
+                        "회원님의 아이디는 <strong>" + username + "</strong> 입니다." +
+                        "<br>" +
+                        "감사합니다."; //이메일 내용 삽입
+        mailSend(setFrom, toMail, title, content);
+    }
+
+    @Transactional
+    public int sendReconfigPassword(String email) {
+        int authNum = makeRandomNumber();
+        String setFrom = "goochul175465@gmail.com"; // email-config에 설정한 자신의 이메일 주소를 입력
+        String toMail = email;
+        String title = "비밀번호 재설정 이메일입니다."; // 이메일 제목
+        String content =
+                "<h1>안녕하세요. 품품을 이용해 주셔서 감사합니다</h1>" + 	//html 형식으로 작성 !
+                        "<hr>" +
+                        "인증 번호는 <strong>" + authNum + "</strong> 입니다." +
+                        "<br>" +
+                        "인증번호를 제대로 입력해주세요"; //이메일 내용 삽입
+        mailSend(setFrom, toMail, title, content);
+        saveAuthNum(email,authNum,EmailType.RECONFIG_PASSWORD);
+        return authNum;
+    }
+
+    private void saveAuthNum(String email, int authNum, EmailType emailType) {
+        emailVerificationRepository.deleteAllByEmailAndAndEmailType(email,emailType);
         emailVerificationRepository.save(new EmailVerification(
                 email,
-                authNum
+                authNum,
+                emailType
         ));
-        return authNum;
     }
 
     private void mailSend(String setFrom, String toMail, String title, String content) {
@@ -70,8 +109,5 @@ public class MailSendService {
             // 이러한 경우 MessagingException이 발생
             throw new EmailSendException("이메일을 보내지 못했습니다");
         }
-
-
     }
-
 }

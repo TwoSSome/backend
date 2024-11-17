@@ -13,10 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.advice.MemberAdvice;
-import towssome.server.dto.CreateRes;
-import towssome.server.dto.EmailCheckReq;
-import towssome.server.dto.ErrorResult;
-import towssome.server.dto.IdDupCheckReq;
+import towssome.server.dto.*;
 import towssome.server.entity.Member;
 import towssome.server.exception.DuplicateIdException;
 import towssome.server.jwt.JoinDTO;
@@ -55,7 +52,7 @@ public class MemberController {
     })
     @PostMapping("/{email}/check")
     public ResponseEntity<?> emailCheck(@PathVariable String email, @RequestBody EmailCheckReq req){
-        if (joinService.verificationEmail(email, req.authNum())) {
+        if (joinService.verificationJoinEmail(email, req.authNum())) {
             return new ResponseEntity<>(HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -86,6 +83,38 @@ public class MemberController {
             throw new DuplicateIdException("이미 가입된 아이디입니다");
         }
 
+    }
+
+    @Operation(summary = "아이디 찾기 API", description = "이메일이 정상 발송되면 200 코드 반환, 발송되지 않으면 EmailSendException 반환")
+    @PostMapping("/member/findId")
+    public ResponseEntity<?> findMyUsername(@RequestBody EmailReq req){
+        memberService.findMyUsername(req.email());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Operation(summary = "비밀번호 재설정 요청 API", description = "이메일이 정상 발송되면 200 코드 반환")
+    @PostMapping("/member/reconfig_password/req")
+    public ResponseEntity<?> ReconfigMyPasswordRequest(@RequestBody EmailUsernameReq req){
+        memberService.reconfigPasswordRequest(req.email(),req.username());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Operation(summary = "비밀번호 재설정 인증번호 API",
+            description = "인증번호가 맞으면 200코드 반환, 틀리면 401 반환, 인증번호가 만료되면 ExpirationEmailException 발생")
+    @PostMapping("/member/reconfig_password/authenticate")
+    public ResponseEntity<?> ReconfigPasswordAuthenticate(@RequestBody EmailAuthNumReq req){
+        boolean checked = memberService.checkReconfigPasswordAuthNum(req.authNum(), req.email());
+        if (checked) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        return new ResponseEntity<>(new UsernameRes(req.email()),HttpStatus.UNAUTHORIZED);
+    }
+
+    @Operation(summary = "비밀번호 재설정 API", description = "재설정할 회원의 이메일과 재설정할 비밀번호를 같이 보내야 합니다")
+    @PostMapping("/member/reconfig_password/execute")
+    public ResponseEntity<?> ReconfigPassword(@RequestBody PasswordReq req){
+        memberService.reconfigPassword(req.reconfigPassword(), req.email());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Operation(summary = "테스트용 API")

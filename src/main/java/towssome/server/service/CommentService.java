@@ -68,7 +68,10 @@ public class CommentService {
     public CursorResult<CommentRes> getCommentPageByReviewId(Long reviewId, Long cursorId, String sort, Pageable page){
         List<CommentRes> commentRes = new ArrayList<>();
         final Page<Comment> comments = getCommentsByReviewId(reviewId, cursorId, sort, page);
+        Member member = memberAdvice.findJwtMember();
+        Boolean isLiked;
         for(Comment comment:comments){
+            isLiked = commentLikeService.isLikedComment(member, comment);
             commentRes.add(new CommentRes(
                     comment.getId(),
                     comment.getBody(),
@@ -76,7 +79,7 @@ public class CommentService {
                     comment.getLastModifiedDate(),
                     comment.getMember().getId(),
                     comment.getReviewPost().getId(),
-                    commentLikeService.isLikedComment(memberAdvice.findJwtMember(),comment),
+                    isLiked,
                     commentLikeService.countLike(comment),
                     comment.getFixFlag()
             ));

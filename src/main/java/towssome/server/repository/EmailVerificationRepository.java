@@ -2,6 +2,7 @@ package towssome.server.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import towssome.server.entity.EmailVerification;
+import towssome.server.enumrated.EmailType;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,5 +17,7 @@ public interface EmailVerificationRepository extends JpaRepository<EmailVerifica
     List<EmailVerification> findByCreateDateBefore(LocalDateTime fiveMinutesAgo);
 
     void deleteByEmail(String email);
+
+    void deleteAllByEmailAndAndEmailType(String email, EmailType emailType);
 
 }

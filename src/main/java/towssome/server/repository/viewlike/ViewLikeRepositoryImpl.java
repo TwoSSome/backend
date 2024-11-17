@@ -1,12 +1,16 @@
 package towssome.server.repository.viewlike;
 
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import towssome.server.dto.CursorResult;
+import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
+import towssome.server.entity.ViewLike;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -71,6 +75,16 @@ public class ViewLikeRepositoryImpl implements ViewLikeRepositoryCustom {
                 .fetchOne();
     }
 
+    @Override
+    public Long findViewAmountByReviewPost(Long reviewId) {
+        return queryFactory
+                .select(viewLike.count())
+                .from(viewLike)
+                .where(viewLike.reviewPost.id.eq(reviewId)
+                        .and(viewLike.viewFlag.eq(Boolean.TRUE)))
+                .fetchOne();
+    }
+
 
 
     private JPAQuery<ReviewPost> buildQuery(Long memberId, String sort, int size, Long offset, boolean viewFlag) {
@@ -99,5 +113,21 @@ public class ViewLikeRepositoryImpl implements ViewLikeRepositoryCustom {
 
     private Boolean hasNext(List<ReviewPost> result, int size) {
         return result.size() > size;
+    }
+
+
+    @Override
+    public List<Tuple> findViewLikesWithScores(Member member, List<Member> clusterMembers) {
+        return queryFactory.select(
+                        viewLike.reviewPost,
+                        viewLike.member,
+                        viewLike.likeFlag,
+                        viewLike.viewFlag,
+                        viewLike.reviewPost.id.count().multiply(0.2).add(1.0).as("likeWeight"),
+                        viewLike.reviewPost.id.count().multiply(0.05).add(1.0).as("viewWeight")
+                )
+                .from(viewLike)
+                .where(viewLike.member.in(clusterMembers))
+                .fetch();
     }
 }

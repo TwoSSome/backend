@@ -23,4 +23,6 @@ public interface ReviewPostRepositoryCustom {
 
     List<Integer> findReviewInCalendarOfMonth(int year, int month, Calendar calendar);
 
+    CursorResult<ReviewPost> getRecommendedReviewsPage(Member member, Pageable pageable);
+
 }

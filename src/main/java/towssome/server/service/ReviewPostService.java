@@ -4,10 +4,16 @@ import com.querydsl.core.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.advice.PhotoAdvice;
 import towssome.server.dto.*;
@@ -20,8 +26,11 @@ import towssome.server.repository.reviewpost.ReviewPostRepository;
 import towssome.server.repository.subscribe.SubscribeRepository;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +43,8 @@ public class ReviewPostService {
     private final HashtagService hashtagService;
     private final HashtagClassificationService hashtagClassificationService;
     private final SubscribeRepository subscribeRepository;
+    private final RestTemplate restTemplate = new RestTemplate();
+
 
     public ReviewPost createReview(
             ReviewPostReq reviewReq,
@@ -46,6 +57,14 @@ public class ReviewPostService {
             default -> throw new NotMatchReviewTypeException("정해진 타입이 아닙니다");
         };
 
+        String itemUrl;
+        if (reviewReq.item_url() == null) {
+            itemUrl = createLinkString(reviewReq.item());
+        }
+        else {
+            itemUrl = reviewReq.item_url();
+        }
+
         ReviewPost reviewPost = new ReviewPost(
                 reviewReq.body(),
                 reviewReq.price(),
@@ -53,7 +72,9 @@ public class ReviewPostService {
                 reviewReq.whereBuy(),
                 0,
                 reviewReq.category(),
-                member
+                member,
+                reviewReq.item(),
+                itemUrl
         );
         reviewPostRepository.save(reviewPost);
         hashtagService.saveCategoryInHashtag(reviewPost, reviewReq.category());
@@ -100,7 +121,9 @@ public class ReviewPostService {
                     review.getStarPoint(),
                     review.getWhereBuy(),
                     postMember.getNickName(),
-                    viewlikeService.getLikeAmountInReviewPost(reviewId)
+                    viewlikeService.getLikeAmountInReviewPost(reviewId),
+                    review.getItem(),
+                    getRandomLink(review.getItem_url()) == null ? null : getRandomLink(review.getItem_url())
             );
         }else {
             //회원 조회
@@ -123,7 +146,9 @@ public class ReviewPostService {
                     review.getStarPoint(),
                     review.getWhereBuy(),
                     member.getNickName(),
-                    viewlikeService.getLikeAmountInReviewPost(reviewId)
+                    viewlikeService.getLikeAmountInReviewPost(reviewId),
+                    review.getItem(),
+                    getRandomLink(review.getItem_url())
             );
         }
         return reviewRes;
@@ -144,8 +169,19 @@ public class ReviewPostService {
             for (Long deletedPhotoId : deletedPhotoIds)
                 photoAdvice.deletePhoto(deletedPhotoId);
         }
-
         ReviewPost reviewPost = getReview(reviewId);
+
+        String itemUrl;
+        if (reviewPost.getItem() == null || reviewPost.getItem_url() == null || !reviewPost.getItem().equals(req.item()) ) {
+            itemUrl = createLinkString(req.item());
+        }
+        else if(req.item_url() != null) {
+            itemUrl = req.item_url();
+        }
+        else {
+            itemUrl = reviewPost.getItem_url();
+        }
+
         photoAdvice.saveReviewPhoto(addPhotos, reviewPost);
         ReviewPostUpdateDto dto = new ReviewPostUpdateDto(
                 reviewId,
@@ -153,7 +189,9 @@ public class ReviewPostService {
                 req.price(),
                 req.whereBuy(),
                 req.category(),
-                req.reviewType()
+                req.reviewType(),
+                req.item(),
+                itemUrl
         );
         reviewPostRepository.updateReview(dto);
     }
@@ -278,5 +316,45 @@ public class ReviewPostService {
         return cursorId == null ?
                 reviewPostRepository.findMyPostFirstPageByMemberId(memberId, sort, page) :
                 reviewPostRepository.findByMemberIdLessThanOrderByIdDesc(memberId, cursorId, sort, page);
+    }
+
+
+    private String createLinkString(String item) {
+        if(item == null) return null;
+        String url = "http://localhost:5000/itemurls";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
+
+        HttpEntity<String> entity = new HttpEntity<>(item, headers);
+
+        ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+
+        String responseBody = response.getBody();
+        System.out.println("Response from Flask: " + responseBody);
+
+        JSONArray jsonArray = new JSONArray(responseBody);
+
+        StringBuilder formattedLinks = new StringBuilder();
+        for (int i = 0; i < jsonArray.length(); i++) {
+            formattedLinks.append(jsonArray.getString(i));
+            if (i < jsonArray.length() - 1) {
+                formattedLinks.append(", ");
+            }
+        }
+
+        return formattedLinks.toString();
+    }
+
+    private String getRandomLink(String url) {
+        if(url == null) return null;
+
+        // 문자열을 쉼표로 구분하여 리스트로 변환
+        List<String> linkList = Arrays.asList(url.split(",\\s*"));
+
+        // 무작위로 리스트에서 하나의 링크 선택
+        Random random = new Random();
+        int randomIndex = random.nextInt(linkList.size());
+        return linkList.get(randomIndex);
     }
 }

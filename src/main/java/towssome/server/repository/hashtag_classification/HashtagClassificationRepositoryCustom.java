@@ -12,6 +12,4 @@ public interface HashtagClassificationRepositoryCustom {
     Page<ReviewPost> findFirstReviewPageByHashtag(String keyword, String sort, Pageable pageable);
     Page<ReviewPost> findReviewPageByCursorIdAndHashTag(String keyword, Long cursorId, String sort, Pageable pageable);
     List<Tuple> findHashtagsByReviewId(Long reviewId);
-    Page<ReviewPost> findFirstRecommendPageByHashtag(QuickRecommendReq req, String sort, Pageable pageable);
-    Page<ReviewPost> findRecommendPageByCursorIdAndHashTag(QuickRecommendReq req, Long cursorId, String sort, Pageable pageable);
 }

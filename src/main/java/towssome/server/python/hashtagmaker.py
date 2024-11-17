@@ -1,5 +1,7 @@
+import json
 import subprocess
 import sys
+import urllib.request
 
 from userClustering import fetch_user_tags, vectorize_tags, cluster_users
 
@@ -45,6 +47,7 @@ except:
 import torch
 from torch import nn
 import re
+import os
 
 app = Flask(__name__)
 
@@ -143,7 +146,9 @@ def main():
     hashtags = hashtag_extractor(keywords)
     return jsonify({"hashtags": hashtags})
 
-model = torch.load('model.pt', map_location=torch.device('cpu'))
+current_dir = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(current_dir, 'model.pt')
+model = torch.load(model_path, map_location=torch.device('cpu'))
 model.eval()
 tokenizer = KoBERTTokenizer.from_pretrained('skt/kobert-base-v1')
 bert_model = BertModel.from_pretrained('skt/kobert-base-v1')
@@ -215,6 +220,32 @@ stop_words = [
     "맞이", "완전", "그녀", "그", "고급", "모습", "감사", "하루", "배송", "제조일자", "추천", "포장", "신경", "후회", "소비", "그날", "기쁨", "이야기", "기억", "처음",
     "눈물", "행복", "기분", "모양", "리본", "하나하나", "순간", "선물", "사랑"
 ]
+
+
+@app.route('/itemurls', methods=['POST'])
+def item_urls():
+    item = request.data.decode()  # JSON 데이터를 받습니다.
+    client_id = "ovm97v0c2KPfFCAFfbQH"
+    client_secret = "TFcAihT6V_"
+    encText = urllib.parse.quote(item)
+    url = "https://openapi.naver.com/v1/search/shop.json?query=" + encText # JSON 결과
+    data = urllib.request.Request(url)
+    data.add_header("X-Naver-Client-Id",client_id)
+    data.add_header("X-Naver-Client-Secret",client_secret)
+    response = urllib.request.urlopen(data)
+    rescode = response.getcode()
+    if rescode == 200:
+        response_body = response.read()
+        data = response_body.decode('utf-8')
+
+        # Parse the JSON response
+        json_data = json.loads(data)
+
+        # Collect all links from the items
+        links = [item['link'] for item in json_data.get('items', [])]
+        return jsonify(links)
+    else:
+        return jsonify({"error": "상품 URL을 가져오는 데 실패했습니다."}), 500
 
 @app.route('/userClustering', methods=['GET'])
 def user_clustering():
