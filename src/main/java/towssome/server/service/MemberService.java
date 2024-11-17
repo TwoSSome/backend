@@ -12,6 +12,8 @@ import towssome.server.dto.RankerRes;
 import towssome.server.entity.*;
 import towssome.server.enumrated.EmailType;
 import towssome.server.exception.NotFoundMemberException;
+import towssome.server.jwt.JwtStatic;
+import towssome.server.jwt.JwtUtil;
 import towssome.server.repository.*;
 import towssome.server.repository.member.MemberRepository;
 
@@ -29,6 +31,7 @@ public class MemberService {
     private final ServiceAdvice serviceAdvice;
     private final MailSendAdvice mailSendAdvice;
     private final BCryptPasswordEncoder encoder;
+    private final JwtUtil jwtUtil;
 
     public Member getMember(Long memberId) {
         return memberRepository.findById(memberId).orElseThrow(() ->
@@ -158,6 +161,10 @@ public class MemberService {
 
     public boolean checkReconfigPasswordAuthNum(int authNum, String email) {
         return mailSendAdvice.CheckAuthNum(email, authNum, EmailType.RECONFIG_PASSWORD);
+    }
+
+    public String getJwtForReconfigPassword(String email) {
+        return jwtUtil.createJwt("reconfig", email, JwtStatic.RECONFIG_EXPIRE_MS);
     }
 
     @Transactional

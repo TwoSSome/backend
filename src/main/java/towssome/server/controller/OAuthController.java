@@ -12,7 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import towssome.server.dto.JwtRes;
+import towssome.server.dto.AccessRefreshRes;
 import towssome.server.dto.OAuthInitialConfigReq;
 import towssome.server.entity.Member;
 import towssome.server.exception.NotFoundMemberException;
@@ -37,7 +37,7 @@ public class OAuthController {
     parameters = @Parameter(name = "jwt", description = "소셜로그인 시 전달받은 jwt"),
     responses = {
             @ApiResponse(responseCode = "400", description = "jwt 형식이 올바르지 않음"),
-            @ApiResponse(responseCode = "200", description = "jwt 인증 성공", content = @Content(schema = @Schema(implementation = JwtRes.class)))
+            @ApiResponse(responseCode = "200", description = "jwt 인증 성공", content = @Content(schema = @Schema(implementation = AccessRefreshRes.class)))
     })
     @GetMapping("/OAuth/social")
     public ResponseEntity<?> oauthJwt(@RequestParam String jwt){
@@ -56,8 +56,8 @@ public class OAuthController {
 
         Member member = memberRepository.findBySocialId(socialId).orElseThrow(() -> new NotFoundMemberException("해당 멤버가 없습니다"));
 
-        return new ResponseEntity<JwtRes>(
-                new JwtRes(
+        return new ResponseEntity<AccessRefreshRes>(
+                new AccessRefreshRes(
                         access,
                         refresh,
                         member.getId()

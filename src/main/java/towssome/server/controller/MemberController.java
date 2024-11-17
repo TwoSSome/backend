@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import towssome.server.dto.*;
 import towssome.server.entity.Member;
 import towssome.server.exception.DuplicateIdException;
 import towssome.server.jwt.JoinDTO;
+import towssome.server.jwt.JwtUtil;
 import towssome.server.service.JoinService;
 import towssome.server.service.MemberService;
 
@@ -29,6 +31,7 @@ public class MemberController {
     private final MemberService memberService;
     private final JoinService joinService;
     private final MemberAdvice memberAdvice;
+    private final JwtUtil jwtUtil;
 
     @Operation(summary = "이메일 인증 요청 API",parameters = {@Parameter(name = "email", description = "인증할 이메일")},
     responses = {
@@ -99,21 +102,66 @@ public class MemberController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @Operation(summary = "비밀번호 재설정 인증번호 API",
-            description = "인증번호가 맞으면 200코드 반환, 틀리면 401 반환, 인증번호가 만료되면 ExpirationEmailException 발생")
+    @Operation(
+            summary = "비밀번호 재설정 인증번호 API",
+            description = "인증번호가 맞으면 200코드 반환, 틀리면 401 반환, 인증번호가 만료되면 ExpirationEmailException 발생"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "인증번호가 올바름",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = JwtRes.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증번호가 틀림"
+            )
+    })
     @PostMapping("/member/reconfig_password/authenticate")
     public ResponseEntity<?> ReconfigPasswordAuthenticate(@RequestBody EmailAuthNumReq req){
         boolean checked = memberService.checkReconfigPasswordAuthNum(req.authNum(), req.email());
         if (checked) {
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(new JwtRes(
+                    memberService.getJwtForReconfigPassword(req.email())
+            ) ,HttpStatus.OK);
         }
-        return new ResponseEntity<>(new UsernameRes(req.email()),HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
-    @Operation(summary = "비밀번호 재설정 API", description = "재설정할 회원의 이메일과 재설정할 비밀번호를 같이 보내야 합니다")
+    @Operation(
+            summary = "비밀번호 재설정 API",
+            description = "/member/reconfig_password/authenticate에서 발급받은 jwt와 재설정할 비밀번호를 같이 보내야 합니다"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "비밀번호 재설정 성공"),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "JWT가 만료되었거나 유효하지 않은 경우",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResult.class))
+            )
+    })
     @PostMapping("/member/reconfig_password/execute")
     public ResponseEntity<?> ReconfigPassword(@RequestBody PasswordReq req){
-        memberService.reconfigPassword(req.reconfigPassword(), req.email());
+
+        String jwt = req.jwt();
+        String email = jwtUtil.getEmail(jwt);
+        String category = jwtUtil.getCategory(jwt);
+
+        if (jwtUtil.isExpired(jwt)){
+            return new ResponseEntity<>(new ErrorResult(
+                    "JWTExpiredException",
+                    "jwt 만료 시간이 지났습니다"
+            ), HttpStatus.BAD_REQUEST);
+        }
+
+        if (!category.equals("reconfig")) {
+            return new ResponseEntity<>(new ErrorResult(
+                    "InvalidJwtException",
+                    "정상적인 jwt 토큰이 아닙니다"
+            ), HttpStatus.BAD_REQUEST);
+        }
+
+        memberService.reconfigPassword(req.reconfigPassword(), email);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
