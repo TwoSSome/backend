@@ -16,6 +16,7 @@ import towssome.server.dto.CursorResult;
 import towssome.server.dto.HashtagRes;
 import towssome.server.entity.HashTag;
 import towssome.server.entity.HashtagClassification;
+import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
 import towssome.server.repository.hashtag.HashTagRepository;
 import towssome.server.repository.hashtag_classification.HashtagClassificationRepository;
@@ -172,6 +173,37 @@ public class HashtagService {
         ArrayList<HashtagRes> result = new ArrayList<>();
 
         for (HashTag hashTag : hashtagRank) {
+            result.add(new HashtagRes(
+                    hashTag.getId(),
+                    hashTag.getName()
+            ));
+        }
+
+        return result;
+    }
+
+    public List<HashtagRes> getAllReviewHashtags() {
+        List<HashTag> allHashtags = hashtagRepository.findAllReviewHashTags();
+
+        ArrayList<HashtagRes> result = new ArrayList<>();
+
+        for (HashTag hashTag : allHashtags) {
+            result.add(new HashtagRes(
+                    hashTag.getId(),
+                    hashTag.getName()
+            ));
+        }
+
+        return result;
+    }
+
+    public List<HashtagRes> getMemberViewedHashtags(Member member) {
+
+        List<HashTag> allHashtags = hashtagRepository.findMemberViewedHashTags(member);
+
+        ArrayList<HashtagRes> result = new ArrayList<>();
+
+        for (HashTag hashTag : allHashtags) {
             result.add(new HashtagRes(
                     hashTag.getId(),
                     hashTag.getName()

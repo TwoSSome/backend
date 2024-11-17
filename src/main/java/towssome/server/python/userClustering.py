@@ -22,7 +22,6 @@ import numpy as np
 from gensim.models import FastText
 
 from sklearn.preprocessing import StandardScaler
-from flask import Flask, jsonify
 
 #from sklearn.cluster import DBSCAN
 #from sklearn.neighbors import NearestNeighbors
@@ -57,12 +56,7 @@ def vectorize_tags(user_tags):
 """
 
 #FastWord
-def vectorize_tags(user_tags):
-    all_tags = [tag for user in user_tags.values() for tag in user["tags"]]
-
-    # FastText 모델 훈련
-    model = FastText(sentences=[all_tags], vector_size=100, window=5, min_count=1, workers=4)
-
+def vectorize_tags(user_tags, model):
     # 태그 벡터 생성
     user_vectors = {}
     for user_id, user in user_tags.items():

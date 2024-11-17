@@ -3,9 +3,14 @@ package towssome.server.service;
 import com.querydsl.core.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 import towssome.server.advice.PhotoAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.*;
@@ -28,6 +33,7 @@ public class RecommendService {
     private final HashtagClassificationService hashtagClassificationService;
     private final ViewlikeService viewlikeService;
     private final PhotoAdvice photoAdvice;
+    private final RestTemplate restTemplate;
 
     @Transactional
     public CursorResult<ProfileRes> getRecommendProfilePage(Member jwtMember, int page, int size) {
@@ -118,5 +124,23 @@ public class RecommendService {
                 (long) page +1,
                 recommendedReviewList.hasNext()
         );
+    }
+
+    public ListResultRes<List<String>> getSearchRecommendTags(String searchTerm, int size) {
+        try {
+            String urlString = "http://localhost:5000/tagRecommend?search_term=" + searchTerm + "&size=" + size;
+
+            ResponseEntity<List<String>> response = restTemplate.exchange(
+                    urlString, HttpMethod.GET, null, new ParameterizedTypeReference<List<String>>() {});
+
+            List<String> recommendedTags = response.getBody();
+
+            return new ListResultRes<>(recommendedTags);
+
+        } catch (HttpClientErrorException e) {
+            System.err.println("Error during the request to Python service: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Error while fetching recommended tags from Python service", e);
+        }
     }
 }

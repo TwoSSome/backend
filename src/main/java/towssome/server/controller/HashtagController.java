@@ -10,16 +10,15 @@ import towssome.server.advice.MemberAdvice;
 import towssome.server.dto.CursorResult;
 import towssome.server.dto.HashtagDeleteReq;
 import towssome.server.dto.HashtagRes;
-import towssome.server.dto.VirtualRes;
 import towssome.server.entity.HashTag;
 import towssome.server.entity.Member;
 import towssome.server.exception.PageException;
 import towssome.server.service.HashtagClassificationService;
 import towssome.server.service.HashtagService;
-import towssome.server.service.MemberService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Tag(name = "해시태그")
 @RestController
@@ -29,7 +28,6 @@ public class HashtagController {
     private final HashtagService hashtagService;
     private final HashtagClassificationService hashtagClassificationService;
     private final MemberAdvice memberAdvice;
-    private final MemberService memberService;
 
     @Operation(summary = "리뷰글 해시태그 삭제 API", description = "리뷰글에서 해시태그를 삭제합니다")
     @PostMapping("/delete")
@@ -83,5 +81,20 @@ public class HashtagController {
     public List<HashtagRes> getHashtagRank(){
 
         return hashtagService.getHashtagRank();
+    }
+
+    @GetMapping("/getAllTags")
+    public ResponseEntity<List<HashtagRes>> getAllReviewTags() {
+        List<HashtagRes> allTagList = hashtagService.getAllReviewHashtags();
+
+        return ResponseEntity.ok(allTagList);
+    }
+
+    @GetMapping("/getJwtMemberViewedReviewTags")
+    public ResponseEntity<List<HashtagRes>> getJwtMemberViewedTags() {
+        Member member = memberAdvice.findJwtMember();
+        List<HashtagRes> allTagList = hashtagService.getMemberViewedHashtags(member);
+
+        return ResponseEntity.ok(allTagList);
     }
 }
