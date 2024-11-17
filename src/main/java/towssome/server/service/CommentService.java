@@ -69,19 +69,26 @@ public class CommentService {
         List<CommentRes> commentRes = new ArrayList<>();
         final Page<Comment> comments = getCommentsByReviewId(reviewId, cursorId, sort, page);
         Member member = memberAdvice.findJwtMember();
+        ProfileSimpleRes profileSimpleRes;
         Boolean isLiked;
         for(Comment comment:comments){
+            Member commentedMember = comment.getMember();
+            profileSimpleRes = new ProfileSimpleRes(
+                    commentedMember.getNickName(),
+                    commentedMember.getProfilePhoto() == null ? null : commentedMember.getProfilePhoto().getS3Path(),
+                    commentedMember.getId()
+            );
             isLiked = commentLikeService.isLikedComment(member, comment);
             commentRes.add(new CommentRes(
                     comment.getId(),
                     comment.getBody(),
                     comment.getCreateDate(),
                     comment.getLastModifiedDate(),
-                    comment.getMember().getId(),
                     comment.getReviewPost().getId(),
                     isLiked,
                     commentLikeService.countLike(comment),
-                    comment.getFixFlag()
+                    comment.getFixFlag(),
+                    profileSimpleRes
             ));
         }
         cursorId = comments.isEmpty()?
