@@ -16,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.transaction.annotation.Transactional;
 import towssome.server.dto.ErrorResult;
 import towssome.server.entity.Member;
 import towssome.server.entity.RefreshToken;
@@ -138,14 +139,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         return cookie;
     }
 
-    private void addRefreshEntity(String username, String refresh, Long expiredMs) {
+    @Transactional
+    protected void addRefreshEntity(String username, String refresh, Long expiredMs) {
 
         Date date = new Date(System.currentTimeMillis() + expiredMs);
 
-        if (refreshTokenRepository.existsByUsername(username)) {
-            RefreshToken byUsername = refreshTokenRepository.findByUsername(username);
-            refreshTokenRepository.delete(byUsername);
-        }
+        refreshTokenRepository.deleteAllByUsername(username);
 
         RefreshToken refreshEntity = new RefreshToken(username,refresh,date.toString());
 

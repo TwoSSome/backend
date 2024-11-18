@@ -42,6 +42,12 @@ public class ReissueController {
             return new ResponseEntity<>("refresh token null", HttpStatus.BAD_REQUEST);
         }
 
+        // DB에 저장되어 있는지 확인
+        Boolean isExist = refreshTokenRepository.existsByRefresh(refresh);
+        if (!isExist) {
+            return new ResponseEntity<>("invalid refresh token", HttpStatus.BAD_REQUEST);
+        }
+
         // expired check
         try {
             jwtUtil.isExpired(refresh);
@@ -53,12 +59,6 @@ public class ReissueController {
         String category = jwtUtil.getCategory(refresh);
 
         if (!category.equals("refresh")) {
-            return new ResponseEntity<>("invalid refresh token", HttpStatus.BAD_REQUEST);
-        }
-
-        // DB에 저장되어 있는지 확인
-        Boolean isExist = refreshTokenRepository.existsByRefresh(refresh);
-        if (!isExist) {
             return new ResponseEntity<>("invalid refresh token", HttpStatus.BAD_REQUEST);
         }
 
@@ -101,6 +101,11 @@ public class ReissueController {
     private void addRefreshEntity(String username, String refresh, Long expiredMs) {
 
         Date date = new Date(System.currentTimeMillis() + expiredMs);
+
+        if (refreshTokenRepository.existsByUsername(username)) {
+            RefreshToken byUsername = refreshTokenRepository.findByUsername(username);
+            refreshTokenRepository.delete(byUsername);
+        }
 
         RefreshToken refreshEntity = new RefreshToken(username,refresh,date.toString());
 
