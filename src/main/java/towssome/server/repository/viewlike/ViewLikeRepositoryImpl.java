@@ -115,19 +115,4 @@ public class ViewLikeRepositoryImpl implements ViewLikeRepositoryCustom {
         return result.size() > size;
     }
 
-
-    @Override
-    public List<Tuple> findViewLikesWithScores(Member member, List<Member> clusterMembers) {
-        return queryFactory.select(
-                        viewLike.reviewPost,
-                        viewLike.member,
-                        viewLike.likeFlag,
-                        viewLike.viewFlag,
-                        viewLike.reviewPost.id.count().multiply(0.2).add(1.0).as("likeWeight"),
-                        viewLike.reviewPost.id.count().multiply(0.05).add(1.0).as("viewWeight")
-                )
-                .from(viewLike)
-                .where(viewLike.member.in(clusterMembers))
-                .fetch();
-    }
 }

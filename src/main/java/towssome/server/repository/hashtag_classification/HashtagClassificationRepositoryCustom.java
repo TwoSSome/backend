@@ -3,7 +3,6 @@ package towssome.server.repository.hashtag_classification;
 import com.querydsl.core.Tuple;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import towssome.server.dto.QuickRecommendReq;
 import towssome.server.entity.ReviewPost;
 
 import java.util.List;
