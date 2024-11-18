@@ -91,7 +91,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String refresh = jwtUtil.createJwt("refresh", username, role, REFRESH_EXPIRE_MS);
 
         // refreshToken 저장
-        addRefreshEntity(username, refresh, REFRESH_EXPIRE_MS);
+        jwtUtil.addRefreshEntity(username, refresh, REFRESH_EXPIRE_MS);
 
         // 응답 설정
         response.setContentType("application/json");
@@ -127,27 +127,4 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         writer.flush();
     }
 
-    //쿠키 생성 메서드
-    private Cookie createCookie(String key, String value) {
-
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24*60*60);
-        cookie.setSecure(false); //https 설정 시
-        //cookie.setPath("/");
-        cookie.setHttpOnly(true);
-
-        return cookie;
-    }
-
-    @Transactional
-    protected void addRefreshEntity(String username, String refresh, Long expiredMs) {
-
-        Date date = new Date(System.currentTimeMillis() + expiredMs);
-
-        refreshTokenRepository.deleteAllByUsername(username);
-
-        RefreshToken refreshEntity = new RefreshToken(username,refresh,date.toString());
-
-        refreshTokenRepository.save(refreshEntity);
-    }
 }
