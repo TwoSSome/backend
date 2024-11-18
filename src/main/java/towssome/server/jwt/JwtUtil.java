@@ -1,9 +1,13 @@
 package towssome.server.jwt;
 
 import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
+import towssome.server.entity.RefreshToken;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -14,10 +18,11 @@ import java.util.Date;
 public class JwtUtil {
 
     private SecretKey secretKey;
-    private RefreshTokenRepository refreshTokenRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
-    public JwtUtil(@Value("${jwt.secret}") String secret) {
+    public JwtUtil(@Value("${jwt.secret}") String secret, RefreshTokenRepository refreshTokenRepository) {
         secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
+        this.refreshTokenRepository = refreshTokenRepository;
     }
 
     public String getUsername(String token) {
@@ -66,6 +71,30 @@ public class JwtUtil {
                 .expiration(new Date(System.currentTimeMillis() + expiredMs)) //토큰 소멸 시간
                 .signWith(secretKey)
                 .compact();
+    }
+
+    @Transactional
+    protected void addRefreshEntity(String username, String refresh, Long expiredMs) {
+
+        Date date = new Date(System.currentTimeMillis() + expiredMs);
+
+        refreshTokenRepository.deleteAllByUsername(username);
+
+        RefreshToken refreshEntity = new RefreshToken(username,refresh,date.toString());
+
+        refreshTokenRepository.save(refreshEntity);
+    }
+
+    //쿠키 생성 메서드
+    private Cookie createCookie(String key, String value) {
+
+        Cookie cookie = new Cookie(key, value);
+        cookie.setMaxAge(24*60*60);
+        cookie.setSecure(false); //https 설정 시
+        //cookie.setPath("/");
+        cookie.setHttpOnly(true);
+
+        return cookie;
     }
 
 }
