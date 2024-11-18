@@ -11,6 +11,8 @@ import towssome.server.exception.PageException;
 import towssome.server.service.MemberService;
 import towssome.server.service.RecommendService;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -43,6 +45,12 @@ public class RecommendController {
         }
         Member jwtMember = memberAdvice.findJwtMember();
         return recommendService.getRecommendedReview(jwtMember, cursorId, size);
+    }
+
+    @GetMapping("/searchtag")
+    public ListResultRes<List<String>> keywordSearch(@RequestParam(value="keyword") String keyword,
+                                                     @RequestParam(value = "size", required = false, defaultValue = "15") Integer size){
+        return recommendService.getSearchRecommendTags(keyword, size);
     }
 
 

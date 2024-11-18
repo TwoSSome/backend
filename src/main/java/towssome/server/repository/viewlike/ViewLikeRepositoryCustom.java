@@ -17,6 +17,4 @@ public interface ViewLikeRepositoryCustom {
 
     Long findLikeAmountByReviewPost(Long reviewId);
     Long findViewAmountByReviewPost(Long reviewId);
-
-    List<Tuple> findViewLikesWithScores(Member member, List<Member> clusterMembers);
 }

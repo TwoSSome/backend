@@ -11,8 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
-import towssome.server.dto.QuickRecommendReq;
-import towssome.server.entity.QHashtagClassification;
 import towssome.server.entity.ReviewPost;
 
 import java.util.List;

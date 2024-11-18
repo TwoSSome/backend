@@ -4,6 +4,7 @@ import sys
 import urllib.request
 
 from userClustering import fetch_user_tags, vectorize_tags, cluster_users
+from tagRecommend import get_all_tags_from_java, get_viewed_review_tags_from_java, load_fasttext_model, train_and_save_fasttext_model, combine_and_sort_similar_tags, extract_names
 
 try:
     # 없는 모듈 import시 에러 발생
@@ -250,16 +251,49 @@ def item_urls():
 @app.route('/userClustering', methods=['GET'])
 def user_clustering():
     user_tags = fetch_user_tags()
+    all_tags = [tag for user in user_tags.values() for tag in user["tags"]]
+
+    model_path = "usertags_model.model"
+    try:
+        model = load_fasttext_model(model_path)
+        print("모델 로드 완료.")
+    except Exception as e:
+        print(f"모델 로드 실패, 새로 학습합니다. 오류: {e}")
+        model = train_and_save_fasttext_model(all_tags, model_path)
+
     if user_tags:
-        user_vectors = vectorize_tags(user_tags)
+        user_vectors = vectorize_tags(user_tags, model)
         clustered_users = cluster_users(user_vectors)
 
-        # numpy.int64 키를 기본 int로 변환
         clustered_users = {int(k): v for k, v in clustered_users.items()}
 
         return jsonify(clustered_users)
     else:
         return jsonify({"error": "사용자 태그를 가져오는 데 실패했습니다."}), 500
+
+@app.route("/tagRecommend", methods=["GET"])
+def tag_recommend():
+    size = request.args.get("size", type=int)
+    search_term = request.args.get("search_term", type=str)
+    model_path = "tags_model.model"
+
+    all_tags = get_all_tags_from_java()
+    review_tags = get_viewed_review_tags_from_java()
+
+    all_tags = extract_names(all_tags)
+    review_tags = extract_names(review_tags)
+
+    try:
+        model = load_fasttext_model(model_path)
+        print("모델 로드 완료.")
+    except Exception as e:
+        print(f"모델 로드 실패, 새로 학습합니다. 오류: {e}")
+        model = train_and_save_fasttext_model(all_tags, model_path)
+
+    recommended_tags = combine_and_sort_similar_tags(review_tags, search_term, model, all_tags, size)
+
+    print(recommended_tags)
+    return jsonify(recommended_tags)
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000, host="0.0.0.0")
