@@ -1,5 +1,6 @@
 package towssome.server.service;
 
+import com.querydsl.core.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,7 @@ public class HashtagService {
     private RestTemplate restTemplate;
     private final HashTagRepository hashtagRepository;
     private final HashtagClassificationRepository hashtagClassificationRepository;
+    private final HashtagClassificationService hashtagClassificationService;
 
 
     /**
@@ -213,6 +215,17 @@ public class HashtagService {
         return result;
     }
 
+    public List<HashtagRes> getHashtags(Long reviewId) {
+        List<HashtagRes> hashtags = new ArrayList<>();
+        for(Tuple tuple : hashtagClassificationService.getHashtags(reviewId)) {
+            hashtags.add(new HashtagRes(
+                    tuple.get(0, Long.class),
+                    tuple.get(1, String.class)
+            ));
+        }
+
+        return hashtags;
+    }
 
 
 }

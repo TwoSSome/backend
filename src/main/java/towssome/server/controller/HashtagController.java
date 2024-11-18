@@ -18,7 +18,6 @@ import towssome.server.service.HashtagService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Tag(name = "해시태그")
 @RestController
@@ -39,13 +38,13 @@ public class HashtagController {
     @Operation(summary = "리뷰글의 해시태그 API", description = "해당 리뷰글이 가지고 있는 해시태그를 가져옵니다")
     @GetMapping("/{reviewId}")
     public ResponseEntity<?> getHashtags(@PathVariable Long reviewId) {
-        return new ResponseEntity<>(hashtagClassificationService.getHashtags(reviewId), HttpStatus.OK);
+        return new ResponseEntity<>(hashtagService.getHashtags(reviewId), HttpStatus.OK);
     }
 
     @Operation(summary = "모든 해시태그 API", description = "존재하는 모든 해시태그를 가져옵니다")
     @GetMapping
     public ResponseEntity<?> getAllHashtags() {
-        return new ResponseEntity<>(hashtagClassificationService.getAllHashtags(), HttpStatus.OK);
+        return new ResponseEntity<>(hashtagService.getAllReviewHashtags(), HttpStatus.OK);
     }
 
 
