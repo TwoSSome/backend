@@ -8,7 +8,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import towssome.server.advice.MemberAdvice;
 import towssome.server.advice.PhotoAdvice;
-import towssome.server.dto.*;
+import towssome.server.dto.CursorResult;
+import towssome.server.dto.HashtagRes;
+import towssome.server.dto.PhotoInPost;
+import towssome.server.dto.ReviewSimpleRes;
 import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
 import towssome.server.repository.hashtag_classification.HashtagClassificationRepository;
@@ -82,11 +85,4 @@ public class HashtagClassificationService{
     public List<Tuple> getHashtags(Long reviewId) {
         return hashtagClassificationRepository.findHashtagsByReviewId(reviewId);
     }
-
-    public Object getAllHashtags() {
-        return hashtagClassificationRepository.findAll();
-    }
-
-
-
 }
