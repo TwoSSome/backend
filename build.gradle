@@ -26,11 +26,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     compileOnly 'org.projectlombok:lombok'
-    if (System.getProperty('spring.profiles.active') == 'prod') { // 서버 환경일때
-        implementation 'com.mysql:mysql-connector-j:8.3.0' // MySQL 드라이버
-    } else { // 로컬 환경일때
+//    if (System.getProperty('spring.profiles.active') == 'prod') { // 서버 환경일때
+        implementation 'com.mysql:mysql-connector-j' // MySQL 드라이버
+//    } else { // 로컬 환경일때
         implementation 'com.h2database:h2' // H2 데이터베이스
-    }
+//    }
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
