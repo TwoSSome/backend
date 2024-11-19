@@ -27,7 +27,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     compileOnly 'org.projectlombok:lombok'
     if (System.getenv('DOCKER_USERNAME') && System.getenv('DOCKER_PASSWORD')) { // 서버 환경일때
-        implementation 'mysql:mysql-connector-java:8.0.34' // MySQL 드라이버
+        implementation 'mysql:mysql-connector-java:8.1.0' // MySQL 드라이버
     } else { // 로컬 환경일때
         implementation 'com.h2database:h2' // H2 데이터베이스
     }
