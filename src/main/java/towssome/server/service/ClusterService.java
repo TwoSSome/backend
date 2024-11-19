@@ -1,6 +1,7 @@
 package towssome.server.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,9 @@ public class ClusterService {
     private final ClusterRepository clusterRepository;
     private final MemberRepository memberRepository;
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String pythonServiceUrl = "http://localhost:5000/userClustering";
+    @Value("${flask.IP}")
+    private String FLASK_IP;
+    private final String pythonServiceUrl = FLASK_IP + "/userClustering";
 
     @Transactional
     public void performClustering() {

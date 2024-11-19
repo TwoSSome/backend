@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.advice.PhotoAdvice;
+import towssome.server.advice.URLAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
@@ -44,7 +46,8 @@ public class ReviewPostService {
     private final HashtagClassificationService hashtagClassificationService;
     private final SubscribeRepository subscribeRepository;
     private final RestTemplate restTemplate = new RestTemplate();
-
+    @Value("${flask.IP}")
+    private String FLASK_IP;
 
     public ReviewPost createReview(
             ReviewPostReq reviewReq,
@@ -321,7 +324,7 @@ public class ReviewPostService {
 
     private String createLinkString(String item) {
         if(item == null) return null;
-        String url = "http://localhost:5000/itemurls";
+        String url = FLASK_IP + "/itemurls";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));

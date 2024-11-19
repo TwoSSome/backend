@@ -7,12 +7,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import towssome.server.advice.URLAdvice;
 import towssome.server.dto.CursorResult;
 import towssome.server.dto.HashtagRes;
 import towssome.server.entity.HashTag;
@@ -37,7 +39,8 @@ public class HashtagService {
     private final HashTagRepository hashtagRepository;
     private final HashtagClassificationRepository hashtagClassificationRepository;
     private final HashtagClassificationService hashtagClassificationService;
-
+    @Value("${flask.IP}")
+    private String FLASK_IP;
 
     /**
      * koBert 를 통해 추출한 문자열을 인자로 받습니다. 해당 문자열이 해시태그로 저장되어 있으면 1증가
@@ -46,7 +49,7 @@ public class HashtagService {
      */
     public void createHashtag(ReviewPost reviewPost) {
         String stringWithoutNewLines = reviewPost.getBody().replaceAll("\\r\\n|\\r|\\n", "");
-        String url = "http://localhost:5000/makeHashtag";
+        String url = FLASK_IP + "/makeHashtag";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));  // 문자열 전송을 위한 컨텐트 타입
         HttpEntity<String> entity = new HttpEntity<>(stringWithoutNewLines, headers);
