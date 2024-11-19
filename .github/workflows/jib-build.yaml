@@ -67,4 +67,4 @@ jobs:
             docker pull gooch1744/poompoom-api:latest
             docker stop poompoom-api || true
             docker rm poompoom-api || true
-            docker run -d --name poompoom-api -p 8080:8080 -e TZ=Asia/Seoul gooch1744/poompoom-api:latest
+            docker run -d --name poompoom-api -p 8080:8080 -e TZ=Asia/Seoul --add-host=host.docker.internal:host-gateway gooch1744/poompoom-api:latest
