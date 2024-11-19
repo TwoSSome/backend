@@ -3,7 +3,7 @@ name: Jib Build and Push
 on:
   push:
     branches:
-      - main  # main 브랜치에 푸시될 때 빌드 및 푸시 실행
+      - master  # master 브랜치에 푸시될 때 빌드 및 푸시 실행
 
 jobs:
   build:
