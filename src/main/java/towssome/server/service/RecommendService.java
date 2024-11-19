@@ -3,6 +3,7 @@ package towssome.server.service;
 import com.querydsl.core.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpMethod;
@@ -34,6 +35,8 @@ public class RecommendService {
     private final ViewlikeService viewlikeService;
     private final PhotoAdvice photoAdvice;
     private final RestTemplate restTemplate;
+    @Value("${flask.IP}")
+    private String FLASK_IP;
 
     @Transactional
     public CursorResult<ProfileRes> getRecommendProfilePage(Member jwtMember, int page, int size) {
@@ -128,7 +131,7 @@ public class RecommendService {
 
     public ListResultRes<List<String>> getSearchRecommendTags(String searchTerm, int size) {
         try {
-            String urlString = "http://localhost:5000/tagRecommend?search_term=" + searchTerm + "&size=" + size;
+            String urlString = FLASK_IP + "/tagRecommend?search_term=" + searchTerm + "&size=" + size;
 
             ResponseEntity<List<String>> response = restTemplate.exchange(
                     urlString, HttpMethod.GET, null, new ParameterizedTypeReference<List<String>>() {});
