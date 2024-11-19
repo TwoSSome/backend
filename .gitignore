@@ -8,7 +8,6 @@ application.properties
 TestInit.java
 src/test/
 src/test/java/towssome/server/ServerApplicationTests.java
-build.gradle
 기능-추가.md
 버그-수정.md
 
