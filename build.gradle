@@ -27,7 +27,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     compileOnly 'org.projectlombok:lombok'
     if (System.getProperty('spring.profiles.active') == 'prod') { // 서버 환경일때
-        runtimeOnly 'com.mysql:mysql-connector-j' // MySQL 드라이버
+        runtimeOnly 'com.mysql:mysql-connector-j:8.3.0' // MySQL 드라이버
     } else { // 로컬 환경일때
         implementation 'com.h2database:h2' // H2 데이터베이스
     }
