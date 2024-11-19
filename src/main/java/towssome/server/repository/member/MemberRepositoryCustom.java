@@ -10,4 +10,5 @@ public interface MemberRepositoryCustom {
 
     void reconfigPassword(String password, String email);
 
+
 }

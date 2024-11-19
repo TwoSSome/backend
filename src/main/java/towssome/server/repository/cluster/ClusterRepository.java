@@ -7,6 +7,4 @@ import java.util.List;
 
 public interface ClusterRepository extends JpaRepository<Cluster,Long>,ClusterRepositoryCustom {
     void deleteAllBy();
-    Cluster findByMemberId(long memberId);
-    List<Cluster> findByClusterNum(Long clusterNum);
 }
