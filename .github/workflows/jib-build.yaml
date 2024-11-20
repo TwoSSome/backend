@@ -33,8 +33,7 @@ jobs:
 
       - name: Build and Push Docker Image with Jib
         run: |
-          ./gradlew clean
-          ./gradlew jib
+          ./gradlew clean compileQuerydsl jib --stacktrace --info
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
