@@ -2,6 +2,7 @@ package towssome.server.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import towssome.server.entity.Member;
 import towssome.server.entity.SearchHistory;
@@ -9,6 +10,7 @@ import towssome.server.repository.SearchHistoryRepository;
 
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SearchHistoryService {
@@ -20,11 +22,12 @@ public class SearchHistoryService {
 
         if (existingSearchHistory.isPresent()) {
             SearchHistory searchHistory = existingSearchHistory.get();
-        } else {
-            SearchHistory newSearchHistory = new SearchHistory();
-            newSearchHistory.setMember(member);
-            newSearchHistory.setKeyword(keyword);
-            searchHistoryRepository.save(newSearchHistory);
+            searchHistory.setKeyword(keyword);
+            return;
         }
+        SearchHistory newSearchHistory = new SearchHistory();
+        newSearchHistory.setMember(member);
+        newSearchHistory.setKeyword(keyword);
+        searchHistoryRepository.save(newSearchHistory);
     }
 }
