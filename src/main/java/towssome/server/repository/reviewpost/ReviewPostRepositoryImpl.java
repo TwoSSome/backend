@@ -7,6 +7,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -29,6 +30,7 @@ import static towssome.server.entity.QReviewPost.reviewPost;
 import static towssome.server.entity.QSubscribe.*;
 import static towssome.server.entity.QViewLike.viewLike;
 
+@Slf4j
 @RequiredArgsConstructor
 public class ReviewPostRepositoryImpl implements ReviewPostRepositoryCustom {
     private final JPAQueryFactory queryFactory;
@@ -176,9 +178,9 @@ public class ReviewPostRepositoryImpl implements ReviewPostRepositoryCustom {
         Map<ReviewPost, Double> trendScores = new HashMap<>();
         Map<ReviewPost, Double> keywordScores = new HashMap<>();
 
-        List<Member> allMembers = queryFactory.select(member)
-                .from(member)
-                .fetch();
+        List<ReviewPost> allReviews = queryFactory.selectFrom(reviewPost).fetch();
+
+        List<Member> allMembers = queryFactory.selectFrom(member).fetch();
 
         for (Member otherMember : allMembers) {
             double similarity = calculateInteractionSimilarity(jwtMember, otherMember, clusterMembers.contains(otherMember));
@@ -197,10 +199,12 @@ public class ReviewPostRepositoryImpl implements ReviewPostRepositoryCustom {
             }
         }
 
-        for (ReviewPost reviewPost : interactionScores.keySet()) {
-            double finalScore = interactionScores.get(reviewPost)
-                    * trendScores.get(reviewPost)
-                    * keywordScores.get(reviewPost);
+        for (ReviewPost reviewPost : allReviews) {
+            double interactionScore = interactionScores.getOrDefault(reviewPost, 0.0);
+            double trendScore = trendScores.getOrDefault(reviewPost, 1.0);
+            double keywordScore = keywordScores.getOrDefault(reviewPost, 1.0);
+
+            double finalScore = interactionScore * trendScore * keywordScore;
 
             recommendationScores.merge(reviewPost, finalScore, Double::sum);
         }
@@ -255,16 +259,23 @@ public class ReviewPostRepositoryImpl implements ReviewPostRepositoryCustom {
 
     private double calculateKeywordBoost(Member jwtMember, ReviewPost reviewPost) {
         List<String> searchedKeywords = getSearchedKeywords(jwtMember);
-
         List<Tuple> reviewTags = hashtagClassificationService.getHashtags(reviewPost.getId());
+
+        if (reviewTags.isEmpty() || searchedKeywords.isEmpty()) {
+            return 1.0;
+        }
 
         long commonKeywords = searchedKeywords.stream()
                 .filter(keyword -> reviewTags.stream()
-                        .anyMatch(tag -> Objects.requireNonNull(tag.get(1, String.class)).equalsIgnoreCase(keyword)))
+                        .anyMatch(tag -> {
+                            String tagValue = tag.get(1, String.class);
+                            return tagValue != null && tagValue.equalsIgnoreCase(keyword);
+                        }))
                 .count();
 
         return 1 + (commonKeywords * 0.3);
     }
+
 
     private List<String> getSearchedKeywords(Member jwtMember) {
         return searchHistoryRepository.findKeywordsByMember(jwtMember);
