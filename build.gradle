@@ -111,17 +111,26 @@ test {
     useJUnitPlatform()
 }
 
-/**
- * QueryDSL Build Options
- */
-def querydslDir = "src/main/generated"
+def querydslDir = "build/generated/source/apt/main"
 
-sourceSets {
-    main.java.srcDirs += [ querydslDir ]
+tasks.register("compileQuerydsl", JavaCompile) {
+    group = "build"
+    description = "Generates the Q-classes for QueryDSL"
+    source = sourceSets.main.java
+    classpath = sourceSets.main.compileClasspath
+    options.annotationProcessorGeneratedSourcesDirectory = file(querydslDir)
 }
 
 tasks.withType(JavaCompile) {
-    options.getGeneratedSourceOutputDirectory().set(file(querydslDir))
+    options.annotationProcessorGeneratedSourcesDirectory = file(querydslDir)
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += querydslDir
+        }
+    }
 }
 
 clean.doLast {
