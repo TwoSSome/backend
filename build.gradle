@@ -118,6 +118,7 @@ tasks.register("compileQuerydsl", JavaCompile) {
     description = "Generates the Q-classes for QueryDSL"
     source = sourceSets.main.java
     classpath = sourceSets.main.compileClasspath
+    destinationDirectory.set(file(querydslDir)) // destinationDirectory 명시적으로 설정
     options.annotationProcessorGeneratedSourcesDirectory = file(querydslDir)
 }
 
@@ -136,3 +137,4 @@ sourceSets {
 clean.doLast {
     file(querydslDir).deleteDir()
 }
+
