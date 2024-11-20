@@ -33,20 +33,20 @@ public class SubscribeController {
             @ApiResponse(responseCode = "200", description = "구독 성공", content = @Content(schema = @Schema(implementation = CreateRes.class)))
     })
     @PostMapping("/add")
-    public ResponseEntity<?> addSubscribe(@RequestBody FollowReq req){
+    public ResponseEntity<?> addSubscribe(@RequestBody FollowReq req) {
 
         Member subscriber = memberAdvice.findJwtMember();
         Member following = memberService.getMember(req.subscribeId());
 
         Subscribe subscribe = subscribeService.addSubscribe(subscriber, following);
 
-        return new ResponseEntity<>(new CreateRes(subscribe.getId()),HttpStatus.OK);
+        return new ResponseEntity<>(new CreateRes(subscribe.getId()), HttpStatus.OK);
     }
 
     @Operation(summary = "구독 취소 API", parameters = {
     })
     @PostMapping("/cancel")
-    public ResponseEntity<?> cancelSubscribe(@RequestBody CancelFollowReq req){
+    public ResponseEntity<?> cancelSubscribe(@RequestBody CancelFollowReq req) {
 
         Subscribe cancelSubscribe = subscribeService.getSubscribe(req.cancelId());
         subscribeService.cancelSubscribe(cancelSubscribe);
@@ -62,15 +62,15 @@ public class SubscribeController {
     @GetMapping
     public CursorResult<SubscribeRes> getSubscribe(
             @RequestParam int cursorId,
-            @RequestParam(required = false) Integer size){
+            @RequestParam(required = false) Integer size) {
 
         if (cursorId < 1) {
             throw new PageException("페이지는 1보다 작을 수 없습니다!!");
         }
 
-        if(size == null) size = 10;
+        if (size == null) size = 10;
         Member jwtMember = memberAdvice.findJwtMember();
-        return subscribeService.getSubscribePage(jwtMember, cursorId -1, size);
+        return subscribeService.getSubscribePage(jwtMember, cursorId - 1, size);
     }
 
 }

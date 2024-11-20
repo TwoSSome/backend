@@ -7,6 +7,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -30,7 +31,9 @@ import static towssome.server.entity.QSubscribe.*;
 import static towssome.server.entity.QViewLike.viewLike;
 
 @RequiredArgsConstructor
+@Slf4j
 public class ReviewPostRepositoryImpl implements ReviewPostRepositoryCustom {
+
     private final JPAQueryFactory queryFactory;
     private final ViewLikeRepository viewLikeRepository;
     private final SearchHistoryRepository searchHistoryRepository;
@@ -43,7 +46,7 @@ public class ReviewPostRepositoryImpl implements ReviewPostRepositoryCustom {
 
         List<ReviewPost> content = queryFactory.select(reviewPost)
                 .from(subscribe)
-                .innerJoin(subscribe.followed,member)
+                .innerJoin(subscribe.followed, member)
                 .innerJoin(reviewPost).on(reviewPost.member.eq(member))
                 .where(subscribe.subscriber.eq(subscriber))
                 .orderBy(reviewPost.createDate.desc())
@@ -163,7 +166,7 @@ public class ReviewPostRepositoryImpl implements ReviewPostRepositoryCustom {
         return Objects.equals(sort, "asc") ? reviewPost.id.asc() : reviewPost.id.desc();
     }
 
-    private BooleanExpression getLTGT(String sort, Long cursorId){
+    private BooleanExpression getLTGT(String sort, Long cursorId) {
         return Objects.equals(sort, "asc") ? reviewPost.id.gt(cursorId) : reviewPost.id.lt(cursorId);
     }
 

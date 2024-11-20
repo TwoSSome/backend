@@ -110,16 +110,21 @@ public class ReviewController {
      */
     @Operation(summary = "구독 계정 리뷰글 조회 API",
             description = "구독한 계정들의 리뷰글 전체 조회 API",
-            parameters = {@Parameter(name = "cursorId", description = "최소 1이상, 한 페이지마다 10개의 리뷰글 가져옴") })
+            parameters = {
+            @Parameter(name = "cursorId", description = "최소 1이상, 한 페이지마다 10개의 리뷰글 가져옴"),
+            @Parameter(name = "size", description = "페이지의 리뷰글 갯수, default로 10개로 설정되어 있습니다")
+    })
     @GetMapping("/subscribe")
-    public CursorResult<ReviewSimpleRes> getSubscribeReviews(@RequestParam int cursorId){
+    public CursorResult<ReviewSimpleRes> getSubscribeReviews(
+            @RequestParam int cursorId,
+            @RequestParam(required = false,defaultValue = "10") Integer size){
 
         if (cursorId <= 0) {
             throw new PageException("페이지 번호는 0보다 커야 합니다");
         }
         Member jwtMember = memberAdvice.findJwtMember();
 
-        return reviewPostService.getSubscribeReview(jwtMember, cursorId);
+        return reviewPostService.getSubscribeReview(jwtMember, cursorId, size);
     }
 
     @Operation(summary = "해시태그 검색 API", description = "cursorId를 기준으로 sort 값으로 size 만큼의 게시글을 검색",

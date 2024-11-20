@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import towssome.server.advice.PhotoAdvice;
-import towssome.server.advice.URLAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
@@ -63,8 +62,7 @@ public class ReviewPostService {
         String itemUrl;
         if (reviewReq.item_url() == null) {
             itemUrl = createLinkString(reviewReq.item());
-        }
-        else {
+        } else {
             itemUrl = reviewReq.item_url();
         }
 
@@ -91,13 +89,13 @@ public class ReviewPostService {
                 new NotFoundReviewPostException("해당 리뷰글이 존재하지 않습니다."));
     }
 
-    public ReviewPostRes getReview(Long reviewId, Member member){
+    public ReviewPostRes getReview(Long reviewId, Member member) {
         ReviewPost review = getReview(reviewId);
         List<PhotoInPost> photo = photoAdvice.getPhotoS3Path(review);
         ReviewPostRes reviewRes;
 
         List<HashtagRes> hashtags = new ArrayList<>();
-        for(Tuple tuple : hashtagClassificationService.getHashtags(review.getId())) {
+        for (Tuple tuple : hashtagClassificationService.getHashtags(review.getId())) {
             hashtags.add(new HashtagRes(
                     tuple.get(0, Long.class),
                     tuple.get(1, String.class)
@@ -128,7 +126,7 @@ public class ReviewPostService {
                     review.getItem(),
                     getRandomLink(review.getItem_url()) == null ? null : getRandomLink(review.getItem_url())
             );
-        }else {
+        } else {
             //회원 조회
             viewlikeService.viewProcess(review, member);
             reviewRes = new ReviewPostRes(
@@ -167,7 +165,7 @@ public class ReviewPostService {
 
     @Transactional
     public void updateReview(Long reviewId, ReviewPostUpdateReq req, List<MultipartFile> addPhotos) throws IOException {
-        if(!req.willDeletePhoto().isEmpty()) {
+        if (!req.willDeletePhoto().isEmpty()) {
             List<Long> deletedPhotoIds = req.willDeletePhoto();
             for (Long deletedPhotoId : deletedPhotoIds)
                 photoAdvice.deletePhoto(deletedPhotoId);
@@ -175,13 +173,11 @@ public class ReviewPostService {
         ReviewPost reviewPost = getReview(reviewId);
 
         String itemUrl;
-        if (reviewPost.getItem() == null || reviewPost.getItem_url() == null || !reviewPost.getItem().equals(req.item()) ) {
+        if (reviewPost.getItem() == null || reviewPost.getItem_url() == null || !reviewPost.getItem().equals(req.item())) {
             itemUrl = createLinkString(req.item());
-        }
-        else if(req.item_url() != null) {
+        } else if (req.item_url() != null) {
             itemUrl = req.item_url();
-        }
-        else {
+        } else {
             itemUrl = reviewPost.getItem_url();
         }
 
@@ -204,7 +200,9 @@ public class ReviewPostService {
         return reviewPostRepository.findAllByMember(member).contains(reviewPost);
     }
 
-    /**최근 리뷰글 or 추천 리뷰글 */
+    /**
+     * 최근 리뷰글 or 추천 리뷰글
+     */
     public CursorResult<ReviewSimpleRes> getRecentReviewPage(Long cursorId, Boolean recommend, Pageable page) {
         List<ReviewSimpleRes> reviewSimpleRes = new ArrayList<>();
         final Page<ReviewPost> reviewPosts = getRecentReviewPosts(cursorId, recommend, page);
@@ -213,7 +211,7 @@ public class ReviewPostService {
 
     private CursorResult<ReviewSimpleRes> getReviewSimpleResCursorResult(List<ReviewSimpleRes> reviewSimpleRes, Page<ReviewPost> reviewPosts) {
         Long cursorId;
-        for(ReviewPost review : reviewPosts) {
+        for (ReviewPost review : reviewPosts) {
             List<PhotoInPost> bodyPhotos = photoAdvice.getPhotoS3Path(review);
             String bodyPhoto = bodyPhotos.isEmpty() ? null : bodyPhotos.get(0).photoPath();
             String profilePhoto = review.getMember().getProfilePhoto() != null ?
@@ -221,7 +219,7 @@ public class ReviewPostService {
                     null;
 
             List<HashtagRes> hashtags = new ArrayList<>();
-            for(Tuple tuple : hashtagClassificationService.getHashtags(review.getId())) {
+            for (Tuple tuple : hashtagClassificationService.getHashtags(review.getId())) {
                 hashtags.add(new HashtagRes(
                         tuple.get(0, Long.class),
                         tuple.get(1, String.class)
@@ -260,25 +258,35 @@ public class ReviewPostService {
                 reviewPostRepository.findByCursorIdLessThanOrderByReviewIdDesc(cursorId, recommend, page); // cursor_id가 null이 아니면 cursor_id보다 작은 리뷰글부터 페이지를 가져옴
     }
 
-    /**Get My Posts*/
+    /**
+     * Get My Posts
+     */
     public CursorResult<ReviewSimpleRes> getMyReviewPage(Member member, Long cursorId, String sort, Pageable page) {
         List<ReviewSimpleRes> reviewSimpleRes = new ArrayList<>();
         final Page<ReviewPost> reviewPosts = getMyReviewPosts(member.getId(), cursorId, sort, page);
         return getReviewSimpleResCursorResult(reviewSimpleRes, reviewPosts);
     }
 
+    /**
+     * 구독 계정 리뷰글들 가져오기
+     *
+     * @param subscriber, 구독 계정의 리뷰글들을 보고 싶은 회원
+     * @param page, 페이지
+     * @param size, 페이지 내 리뷰글 크기, default 10
+     * @return
+     */
     @Transactional
-    public CursorResult<ReviewSimpleRes> getSubscribeReview(Member subscriber, int page) {
+    public CursorResult<ReviewSimpleRes> getSubscribeReview(Member subscriber, int page, Integer size) {
 
         if (!subscribeRepository.existsBySubscriber(subscriber)) {
             return new CursorResult<>(
                     new ArrayList<>(1),
-                    (long)page,
+                    (long) page,
                     false
             );
         }
 
-        CursorResult<ReviewPost> subscribeReviewList = reviewPostRepository.findSubscribeReviewList(subscriber, PageRequest.of(page-1, 10));
+        CursorResult<ReviewPost> subscribeReviewList = reviewPostRepository.findSubscribeReviewList(subscriber, PageRequest.of(page - 1, size));
 
         ArrayList<ReviewSimpleRes> reviewSimpleRes = new ArrayList<>();
         for (ReviewPost value : subscribeReviewList.values()) {
@@ -290,7 +298,7 @@ public class ReviewPostService {
             String bodyPhoto = photoS3Path.isEmpty() ? null : photoS3Path.get(0).photoPath();
 
             List<HashtagRes> hashtags = new ArrayList<>();
-            for(Tuple tuple : hashtagClassificationService.getHashtags(value.getId())) {
+            for (Tuple tuple : hashtagClassificationService.getHashtags(value.getId())) {
                 hashtags.add(new HashtagRes(
                         tuple.get(0, Long.class),
                         tuple.get(1, String.class)
@@ -310,7 +318,7 @@ public class ReviewPostService {
 
         return new CursorResult<>(
                 reviewSimpleRes,
-                (long) page +1,
+                (long) page + 1,
                 subscribeReviewList.hasNext()
         );
     }
@@ -323,7 +331,7 @@ public class ReviewPostService {
 
 
     private String createLinkString(String item) {
-        if(item == null) return null;
+        if (item == null) return null;
         String url = FLASK_IP + "/itemurls";
 
         HttpHeaders headers = new HttpHeaders();
@@ -350,7 +358,7 @@ public class ReviewPostService {
     }
 
     private String getRandomLink(String url) {
-        if(url == null) return null;
+        if (url == null) return null;
 
         // 문자열을 쉼표로 구분하여 리스트로 변환
         List<String> linkList = Arrays.asList(url.split(",\\s*"));

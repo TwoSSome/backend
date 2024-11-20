@@ -30,7 +30,6 @@ public class CommentController {
     private final CommentLikeService commentLikeService;
     private final MemberAdvice memberAdvice;
     private static final int DEFAULT_SIZE = 20;
-    private final MemberService memberService;
 
     @Operation(summary = "댓글 생성 API", parameters = {
             @Parameter(name = "reviewId", description = "댓글이 생성될 리뷰글 id"),
