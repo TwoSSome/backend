@@ -64,8 +64,8 @@ public class HashTagRepositoryImpl implements HashTagRepositoryCustom{
         return queryFactory
                 .selectFrom(hashTag)
                 .join(hashtagClassification).on(hashtagClassification.hashTag.eq(hashTag))
-                .join(hashtagClassification).on(hashtagClassification.reviewPost.eq(reviewPost))
-                .join(reviewPost).on(viewLike.reviewPost.eq(reviewPost))
+                .join(reviewPost).on(hashtagClassification.reviewPost.eq(reviewPost))
+                .join(viewLike).on(viewLike.reviewPost.eq(reviewPost))
                 .where(viewLike.member.id.eq(member.getId()))
                 .distinct()
                 .fetch();

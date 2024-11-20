@@ -4,7 +4,7 @@ import sys
 import urllib.request
 
 from userClustering import fetch_user_tags, vectorize_tags, cluster_users
-from tagRecommend import get_all_tags_from_java, get_viewed_review_tags_from_java, load_fasttext_model, train_and_save_fasttext_model, combine_and_sort_similar_tags, extract_names
+from tagRecommend import get_all_tags_from_java, get_viewed_review_tags_from_java, load_fasttext_model, train_and_save_fasttext_model, sort_similar_tags, sort_similar_tag_random, extract_names
 
 try:
     # 없는 모듈 import시 에러 발생
@@ -40,7 +40,7 @@ except ImportError:
     from kobert_tokenizer import KoBERTTokenizer
 
 try:
-    from flask import Flask, jsonify, request
+    from flask import Flask, jsonify, request, Response
 except:
     subprocess.check_call([sys.executable,'-m', 'pip', 'install', '--upgrade', 'flask'])
     from flask import Flask
@@ -271,14 +271,18 @@ def user_clustering():
     else:
         return jsonify({"error": "사용자 태그를 가져오는 데 실패했습니다."}), 500
 
-@app.route("/tagRecommend", methods=["GET"])
+@app.route("/tagsRecommend", methods=["GET"])
 def tag_recommend():
     size = request.args.get("size", type=int)
-    search_term = request.args.get("search_term", type=str)
     model_path = "tags_model.model"
 
+    access_token = request.headers.get("access")
+
+    if access_token is None:
+        return {"error": "Authorization header is missing"}, 400
+
     all_tags = get_all_tags_from_java()
-    review_tags = get_viewed_review_tags_from_java()
+    review_tags = get_viewed_review_tags_from_java(access_token)
 
     all_tags = extract_names(all_tags)
     review_tags = extract_names(review_tags)
@@ -290,10 +294,37 @@ def tag_recommend():
         print(f"모델 로드 실패, 새로 학습합니다. 오류: {e}")
         model = train_and_save_fasttext_model(all_tags, model_path)
 
-    recommended_tags = combine_and_sort_similar_tags(review_tags, search_term, model, all_tags, size)
+    recommended_tags = sort_similar_tags(review_tags, model, all_tags, size)
 
     print(recommended_tags)
     return jsonify(recommended_tags)
+
+@app.route("/failSearchtagRecommend", methods=["GET"])
+def fail_search_tag_recommend():
+    model_path = "tags_model.model"
+
+    access_token = request.headers.get("access")
+
+    if access_token is None:
+        return {"error": "Authorization header is missing"}, 400
+
+    all_tags = get_all_tags_from_java()
+    review_tags = get_viewed_review_tags_from_java(access_token)
+
+    all_tags = extract_names(all_tags)
+    review_tags = extract_names(review_tags)
+
+    try:
+        model = load_fasttext_model(model_path)
+        print("모델 로드 완료.")
+    except Exception as e:
+        print(f"모델 로드 실패, 새로 학습합니다. 오류: {e}")
+        model = train_and_save_fasttext_model(all_tags, model_path)
+
+    recommended_tags = sort_similar_tag_random(review_tags, model, all_tags)
+
+    print(recommended_tags)
+    return Response(recommended_tags, content_type='text/plain; charset=utf-8')
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000, host="0.0.0.0")

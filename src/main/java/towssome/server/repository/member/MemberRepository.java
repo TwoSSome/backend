@@ -18,7 +18,4 @@ public interface MemberRepository extends JpaRepository<Member,Long>, MemberRepo
     Optional<Member> findBySocialId(String socialId);
 
     Optional<Member> findByEmail(String email);
-
-    @Query("SELECT m FROM Member m")
-    List<Member> getAllMembers();
 }

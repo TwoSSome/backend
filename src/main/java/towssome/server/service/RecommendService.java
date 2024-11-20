@@ -3,9 +3,12 @@ package towssome.server.service;
 import com.querydsl.core.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -39,9 +42,8 @@ public class RecommendService {
     private String FLASK_IP;
 
     @Transactional
-    public CursorResult<ProfileRes> getRecommendProfilePage(Member jwtMember, int page, int size) {
-        Cluster memberCluster = clusterRepository.findByMemberId(jwtMember.getId());
-        List<Member> clusteredMembers = getMembersByClusterNum(memberCluster.getClusterNum());
+    public CursorResult<ProfileRes_> getRecommendProfilePage(Member jwtMember, int page, int size) {
+        List<Member> clusteredMembers = clusterRepository.findClustersExceptingMemberAndFollowing(jwtMember.getId());
 
         List<Long> memberIds = clusteredMembers.stream()
                 .map(Member::getId)
@@ -55,21 +57,23 @@ public class RecommendService {
                 .limit(size)
                 .collect(Collectors.toList());
 
-        List<ProfileRes> profileResList = new ArrayList<>();
+        List<ProfileRes_> profileResList = new ArrayList<>();
 
         for (Member member : membersPage) {
             String profilePhotoPath = member.getProfilePhoto() == null ? null : member.getProfilePhoto().getS3Path();
 
             List<ProfileTag> tags = profileTagRepository.findAllByMember(member);
-            List<String> hashtags = new ArrayList<>();
+            List<HashtagRes> hashtags = new ArrayList<>();
+            HashtagRes hashtag;
 
             for (ProfileTag profileTag : tags) {
-                hashtags.add(profileTag.getHashTag().getName());
+                hashtag = new HashtagRes(profileTag.getHashTag().getId(),profileTag.getHashTag().getName());
+                hashtags.add(hashtag);
             }
 
-            profileResList.add(new ProfileRes(
-                    profilePhotoPath,
+            profileResList.add(new ProfileRes_(
                     member.getNickName(),
+                    profilePhotoPath,
                     hashtags,
                     member.getId()
             ));
@@ -80,14 +84,6 @@ public class RecommendService {
                 (long) page + 2,
                 membersPage.size() == size
         );
-    }
-
-
-    public List<Member> getMembersByClusterNum(Long clusterNum) {
-        List<Cluster> clusters = clusterRepository.findByClusterNum(clusterNum);
-        return clusters.stream()
-                .map(Cluster::getMember)
-                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -129,16 +125,45 @@ public class RecommendService {
         );
     }
 
-    public ListResultRes<List<String>> getSearchRecommendTags(String searchTerm, int size) {
+    public ListResultRes<List<String>> getSearchRecommendTags(int size, String accessToken) {
         try {
-            String urlString = FLASK_IP + "/tagRecommend?search_term=" + searchTerm + "&size=" + size;
+            String urlString = FLASK_IP + "/tagsRecommend?size=" + size;
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("access", accessToken);
+
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
 
             ResponseEntity<List<String>> response = restTemplate.exchange(
-                    urlString, HttpMethod.GET, null, new ParameterizedTypeReference<List<String>>() {});
+                    urlString, HttpMethod.GET, entity, new ParameterizedTypeReference<>() {
+                    });
 
             List<String> recommendedTags = response.getBody();
 
             return new ListResultRes<>(recommendedTags);
+
+        } catch (HttpClientErrorException e) {
+            System.err.println("Error during the request to Python service: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Error while fetching recommended tags from Python service", e);
+        }
+    }
+
+    public RecommendTagRes getFailSearchRecommendTag(String accessToken) {
+        try {
+            String urlString = FLASK_IP + "/failSearchtagRecommend";
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("access", accessToken);
+
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    urlString, HttpMethod.GET, entity, String.class);
+
+            String recommendedTag = response.getBody();
+
+            return new RecommendTagRes(recommendedTag);
 
         } catch (HttpClientErrorException e) {
             System.err.println("Error during the request to Python service: " + e.getMessage());
