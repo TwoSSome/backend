@@ -250,7 +250,8 @@ def item_urls():
 
 @app.route('/userClustering', methods=['GET'])
 def user_clustering():
-    user_tags = fetch_user_tags()
+    access_token = request.headers.get("access")
+    user_tags = fetch_user_tags(access_token)
     all_tags = [tag for user in user_tags.values() for tag in user["tags"]]
 
     model_path = "usertags_model.model"

@@ -29,8 +29,11 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 
 
-def fetch_user_tags():
-    response = requests.get("http://localhost:8080/allmemberprofiletag")
+def fetch_user_tags(access_token):
+    headers = {
+        "access": access_token
+    }
+    response = requests.get("http://localhost:8080/allmemberprofiletag", headers = headers)
     if response.status_code == 200:
         return response.json()
     else:
