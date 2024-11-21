@@ -2,6 +2,10 @@ package towssome.server.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +41,7 @@ public class CommentController {
             @Parameter(name = "req", description = "body : 댓글 본문 ")
     })
     @PostMapping("/{reviewId}/create")
-    public ResponseEntity<CreateRes> createComment(@PathVariable Long reviewId, @RequestBody CommentReq req) throws IOException{
+    public ResponseEntity<CreateRes> createComment(@PathVariable Long reviewId, @RequestBody CommentReq req) throws IOException {
         log.info("commentDTO = {}", req);
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Comment comment = commentService.createComment(reviewId, req.body(), username);
@@ -51,7 +55,7 @@ public class CommentController {
     @PostMapping("/{reviewId}/update/{commentId}")
     public ResponseEntity<?> updateComment(@PathVariable Long commentId, @RequestBody CommentUpdateReq req, @PathVariable String reviewId) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        if(!commentService.getComment(commentId).getMember().getUsername().equals(username)){
+        if (!commentService.getComment(commentId).getMember().getUsername().equals(username)) {
             return new ResponseEntity<>("You are not the author of this comment", HttpStatus.FORBIDDEN);
         }
         commentService.updateComment(commentId, req);
@@ -63,9 +67,9 @@ public class CommentController {
             @Parameter(name = "commentId", description = "삭제할 댓글 id")
     })
     @PostMapping("/{reviewId}/delete/{commentId}")
-    public ResponseEntity<?> deleteComment(@PathVariable Long reviewId, @PathVariable Long commentId){
+    public ResponseEntity<?> deleteComment(@PathVariable Long reviewId, @PathVariable Long commentId) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        if(!commentService.getComment(commentId).getMember().getUsername().equals(username)){
+        if (!commentService.getComment(commentId).getMember().getUsername().equals(username)) {
             return new ResponseEntity<>("You are not the author of this comment", HttpStatus.FORBIDDEN);
         }
         Comment comment = commentService.getComment(commentId);
@@ -81,35 +85,62 @@ public class CommentController {
     public CursorResult<CommentRes> getComments(@PathVariable Long reviewId,
                                                 @RequestParam(value = "cursorId", required = false) Long cursorId,
                                                 @RequestParam(value = "sort", defaultValue = "asc", required = false) String sort,
-                                                @RequestParam(value = "size", required = false) Integer size){
-        if(size == null) size = DEFAULT_SIZE;
-        return commentService.getCommentPageByReviewId(reviewId, cursorId, sort, PageRequest.of(0,size));
+                                                @RequestParam(value = "size", required = false) Integer size) {
+        if (size == null) size = DEFAULT_SIZE;
+        return commentService.getCommentPageByReviewId(reviewId, cursorId, sort, PageRequest.of(0, size));
     }
 
     @Operation(summary = "댓글 좋아요/취소 API", description = "선택한 리뷰글의 댓글을 조회", parameters = {
             @Parameter(name = "commentId", description = "좋아요/취소할 댓글의 id")
     })
     @PostMapping("/{reviewId}/commentLike/{commentId}")
-    public ResponseEntity<ChangeLikeRes> changeLike(@PathVariable Long reviewId, @PathVariable Long commentId){
+    public ResponseEntity<ChangeLikeRes> changeLike(@PathVariable Long reviewId, @PathVariable Long commentId) {
         Member user = memberAdvice.findJwtMember();
         Comment comment = commentService.getComment(commentId);
         Boolean likeStatus = commentLikeService.likeProcess(user, comment);
         ChangeLikeRes changeLikeRes;
         changeLikeRes = new ChangeLikeRes(likeStatus);
-        return new ResponseEntity<>(changeLikeRes,HttpStatus.OK);
+        return new ResponseEntity<>(changeLikeRes, HttpStatus.OK);
     }
 
-    @Operation(summary = "고정 댓글 조회 API", description = "선택한 리뷰글의 고정 댓글을 조회", parameters = {
-            @Parameter(name = "reviewId", description = "조회할 리뷰 id")
+    @Operation(
+            summary = "고정 댓글 조회 API",
+            description = "선택한 리뷰글의 고정 댓글을 조회",
+            parameters = {
+                    @Parameter(name = "reviewId", description = "조회할 리뷰 id", required = true, example = "1")
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "고정 댓글 조회 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CommentRes.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "고정 댓글을 찾을 수 없음",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Void.class)
+                    )
+            )
     })
     @GetMapping("{reviewId}/fixedComment")
-    public ResponseEntity<CommentRes> getFixedComment(@PathVariable Long reviewId){
+    public ResponseEntity<?> getFixedComment(@PathVariable Long reviewId) {
         Comment comment = commentService.getFixedCommentByReviewId(reviewId);
-        Member commentedMember = comment.getMember();
-        ProfileSimpleRes profileSimpleRes;
         CommentRes commentRes;
-        if(comment == null) commentRes = null;
+        Member commentedMember;
+        ProfileSimpleRes profileSimpleRes;
+        if (comment == null) {
+            return new ResponseEntity<>(new EmptyRes(
+                    "고정댓글이 없습니다"
+            ),HttpStatus.NOT_FOUND);
+        }
         else{
+            commentedMember = comment.getMember();
             profileSimpleRes = new ProfileSimpleRes(
                     commentedMember.getNickName(),
                     commentedMember.getProfilePhoto() == null ? null : commentedMember.getProfilePhoto().getS3Path(),
@@ -121,7 +152,7 @@ public class CommentController {
                     comment.getCreateDate(),
                     comment.getLastModifiedDate(),
                     comment.getReviewPost().getId(),
-                    commentLikeService.isLikedComment(memberAdvice.findJwtMember(),comment),
+                    commentLikeService.isLikedComment(memberAdvice.findJwtMember(), comment),
                     commentLikeService.countLike(comment),
                     comment.getFixFlag(),
                     profileSimpleRes
@@ -131,13 +162,13 @@ public class CommentController {
     }
 
     @PostMapping("{reviewId}/fix/{commentId}")
-    public ResponseEntity<?> changeFixedComment(@PathVariable Long reviewId, @PathVariable Long commentId){
+    public ResponseEntity<?> changeFixedComment(@PathVariable Long reviewId, @PathVariable Long commentId) {
         commentService.changeFixedComment(reviewId, commentId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("{reviewId}/unpin")
-    public ResponseEntity<?> unpinComment(@PathVariable Long reviewId){
+    public ResponseEntity<?> unpinComment(@PathVariable Long reviewId) {
         commentService.unpinComment(reviewId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
