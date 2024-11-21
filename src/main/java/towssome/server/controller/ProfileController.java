@@ -50,7 +50,8 @@ public class ProfileController {
                 jwtMember.getNickName(),
                 jwtMember.getProfilePhoto() == null ? null : jwtMember.getProfilePhoto().getS3Path(),
                 res,
-                jwtMember.getId()
+                jwtMember.getId(),
+                jwtMember.getUsername()
         );
     }
 
@@ -122,7 +123,9 @@ public class ProfileController {
                 member.getNickName(),
                 member.getProfilePhoto() == null ? null : member.getProfilePhoto().getS3Path(),
                 res,
-                member.getId());
+                member.getId(),
+                member.getUsername()
+                );
     }
 
     @Operation(summary = "타인 리뷰글 조회 API",
@@ -182,7 +185,8 @@ public class ProfileController {
                 searchedMember.getNickName(),
                 searchedMember.getProfilePhoto() == null ? null : searchedMember.getProfilePhoto().getS3Path(),
                 res,
-                searchedMember.getId()
+                searchedMember.getId(),
+                searchedMember.getUsername()
         );
     }
 
