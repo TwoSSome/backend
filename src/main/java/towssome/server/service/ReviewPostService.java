@@ -64,7 +64,7 @@ public class ReviewPostService {
         };
 
         String itemUrl;
-        if (reviewReq.item_url() == null) { // item_url이 없을 경우
+        if (reviewReq.item_url() == null || reviewReq.item_url().isEmpty() || reviewReq.item_url().isBlank()) { // item_url이 없을 경우
             itemUrl = createLinkString(reviewReq.item());
         }
         else { // item_url이 있을 경우
