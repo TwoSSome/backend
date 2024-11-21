@@ -1,5 +1,6 @@
 package towssome.server.controller;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import towssome.server.service.CommunityService;
 import towssome.server.service.ReplyService;
 import towssome.server.service.ReviewPostService;
 
+@Hidden
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/reply")
