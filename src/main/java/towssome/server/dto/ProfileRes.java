@@ -8,6 +8,7 @@ public record ProfileRes(
         String nickName,
         String profileImagePath,
         List<String> profileTagList,
-        Long memberId
+        Long memberId,
+        String username
 ) {
 }
