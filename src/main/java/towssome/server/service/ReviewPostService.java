@@ -16,8 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import towssome.server.advice.MemberAdvice;
 import towssome.server.advice.PhotoAdvice;
-import towssome.server.advice.URLAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.Member;
 import towssome.server.entity.ReviewPost;
@@ -46,8 +46,11 @@ public class ReviewPostService {
     private final HashtagClassificationService hashtagClassificationService;
     private final SubscribeRepository subscribeRepository;
     private final RestTemplate restTemplate = new RestTemplate();
+    private final MemberService memberService;
+    private final MemberAdvice memberAdvice;
     @Value("${flask.IP}")
     private String FLASK_IP;
+    private final SubscribeService subscribeService;
 
     public ReviewPost createReview(
             ReviewPostReq reviewReq,
@@ -119,6 +122,7 @@ public class ReviewPostService {
                     false,
                     false,
                     false,
+                    false,
                     hashtags,
                     review.getReviewType(),
                     review.getStarPoint(),
@@ -144,6 +148,7 @@ public class ReviewPostService {
                     isMyPost(member, review),
                     viewlikeService.isLikedPost(member, review),
                     viewlikeService.isBookmarkedPost(member, review),
+                    subscribeService.isSubscribed(member, review.getMember()),
                     hashtags,
                     review.getReviewType(),
                     review.getStarPoint(),
@@ -213,6 +218,7 @@ public class ReviewPostService {
 
     private CursorResult<ReviewSimpleRes> getReviewSimpleResCursorResult(List<ReviewSimpleRes> reviewSimpleRes, Page<ReviewPost> reviewPosts) {
         Long cursorId;
+        Member member = memberAdvice.findJwtMember();
         for(ReviewPost review : reviewPosts) {
             List<PhotoInPost> bodyPhotos = photoAdvice.getPhotoS3Path(review);
             String bodyPhoto = bodyPhotos.isEmpty() ? null : bodyPhotos.get(0).photoPath();
@@ -236,7 +242,8 @@ public class ReviewPostService {
                     bodyPhoto,
                     review.getReviewType(),
                     hashtags,
-                    viewlikeService.getLikeAmountInReviewPost(review.getId())
+                    viewlikeService.getLikeAmountInReviewPost(review.getId()),
+                    subscribeService.isSubscribed(member, review.getMember())
             ));
         }
         cursorId = reviewPosts.isEmpty() ?
@@ -304,7 +311,8 @@ public class ReviewPostService {
                     bodyPhoto,
                     value.getReviewType(),
                     hashtags,
-                    viewlikeService.getLikeAmountInReviewPost(value.getId())
+                    viewlikeService.getLikeAmountInReviewPost(value.getId()),
+                    true
             ));
         }
 

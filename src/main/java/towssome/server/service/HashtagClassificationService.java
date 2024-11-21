@@ -29,6 +29,7 @@ public class HashtagClassificationService{
     private final ViewLikeRepositoryCustom viewLikeRepositoryCustom;
     private final SearchHistoryService searchHistoryService;
     private final MemberAdvice memberAdvice;
+    private final SubscribeService subscribeService;
 
     public CursorResult<ReviewSimpleRes> getReviewPageByHashtag(String keyword, Long cursorId, String sort, Pageable page) {
         List<ReviewSimpleRes> reviewSimpleRes = new ArrayList<>();
@@ -38,6 +39,7 @@ public class HashtagClassificationService{
 
     private CursorResult<ReviewSimpleRes> getReviewSimpleResCursorResult(List<ReviewSimpleRes> reviewSimpleRes,
                                                                          Page<ReviewPost> reviewPosts) {
+        Member member = memberAdvice.findJwtMember();
         Long cursorId;
         for(ReviewPost review : reviewPosts) {
             List<PhotoInPost> bodyPhotos = photoAdvice.getPhotoS3Path(review);
@@ -62,7 +64,8 @@ public class HashtagClassificationService{
                     bodyPhoto,
                     review.getReviewType(),
                     hashtags,
-                    viewLikeRepositoryCustom.findLikeAmountByReviewPost(review.getId())
+                    viewLikeRepositoryCustom.findLikeAmountByReviewPost(review.getId()),
+                    subscribeService.isSubscribed(member, review.getMember())
             ));
         }
         cursorId = reviewPosts.isEmpty() ?

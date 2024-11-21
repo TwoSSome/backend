@@ -57,6 +57,10 @@ public class SubscribeService {
         return dtoList;
     }
 
+    public boolean isSubscribed(Member subscriber, Member following) {
+        return subscribeRepository.existsBySubscriberAndFollowed(subscriber, following);
+    }
+
     @Transactional
     public CursorResult<SubscribeRes> getSubscribePage(Member subscriber, int page, int size) {
         ArrayList<SubscribeRes> subscribeRes = new ArrayList<>();

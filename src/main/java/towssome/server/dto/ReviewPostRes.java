@@ -16,6 +16,7 @@ public record ReviewPostRes(
         boolean isMyPost,
         boolean isLikedPost,
         boolean isBookmarked,
+        boolean isFollowed,
         List<HashtagRes> hashTags,
         ReviewType reviewType,
         int startPoint,

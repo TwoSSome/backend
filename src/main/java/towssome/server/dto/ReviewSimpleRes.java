@@ -13,6 +13,7 @@ public record ReviewSimpleRes(
         String bodyPhoto,
         ReviewType reviewType,
         List<HashtagRes> hashTags,
-        Long likeAmount
+        Long likeAmount,
+        boolean isFollowed
 ) {
 }
