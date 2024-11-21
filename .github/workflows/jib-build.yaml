@@ -34,7 +34,7 @@ jobs:
 
       - name: Build and Push Docker Image with Jib
         run: |
-          ./gradlew clean compileQuerydsl --refresh-dependencies
+          ./gradlew clean
           ./gradlew jib --stacktrace --info
 
         env:
