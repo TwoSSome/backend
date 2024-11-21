@@ -268,7 +268,7 @@ public class ReviewPostService {
     }
 
     @Transactional
-    public CursorResult<ReviewSimpleRes> getSubscribeReview(Member subscriber, int page) {
+    public CursorResult<ReviewSimpleRes> getSubscribeReview(Member subscriber, int page, int size) {
 
         if (!subscribeRepository.existsBySubscriber(subscriber)) {
             return new CursorResult<>(
@@ -278,7 +278,7 @@ public class ReviewPostService {
             );
         }
 
-        CursorResult<ReviewPost> subscribeReviewList = reviewPostRepository.findSubscribeReviewList(subscriber, PageRequest.of(page-1, 10));
+        CursorResult<ReviewPost> subscribeReviewList = reviewPostRepository.findSubscribeReviewList(subscriber, PageRequest.of(page-1, size));
 
         ArrayList<ReviewSimpleRes> reviewSimpleRes = new ArrayList<>();
         for (ReviewPost value : subscribeReviewList.values()) {
