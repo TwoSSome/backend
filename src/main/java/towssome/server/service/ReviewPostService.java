@@ -64,10 +64,10 @@ public class ReviewPostService {
         };
 
         String itemUrl;
-        if (reviewReq.item_url() == null) {
+        if (reviewReq.item_url() == null) { // item_url이 없을 경우
             itemUrl = createLinkString(reviewReq.item());
         }
-        else {
+        else { // item_url이 있을 경우
             itemUrl = reviewReq.item_url();
         }
 
@@ -106,9 +106,9 @@ public class ReviewPostService {
                     tuple.get(1, String.class)
             ));
         }
+        Member postMember = review.getMember();
         //비회원 조회
         if (member == null) {
-            Member postMember = review.getMember();
             reviewRes = new ReviewPostRes(
                     review.getBody(),
                     review.getPrice(),
@@ -130,7 +130,7 @@ public class ReviewPostService {
                     postMember.getNickName(),
                     viewlikeService.getLikeAmountInReviewPost(reviewId),
                     review.getItem(),
-                    getRandomLink(review.getItem_url()) == null ? null : getRandomLink(review.getItem_url())
+                    getRandomLink(review.getItem_url())
             );
         }else {
             //회원 조회
@@ -140,20 +140,20 @@ public class ReviewPostService {
                     review.getPrice(),
                     review.getCreateDate(),
                     review.getLastModifiedDate(),
-                    member.getId(),
-                    member.getProfilePhoto() != null ?
-                            member.getProfilePhoto().getS3Path() :
+                    postMember.getId(),
+                    postMember.getProfilePhoto() != null ?
+                            postMember.getProfilePhoto().getS3Path() :
                             null,
                     photo,
                     isMyPost(member, review),
                     viewlikeService.isLikedPost(member, review),
                     viewlikeService.isBookmarkedPost(member, review),
-                    subscribeService.isSubscribed(member, review.getMember()),
+                    subscribeService.isSubscribed(member, postMember),
                     hashtags,
                     review.getReviewType(),
                     review.getStarPoint(),
                     review.getWhereBuy(),
-                    member.getNickName(),
+                    postMember.getNickName(),
                     viewlikeService.getLikeAmountInReviewPost(reviewId),
                     review.getItem(),
                     getRandomLink(review.getItem_url())
@@ -182,12 +182,14 @@ public class ReviewPostService {
         String itemUrl;
         if (reviewPost.getItem() == null || reviewPost.getItem_url() == null || !reviewPost.getItem().equals(req.item()) ) {
             itemUrl = createLinkString(req.item());
+            // 기존에 item, item_url이 없거나
+            // 입력한 item과 기존 item이 다를 경우 새로운 링크 생성
         }
         else if(req.item_url() != null) {
-            itemUrl = req.item_url();
+            itemUrl = req.item_url(); // item_url이 새로 입력된 경우 변경
         }
         else {
-            itemUrl = reviewPost.getItem_url();
+            itemUrl = reviewPost.getItem_url(); // item_url이 변경되지 않은 경우 기존 item_url 사용
         }
 
         photoAdvice.saveReviewPhoto(addPhotos, reviewPost);
