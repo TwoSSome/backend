@@ -50,11 +50,10 @@ public class OAuthController {
         if (!category.equals("social") || jwtUtil.isExpired(jwt)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
-        String access = jwtUtil.createJwt("access", socialId, role, JwtStatic.ACCESS_EXPIRE_MS);
-        String refresh = jwtUtil.createJwt("refresh", socialId, role, JwtStatic.REFRESH_EXPIRE_MS);
-
         Member member = memberRepository.findBySocialId(socialId).orElseThrow(() -> new NotFoundMemberException("해당 멤버가 없습니다"));
+
+        String access = jwtUtil.createJwt("access", member.getUsername(), role, JwtStatic.ACCESS_EXPIRE_MS);
+        String refresh = jwtUtil.createJwt("refresh", member.getUsername(), role, JwtStatic.REFRESH_EXPIRE_MS);
 
         return new ResponseEntity<>(
                 new SocialLoginSuccessRes(
@@ -73,6 +72,7 @@ public class OAuthController {
             @RequestPart OAuthInitialConfigReq req,
             @RequestPart(required = false) MultipartFile profileImage) {
 
+        log.info("OAuth/initial");
         String jwt = req.jwt();
 
         String category = jwtUtil.getCategory(jwt);

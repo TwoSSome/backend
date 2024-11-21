@@ -51,17 +51,18 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         //OAuth2User
         CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
 
-        String username = customUserDetails.getName();
+        String socialId = customUserDetails.getName();
         log.info("login success");
 
-        Member member = memberRepository.findBySocialId(username).orElseThrow();
+        Member member = memberRepository.findBySocialId(socialId).orElseThrow();
+        log.info("member = {}",member.getUsername());
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
 
-        String token = jwtUtil.createJwt("social", username, role, ACCESS_EXPIRE_MS);
+        String token = jwtUtil.createJwt("social", socialId, role, ACCESS_EXPIRE_MS);
         log.info("USER ROLE = {}", role);
 
         String redirectUrl = null;
@@ -73,36 +74,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         }
         String redirectUrlWithToken = String.format("%s?token=%s", redirectUrl, token); // jwt 토큰 포함
         response.sendRedirect(redirectUrlWithToken);
-
-
-
-//        String host = request.getHeader("Referer");
-
-//        if (host.contains("localhost")) {
-//            // 로컬 환경에서 사용할 때
-//            log.info("host = {}",host);
-//            if (!role.equals(RoleAdvice.ROLE_TEMP)) { // 처음 로그인 했을 때
-//                String redirectUrl = localURL + tempURL; // 초기 설정 페이지로 리다이렉트
-//                String redirectUrlWithToken = String.format("%s?token=%s", redirectUrl, token); // jwt 토큰 포함
-//                response.sendRedirect(redirectUrlWithToken);
-//            } else { // 처음 로그인이 아닐 때
-//                String redirectUrl = localURL;
-//                String redirectUrlWithToken = String.format("%s?token=%s", redirectUrl, token);
-//                response.sendRedirect(redirectUrlWithToken);
-//            }
-//        }else {
-//            // ec2 환경에서 사용할 때
-//            if (role.equals(RoleAdvice.ROLE_TEMP)) {
-//                String redirectUrl = ec2URL + tempURL;
-//                String redirectUrlWithToken = String.format("%s?token=%s", redirectUrl, token);
-//                response.sendRedirect(redirectUrlWithToken);
-//            } else {
-//                String redirectUrl = ec2URL;
-//                String redirectUrlWithToken = String.format("%s?token=%s", redirectUrl, token);
-//                response.sendRedirect(redirectUrlWithToken);
-//            }
-//        }
-
 
     }
 
