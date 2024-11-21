@@ -24,7 +24,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
         List<Comment> results;
         results = queryFactory
                 .selectFrom(comment)
-                .where(reviewIdContains(reviewId))
+                .where(reviewIdContains(reviewId), comment.fixFlag.isFalse())
                 .orderBy(getOrderSpecifier(sort))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -45,7 +45,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
         List<Comment> results;
         results = queryFactory
                 .selectFrom(comment)
-                .where(reviewIdContains(reviewId), nextCommentId(cursorId, sort))
+                .where(reviewIdContains(reviewId), nextCommentId(cursorId, sort), comment.fixFlag.isFalse())
                 .orderBy(getOrderSpecifier(sort))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
