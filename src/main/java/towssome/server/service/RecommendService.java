@@ -3,7 +3,6 @@ package towssome.server.service;
 import com.querydsl.core.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.PageRequest;
@@ -17,13 +16,16 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import towssome.server.advice.PhotoAdvice;
 import towssome.server.dto.*;
-import towssome.server.entity.*;
-import towssome.server.repository.cluster.ClusterRepository;
+import towssome.server.entity.Member;
+import towssome.server.entity.ProfileTag;
+import towssome.server.entity.ReviewPost;
 import towssome.server.repository.ProfileTagRepository;
+import towssome.server.repository.cluster.ClusterRepository;
 import towssome.server.repository.member.MemberRepository;
 import towssome.server.repository.reviewpost.ReviewPostRepository;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,6 +40,7 @@ public class RecommendService {
     private final ViewlikeService viewlikeService;
     private final PhotoAdvice photoAdvice;
     private final RestTemplate restTemplate;
+    private final SubscribeService subscribeService;
     @Value("${flask.IP}")
     private String FLASK_IP;
 
@@ -114,7 +117,8 @@ public class RecommendService {
                     bodyPhoto,
                     value.getReviewType(),
                     hashtags,
-                    viewlikeService.getLikeAmountInReviewPost(value.getId())
+                    viewlikeService.getLikeAmountInReviewPost(value.getId()),
+                    subscribeService.isSubscribed(member, value.getMember())
             ));
         }
 

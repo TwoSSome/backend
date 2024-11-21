@@ -16,4 +16,5 @@ public interface SubscribeRepository extends JpaRepository<Subscribe,Long>, Subs
 
     boolean existsBySubscriber(Member member);
 
+    boolean existsBySubscriberAndFollowed(Member subscriber, Member following);
 }

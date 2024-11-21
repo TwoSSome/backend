@@ -29,6 +29,7 @@ public class ViewlikeService {
     private final PhotoAdvice photoAdvice;
     private final HashtagClassificationService hashtagClassificationService;
     private final ViewLikeRepositoryCustom viewLikeRepositoryCustom;
+    private final SubscribeService subscribeService;
 
     /** 조회 기록 저장(최초 조회 시) */
     @Transactional
@@ -153,7 +154,8 @@ public class ViewlikeService {
                     bodyPhoto,
                     review.getReviewType(),
                     hashtags,
-                    getLikeAmountInReviewPost(review.getId())
+                    getLikeAmountInReviewPost(review.getId()),
+                    subscribeService.isSubscribed(member, review.getMember())
             ));
         }
         return new CursorResult<>(reviewPostRes, result.nextPageId(), result.hasNext());
