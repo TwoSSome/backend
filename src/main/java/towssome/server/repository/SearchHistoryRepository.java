@@ -16,6 +16,6 @@ import java.util.Optional;
 public interface SearchHistoryRepository extends JpaRepository<SearchHistory, Long> {
     Optional<SearchHistory> findByMemberAndKeyword(Member member, String keyword);
 
-    @Query("SELECT s.keyword FROM SearchHistory s WHERE s.member = :member")
+    @Query("SELECT DISTINCT s.keyword FROM SearchHistory s WHERE s.member = :member")
     List<String> findKeywordsByMember(Member member);
 }
