@@ -1,12 +1,16 @@
 package towssome.server.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import towssome.server.dto.ListResultRes;
 import towssome.server.entity.Cluster;
 import towssome.server.entity.Member;
 import towssome.server.repository.cluster.ClusterRepository;
@@ -16,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ClusterService {
     private final ClusterRepository clusterRepository;
@@ -26,8 +31,8 @@ public class ClusterService {
     private final String pythonServiceUrl = FLASK_IP + "/userClustering";
 
     @Transactional
-    public void performClustering() {
-        Map<String, List<String>> clusteredUsers = fetchClusteredUsersFromPythonService();
+    public void performClustering(String accessToken) {
+        Map<String, List<String>> clusteredUsers = fetchClusteredUsersFromPythonService(accessToken);
 
         clusterRepository.deleteAllBy();
 
@@ -49,12 +54,17 @@ public class ClusterService {
         }
     }
 
-    private Map<String, List<String>> fetchClusteredUsersFromPythonService() {
+    private Map<String, List<String>> fetchClusteredUsersFromPythonService(String accessToken) {
         try {
+            log.info(accessToken);
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("access", accessToken);
+
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
             ResponseEntity<Map<String, List<String>>> response = restTemplate.exchange(
                     pythonServiceUrl,
                     HttpMethod.GET,
-                    null,
+                    entity,
                     new ParameterizedTypeReference<>() {
                     }
             );
