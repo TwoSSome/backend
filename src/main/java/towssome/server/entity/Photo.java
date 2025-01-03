@@ -31,6 +31,10 @@ public class Photo {
     @JoinColumn(name = "community_id")
     private CommunityPost communityPost;
 
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "calendar_post_id")
+    private CalendarPost calendarPost;
+
     @OneToOne(mappedBy = "photo")
     @Setter
     private VoteAttribute voteAttribute;
