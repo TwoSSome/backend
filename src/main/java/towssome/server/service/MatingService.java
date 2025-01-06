@@ -4,13 +4,12 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import towssome.server.advice.ServiceAdvice;
 import towssome.server.entity.*;
 import towssome.server.enumrated.MatingStatus;
 import towssome.server.exception.AlreadyExistMatingException;
 import towssome.server.exception.NotFoundMatingException;
-import towssome.server.repository.CalendarRepository;
-import towssome.server.repository.MatingRepository;
-import towssome.server.repository.ProfileTagRepository;
+import towssome.server.repository.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +22,8 @@ public class MatingService {
     private final MatingRepository matingRepository;
     private final ProfileTagRepository profileTagRepository;
     private final CalendarRepository calendarRepository;
+
+    private final ServiceAdvice serviceAdvice;
 
     public Mating findById(Long id) {
         return matingRepository.findById(id).orElseThrow();
@@ -49,6 +50,7 @@ public class MatingService {
 
     /**
      * 요청을 수락, mating의 상태를 MATING 으로 변경, 둘 사이의 calendar 생성
+     * 이후 기본 태그 6개 생성
      * @param mating
      * @return
      */
@@ -58,11 +60,14 @@ public class MatingService {
         mating.acceptOffer();
         // Calendar 엔티티 id = Mating 엔티티의 두 멤버의 username
         String calendarId = mating.getOfferMember().getUsername() + "-" + mating.getObtainMember().getUsername();
-        calendarRepository.save(new Calendar(
+        Calendar calendar = calendarRepository.save(new Calendar(
                 calendarId,
                 mating.getOfferMember(),
                 mating.getObtainMember()
         ));
+
+        serviceAdvice.calendarInitialize(calendar); // 기본 태그 생성 메소드
+
         return mating;
     }
 
@@ -76,7 +81,7 @@ public class MatingService {
     }
 
     /**
-     * 내가 한 연인 신청이나 내가 받은 연인 요청을 받아옵니다
+     * 내가 한 연인 신청이나 내가 받은 연인 요청을 가져옵니다
      * @param member
      * @return
      */
