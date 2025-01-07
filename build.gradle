@@ -99,10 +99,13 @@ jib {
                 "EMAIL_PASSWORD": System.getenv('EMAIL_PASSWORD') ?: '',
                 "NAVER_CLIENT_ID": System.getenv('NAVER_CLIENT_ID') ?: '',
                 "NAVER_SECRET": System.getenv('NAVER_SECRET') ?: '',
+                "NAVER_REDIRECT_URI": System.getenv('NAVER_REDIRECT_URI') ?: '',
                 "GOOGLE_ID": System.getenv('GOOGLE_ID') ?: '',
                 "GOOGLE_SECRET": System.getenv('GOOGLE_SECRET') ?: '',
+                "GOOGLE_REDIRECT_URI": System.getenv('GOOGLE_REDIRECT_URI') ?: '',
                 "KAKAO_ID": System.getenv('KAKAO_ID') ?: '',
-                "KAKAO_SECRET": System.getenv('KAKAO_SECRET') ?: ''
+                "KAKAO_SECRET": System.getenv('KAKAO_SECRET') ?: '',
+                "KAKAO_REDIRECT_URI": System.getenv('KAKAO_REDIRECT_URI') ?: ''
         ]
     }
 }
