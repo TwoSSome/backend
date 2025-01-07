@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,7 @@ import towssome.server.service.SubscribeService;
 @Tag(name = "구독")
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("/subscribe")
 public class SubscribeController {
 
@@ -68,8 +70,10 @@ public class SubscribeController {
             throw new PageException("페이지는 1보다 작을 수 없습니다!!");
         }
 
+
         if(size == null) size = 10;
         Member jwtMember = memberAdvice.findJwtMember();
+        log.info("subcribe / member = {}",jwtMember.getUsername());
         return subscribeService.getSubscribePage(jwtMember, cursorId -1, size);
     }
 

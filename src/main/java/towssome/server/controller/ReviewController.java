@@ -100,6 +100,7 @@ public class ReviewController {
                                                   @RequestParam(value = "size", required = false) Integer size,
                                                   @RequestParam(value = "recommend", required = false) Boolean recommend) {
         if(size == null) size = PAGE_SIZE;
+        log.info("All review");
         return reviewPostService.getRecentReviewPage(cursorId, recommend, PageRequest.of(0, size));
     }
 
