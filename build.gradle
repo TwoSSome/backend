@@ -79,7 +79,7 @@ jib {
         }
     }
     to {
-        image = 'gooch1744/poompoom-api'
+        image = "${System.getenv('DOCKER_HUB') ?: ''}"
         auth {
             username = System.getenv('DOCKER_USERNAME') ?: 'default_username'
             password = System.getenv('DOCKER_PASSWORD') ?: 'default_password'
