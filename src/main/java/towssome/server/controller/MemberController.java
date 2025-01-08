@@ -1,5 +1,6 @@
 package towssome.server.controller;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -36,6 +37,7 @@ public class MemberController {
     @Operation(summary = "이메일 인증 요청 API",parameters = {@Parameter(name = "email", description = "인증할 이메일")},
     responses = {
             @ApiResponse(responseCode = "500", description = "이메일 형식이 올바르지 않음"),
+            @ApiResponse(responseCode = "400", description = "이미 가입되어있는 이메일임"),
             @ApiResponse(responseCode = "200", description = "이메일 정상 발송")
     })
     @PostMapping("/{email}/send")
@@ -130,7 +132,7 @@ public class MemberController {
 
     @Operation(
             summary = "비밀번호 재설정 API",
-            description = "/member/reconfig_password/authenticate에서 발급받은 jwt와 재설정할 비밀번호를 같이 보내야 합니다"
+            description = "/author/reconfig_password/authenticate에서 발급받은 jwt와 재설정할 비밀번호를 같이 보내야 합니다"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "비밀번호 재설정 성공"),
@@ -165,6 +167,7 @@ public class MemberController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Hidden
     @Operation(summary = "테스트용 API")
     @GetMapping("/auth")
     public String  auth(){
@@ -175,12 +178,13 @@ public class MemberController {
         return "auth ok";
     }
 
+    @Hidden
     @Operation(summary = "테스트용 API")
     @GetMapping("/testAuth")
     public String testAuth (){
 
         Member jwtMember = memberAdvice.findJwtMember();
-        if (jwtMember == null) return "null member";
+        if (jwtMember == null) return "null author";
         else return jwtMember.getNickName();
     }
 

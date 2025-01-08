@@ -27,9 +27,15 @@ public class CalendarPost extends BaseEntity{
     @ManyToOne(fetch = FetchType.EAGER)
     private CalendarSchedule calendarSchedule;
 
-    public CalendarPost(String title, String body, Member author) {
+    public CalendarPost(String title, String body, Member author, CalendarSchedule calendarSchedule) {
         this.title = title;
         this.body = body;
         this.author = author;
+        this.calendarSchedule = calendarSchedule;
+    }
+
+    public void update(String title, String body) {
+        this.title = title;
+        this.body = body;
     }
 }

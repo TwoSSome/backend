@@ -1,6 +1,7 @@
 package towssome.server.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import towssome.server.entity.CalendarPost;
 import towssome.server.entity.CommunityPost;
 import towssome.server.entity.Photo;
 import towssome.server.entity.ReviewPost;
@@ -14,4 +15,6 @@ public interface PhotoRepository extends JpaRepository<Photo,Long> {
 
     List<Photo> findAllByReviewPost(ReviewPost reviewPost);
     List<Photo> findAllByCommunityPost(CommunityPost communityPost);
+
+    List<Photo> findAllByCalendarPost(CalendarPost calendarPost);
 }

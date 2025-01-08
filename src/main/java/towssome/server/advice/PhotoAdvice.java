@@ -12,10 +12,8 @@ import towssome.server.dto.UploadPhoto;
 import towssome.server.entity.*;
 import towssome.server.enumrated.PhotoType;
 import towssome.server.exception.NotFoundPhotoException;
-import towssome.server.exception.PhotoSaveException;
 import towssome.server.repository.PhotoRepository;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,31 +47,30 @@ public class PhotoAdvice {
                     uploadPhoto.s3path(),
                     PhotoType.REVIEW,
                     reviewPost,
+                    null,
                     null
             );
             photoRepository.save(photo);
         }
     }
 
-    public Photo savePhoto(MultipartFile file, PhotoType type) {
-        if (file == null || file.isEmpty()) {
-            return null;
+    public void saveCalendarPostPhoto(List<MultipartFile> files, CalendarPost post) throws IOException {
+        if (files == null) {
+            return;
         }
-        UploadPhoto uploadPhoto = null;
-        try {
-            uploadPhoto = uploadPhoto(file);
-        } catch (RuntimeException e) {
-            throw new PhotoSaveException("사진을 저장하던 중 오류가 발생했습니다");
+        List<UploadPhoto> uploadPhotos = uploadPhotoList(files);
+        for (UploadPhoto uploadPhoto : uploadPhotos) {
+            Photo photo = new Photo(
+                    uploadPhoto.originalFileName(),
+                    uploadPhoto.saveFileName(),
+                    uploadPhoto.s3path(),
+                    PhotoType.CALENDAR_POST,
+                    null,
+                    null,
+                    post
+            );
+            photoRepository.save(photo);
         }
-        Photo photo = new Photo(
-                uploadPhoto.originalFileName(),
-                uploadPhoto.saveFileName(),
-                uploadPhoto.s3path(),
-                type,
-                null,
-                null
-        );
-        return photoRepository.save(photo);
     }
 
     /**
@@ -93,7 +90,8 @@ public class PhotoAdvice {
                     uploadPhoto.s3path(),
                     PhotoType.COMMUNITY,
                     null,
-                    communityPost
+                    communityPost,
+                    null
             );
             photoRepository.save(photo);
         }
@@ -116,6 +114,7 @@ public class PhotoAdvice {
                 uploadPhoto.s3path(),
                 PhotoType.PROFILE,
                 null,
+                null,
                 null
         );
         return photoRepository.save(photo);
@@ -137,6 +136,7 @@ public class PhotoAdvice {
                 uploadPhoto.saveFileName(),
                 uploadPhoto.s3path(),
                 PhotoType.VOTE,
+                null,
                 null,
                 null
         );
@@ -196,12 +196,22 @@ public class PhotoAdvice {
     }
 
     //오버로딩된 함수
+    public void deletePhotos(CalendarPost calendarPost) {
+        List<Photo> photoList = photoRepository.findAllByCalendarPost(calendarPost);
+        for (Photo photo : photoList) {
+            deleteS3Image(photo.getS3Name());
+            photoRepository.delete(photo);
+        }
+    }
+
+    //오버로딩된 함수
     public void deletePhotos(List<Photo> photoList) {
         for (Photo photo : photoList) {
             deleteS3Image(photo.getS3Name());
             photoRepository.delete(photo);
         }
     }
+
 
     /**
      * id로 file 객체 반환
@@ -288,25 +298,4 @@ public class PhotoAdvice {
         return originalFilename.substring(pos + 1);
     }
 
-    public Photo saveVirtualPhoto(MultipartFile file) {
-        if (file == null) {
-            return null;
-        }
-        Photo photo = null;
-        try {
-            UploadPhoto uploadPhoto = uploadPhoto(file);
-            photo = new Photo(
-                    uploadPhoto.originalFileName(),
-                    uploadPhoto.saveFileName(),
-                    uploadPhoto.s3path(),
-                    PhotoType.VIRTUAL,
-                    null,
-                    null
-            );
-            photoRepository.save(photo);
-        } catch (RuntimeException e) {
-            throw new RuntimeException();
-        }
-        return photo;
-    }
 }

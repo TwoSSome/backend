@@ -4,18 +4,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import towssome.server.advice.PhotoAdvice;
 import towssome.server.dto.*;
-import towssome.server.entity.Calendar;
-import towssome.server.entity.CalendarPost;
-import towssome.server.entity.CalendarPostComment;
-import towssome.server.entity.CalendarTag;
+import towssome.server.entity.*;
 import towssome.server.exception.NotFoundCalendarException;
 import towssome.server.exception.NotFoundEntityException;
 import towssome.server.repository.*;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @Slf4j
@@ -28,6 +25,8 @@ public class CalendarService implements CalendarServiceInterface{
     private final CalendarPostCommentRepository calendarPostCommentRepository;
     private final CalendarPostRepository calendarPostRepository;
     private final CalendarRepository calendarRepository;
+    private final PhotoRepository photoRepository;
+    private final PhotoAdvice photoAdvice;
 
     @Override
     public CalendarTag createCalendarTag(CreateCalendarTagDTO dto) {
@@ -78,25 +77,60 @@ public class CalendarService implements CalendarServiceInterface{
         );
     }
 
+
     @Override
     public List<CalendarTagInfo> getAllCalendarTagInfo(Calendar calendar) {
         return List.of();
     }
 
+    //=============================================================================================================
+
     @Override
     public CalendarPost createCalendarPost(CreateCalendarPostDTO dto) {
-        return null;
+        CalendarSchedule calendarSchedule = calendarScheduleRepository.findById(dto.scheduleId()).orElseThrow(
+                () -> new NotFoundEntityException("해당 일정이 없습니다")
+        );
+
+        CalendarPost save = calendarPostRepository.save(new CalendarPost(
+                dto.title(),
+                dto.body(),
+                dto.author(),
+                calendarSchedule
+        ));
+
+        return save;
     }
 
     @Override
+    @Transactional
     public void deleteCalendarPost(long id) {
-
+        CalendarPost calendarPost = calendarPostRepository.findById(id).orElseThrow(
+                () -> new NotFoundEntityException("해당 게시글이 없습니다")
+        );
+        photoAdvice.deletePhotos(calendarPost);
+        calendarPostRepository.deleteById(id);
     }
 
     @Override
-    public void updateCalendarPost(UpdateCalendarPostDTO dto) {
+    @Transactional
+    public CalendarPost updateCalendarPost(UpdateCalendarPostDTO dto) {
+        CalendarPost calendarPost = calendarPostRepository.findById(dto.id()).orElseThrow(
+                () -> new NotFoundEntityException("해당 게시글이 없습니다")
+        );
 
+        List<Long> deletePhotoIdList = dto.deletePhoto();
+        if (!deletePhotoIdList.isEmpty()) {
+            for (Long id : deletePhotoIdList) {
+                photoAdvice.deletePhoto(id);
+            }
+        }
+
+        calendarPost.update(dto.title(), dto.body());
+
+        return calendarPost;
     }
+
+    //=============================================================================================================
 
     @Override
     public CalendarPostComment createCalendarPostComment(CCPCDTO dto) {
@@ -112,6 +146,8 @@ public class CalendarService implements CalendarServiceInterface{
     public void updateCalendarPostComment(updateCPCDTO dto) {
 
     }
+
+    //=============================================================================================================
 
     @Override
     public List<SearchPoomPoomLogInfo> searchPoomPoomLogs(SearchPoomPoomLogDTO dto) {
@@ -130,7 +166,26 @@ public class CalendarService implements CalendarServiceInterface{
 
     @Override
     public CalendarPostDetailInfo getCalendarPostDetail(long id) {
-        return null;
+
+        CalendarPost calendarPost = calendarPostRepository.findById(id).orElseThrow(
+                () -> new NotFoundEntityException("해당 포스트를 찾을 수 없습니다")
+        );
+
+        List<Photo> photoList = photoRepository.findAllByCalendarPost(calendarPost);
+        var photoPathList = new ArrayList<PhotoInPost>();
+        for (Photo photo : photoList) {
+            photoPathList.add(new PhotoInPost(
+                    photo.getId(),
+                    photo.getS3Path()
+            ));
+        }
+
+        return new CalendarPostDetailInfo(
+                photoPathList,
+                calendarPost.getTitle(),
+                calendarPost.getBody(),
+                calendarPost.getAuthor().getId()
+        );
     }
 
     @Override
