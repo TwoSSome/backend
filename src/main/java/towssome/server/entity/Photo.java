@@ -39,13 +39,13 @@ public class Photo {
     @Setter
     private VoteAttribute voteAttribute;
 
-    public Photo(String originalName, String s3Name, String s3Path, PhotoType flag, ReviewPost reviewPost, CommunityPost communityPost) {
+    public Photo(String originalName, String s3Name, String s3Path, PhotoType flag, ReviewPost reviewPost, CommunityPost communityPost, CalendarPost calendarPost) {
         this.originalName = originalName;
         this.s3Name = s3Name;
         this.s3Path = s3Path;
         this.flag = flag;
         this.reviewPost = reviewPost;
         this.communityPost = communityPost;
+        this.calendarPost = calendarPost;
     }
-
 }

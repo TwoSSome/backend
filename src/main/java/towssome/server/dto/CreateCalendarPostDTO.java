@@ -1,4 +1,11 @@
 package towssome.server.dto;
 
-public record CreateCalendarPostDTO() {
+import towssome.server.entity.Member;
+
+public record CreateCalendarPostDTO(
+        Member author,
+        Long scheduleId,
+        String title,
+        String body
+) {
 }

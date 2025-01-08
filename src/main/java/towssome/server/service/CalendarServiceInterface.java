@@ -22,7 +22,7 @@ public interface CalendarServiceInterface {
 
     void deleteCalendarPost(long id);
 
-    void updateCalendarPost(UpdateCalendarPostDTO dto);
+    CalendarPost updateCalendarPost(UpdateCalendarPostDTO dto);
 
     CalendarPostComment createCalendarPostComment(CCPCDTO dto);
 
