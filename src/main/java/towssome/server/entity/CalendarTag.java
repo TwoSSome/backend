@@ -24,9 +24,18 @@ public class CalendarTag {
     @ManyToOne(fetch = FetchType.LAZY)
     private Calendar calendar;
 
-    public CalendarTag(String name, int color, Calendar calendar) {
+    private Boolean isDefaultTag;
+
+    public CalendarTag(String name, int color, Calendar calendar, Boolean isDefaultTag) {
         this.name = name;
         this.color = color;
         this.calendar = calendar;
+        this.isDefaultTag = isDefaultTag;
     }
+
+    public void updateTag(String name, int color) {
+        this.name = name;
+        this.color = color;
+    }
+
 }
