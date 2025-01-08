@@ -1,7 +1,6 @@
 package towssome.server.dto;
 
-public record UpdateCalendarTagDTO(
-        Long id,
+public record UpdateCalendarTagReq(
         String name,
         int color
 ) {

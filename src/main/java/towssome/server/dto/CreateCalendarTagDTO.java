@@ -4,6 +4,7 @@ import towssome.server.entity.Member;
 
 public record CreateCalendarTagDTO(
         Member member,
-        String name
+        String name,
+        int color
 ) {
 }

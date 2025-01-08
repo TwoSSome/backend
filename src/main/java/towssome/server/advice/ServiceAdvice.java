@@ -49,22 +49,24 @@ public class ServiceAdvice {
         CalendarTag OOthAnniversary = new CalendarTag(
                 "n주년",
                 1,
-                calendar
+                calendar,
+                true
         );
         CalendarTag birthday = new CalendarTag(
                 "생일",
                 2,
-                calendar
+                calendar,
+                true
         );
         CalendarTag couplesHoliday = new CalendarTag(
                 "연인 기념일",
                 3,
-                calendar
+                calendar,true
         );
         CalendarTag date = new CalendarTag(
                 "데이트",
                 4,
-                calendar
+                calendar,true
         );
         calendarTagRepository.save(OOthAnniversary);
         calendarTagRepository.save(birthday);

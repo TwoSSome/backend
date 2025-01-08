@@ -13,6 +13,8 @@ public interface CalendarServiceInterface {
 
     void updateCalendarTag(UpdateCalendarTagDTO dto);
 
+    CalendarTagInfo getCalendarTag(Long id);
+
     //작성해야할 API 2번
     List<CalendarTagInfo> getAllCalendarTagInfo(Calendar calendar);
 
