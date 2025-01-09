@@ -174,6 +174,20 @@ public class PhotoAdvice {
     }
 
     /**
+     * 해당 캘린더 포스트의 사진들의 URL을 반환하는 함수
+     * @param calendarPost
+     * @return 사진의 URL 리스트
+     */
+    public List<PhotoInPost> getPhotoS3Path(CalendarPost calendarPost) {
+        List<Photo> photoList = photoRepository.findAllByCalendarPost(calendarPost);
+        ArrayList<PhotoInPost> photoInPosts = new ArrayList<>();
+        for (Photo photo : photoList) {
+            photoInPosts.add(new PhotoInPost(photo.getId(),photo.getS3Path()));
+        }
+        return photoInPosts;
+    }
+
+    /**
      * 리뷰글의 사진들을 모두 지울 때 사용
      * 반드시 사진을 먼저 지우고 리뷰글을 지워야 할 것!! 아니면 고아 객체가 만들어지고 S3의 이미지도 삭제가 불가함
      * @param reviewPost

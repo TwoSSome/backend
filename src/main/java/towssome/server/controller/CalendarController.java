@@ -15,6 +15,7 @@ import towssome.server.advice.MemberAdvice;
 import towssome.server.advice.PhotoAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.CalendarPost;
+import towssome.server.entity.CalendarSchedule;
 import towssome.server.entity.CalendarTag;
 import towssome.server.entity.Member;
 import towssome.server.service.CalendarServiceInterface;
@@ -202,11 +203,107 @@ public class CalendarController {
             )
     })
     @PostMapping("/post/{id}/delete")
-    public ResponseEntity<?> deleteCalendarPost(@PathVariable Long id){
+    public ResponseEntity<?> deleteCalendarPost(@PathVariable Long id) {
 
         calendarService.deleteCalendarPost(id);
 
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Operation(summary = "캘린더 일정 생성 API",
+            description = "캘린더 일정을 생성합니다. 캘린더 태그의 ID가 올바르지 않으면 404 에러를 반환합니다")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "일정 생성 성공",
+                    content = @Content(schema = @Schema(implementation = CreateRes.class))),
+            @ApiResponse(responseCode = "404", description = "캘린더 태그 ID가 잘못됨",
+                    content = @Content(schema = @Schema(implementation = ErrorResult.class))
+            ),
+            @ApiResponse(responseCode = "400", description = "일정의 끝 날짜가 시작 날짜보다 작음"
+            )
+    })
+    @PostMapping("/schedule/create")
+    public ResponseEntity<?> createCalendarSchedule(CreateCalendarScheduleReq req) {
+
+        if (req.endDate().isBefore(req.startDate())) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        Member jwtMember = memberAdvice.findJwtMember();
+
+        CalendarSchedule calendarSchedule = calendarService.createCalendarSchedule(new CreateCalendarScheduleDTO(
+                req.CalendarTagId(),
+                req.title(),
+                req.startDate(),
+                req.endDate(),
+                jwtMember
+        ));
+
+        return new ResponseEntity<>(new CreateRes(calendarSchedule.getId()), HttpStatus.OK);
+    }
+
+    @Operation(summary = "캘린더 일정 업데이트 API",
+            description = "캘린더 일정을 수정합니다. 해당 일정을 찾지 못하면 404 코드를 반환합니다")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "일정 수정 성공"
+            ),
+            @ApiResponse(responseCode = "404", description = "게시글 일정이 잘못됨",
+                    content = @Content(schema = @Schema(implementation = ErrorResult.class))
+            ),
+            @ApiResponse(responseCode = "400", description = "일정의 끝 날짜가 시작 날짜보다 작음"
+            )
+    })
+    @PostMapping("/schedule/{id}/update")
+    public ResponseEntity<?> updateCalendarSchedule(
+            @PathVariable Long id,
+            UpdateCalendarScheduleReq req) {
+
+        if (req.endDate().isBefore(req.startDate())) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        CalendarSchedule calendarSchedule = calendarService.updateCalendarSchedule(new UpdateCalendarScheduleDTO(
+                id,
+                req.title(),
+                req.startDate(),
+                req.endDate()
+        ));
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Operation(summary = "캘린더 일정 삭제 API",
+            description = "캘린더 일정을 삭제합니다. 해당 일정을 찾지 못하면 404 코드를 반환합니다")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "일정 삭제 성공"
+            ),
+            @ApiResponse(responseCode = "404", description = "일정 아이디가 잘못됨",
+                    content = @Content(schema = @Schema(implementation = ErrorResult.class))
+            )
+    })
+    @PostMapping("/schedule/{id}/delete")
+    public ResponseEntity<?> deleteCalendarSchedule(
+            @PathVariable Long id
+    ) {
+        calendarService.deleteCalendarSchedule(id);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Operation(summary = "캘린더 일정 조회 API",
+            description = "캘린더 일정을 조회합니다. 해당 일정을 찾지 못하면 404 에러를 반환합니다")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "일정 조회 성공",
+                    content = @Content(schema = @Schema(implementation = CalendarScheduleDetailInfo.class))),
+            @ApiResponse(responseCode = "404", description = "일정 아이디가 잘못됨",
+                    content = @Content(schema = @Schema(implementation = ErrorResult.class))
+            )
+    })
+    @GetMapping("schedule/{id}")
+    public ResponseEntity<?> getCalendarSchedule(@PathVariable Long id){
+
+        CalendarScheduleDetailInfo calendarScheduleDetail = calendarService.getCalendarScheduleDetail(id);
+
+        return new ResponseEntity<>(calendarScheduleDetail, HttpStatus.OK);
     }
 
 
