@@ -1,6 +1,7 @@
 package towssome.server.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -14,10 +15,9 @@ import org.springframework.web.multipart.MultipartFile;
 import towssome.server.advice.MemberAdvice;
 import towssome.server.advice.PhotoAdvice;
 import towssome.server.dto.*;
-import towssome.server.entity.CalendarPost;
-import towssome.server.entity.CalendarSchedule;
-import towssome.server.entity.CalendarTag;
-import towssome.server.entity.Member;
+import towssome.server.entity.*;
+import towssome.server.exception.NotFoundEntityException;
+import towssome.server.exception.UnauthorizedActionException;
 import towssome.server.service.CalendarServiceInterface;
 
 import java.io.IOException;
@@ -306,5 +306,82 @@ public class CalendarController {
         return new ResponseEntity<>(calendarScheduleDetail, HttpStatus.OK);
     }
 
+    @Operation(summary = "캘린더 게시글 코멘트 생성 API",
+            description = "캘린더 게시글 코멘트를 생성합니다. 캘린더 게시글의 ID가 올바르지 않으면 404 에러를 반환합니다",
+            parameters = @Parameter(name = "postId", description = "코멘트가 생성될 게시글 id")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "게시글 코멘트 생성 성공",
+                    content = @Content(schema = @Schema(implementation = CreateRes.class))),
+            @ApiResponse(responseCode = "404", description = "게시글 ID가 잘못됨",
+                    content = @Content(schema = @Schema(implementation = ErrorResult.class))),
 
+
+    })
+    @PostMapping("/post/{postId}/commentcreate")
+    public ResponseEntity<?> createCalendarPostComment(
+            @PathVariable Long postId,
+            @RequestBody CCPCReq req) {
+
+        Member jwtMember = memberAdvice.findJwtMember();
+        CalendarPostComment calendarPostComment = calendarService.createCalendarPostComment(new CCPCDTO(
+                req.body(), jwtMember, postId
+        ));
+
+        return new ResponseEntity<>(new CreateRes(calendarPostComment.getId()), HttpStatus.OK);
+    }
+
+    @Operation(summary = "캘린더 게시글 코멘트 업데이트 API",
+            description = "캘린더 게시글 코멘트를 수정합니다. 해당 코멘트가 존재하지 않으면 404 에러를 반환합니다",
+            parameters = @Parameter(name = "commentId", description = "수정될 코멘트 id")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "코멘트 수정 성공"),
+            @ApiResponse(responseCode = "404", description = "코멘트 아이디가 잘못됨",
+                    content = @Content(schema = @Schema(implementation = ErrorResult.class))),
+            @ApiResponse(responseCode = "400", description = "코멘트 본문이 없음"),
+            @ApiResponse(responseCode = "401", description = "본인이 작성한 코멘트 아님",
+                    content = @Content(schema = @Schema(implementation = ErrorResult.class)))
+    })
+    @PostMapping("/comment/{commentId}/update")
+    public ResponseEntity<?> updateCalendarPostComment(
+            @PathVariable Long commentId,
+            @RequestBody UpdateCPCReq req) throws IOException {
+
+        try {
+            CalendarPostComment calendarPostComment = calendarService.updateCalendarPostComment(new UpdateCPCDTO(
+                    commentId,
+                    req.body()
+            ));
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (NotFoundEntityException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (UnauthorizedActionException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @Operation(summary = "캘린더 게시글 코멘트 삭제 API",
+            description = "캘린더 게시글 코멘트을 삭제합니다. 해당 코멘트를 찾지 못하면 404 코드를 반환합니다",
+            parameters = @Parameter(name = "commentId", description = "삭제될 코멘트 id"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "코멘트 삭제 성공"),
+            @ApiResponse(responseCode = "404", description = "코멘트 아이디가 잘못됨",
+                    content = @Content(schema = @Schema(implementation = ErrorResult.class))),
+            @ApiResponse(responseCode = "401", description = "본인이 작성한 코멘트 아님",
+                    content = @Content(schema = @Schema(implementation = ErrorResult.class)))
+    })
+    @PostMapping("/comment/{commentId}/delete")
+    public ResponseEntity<?> deleteCalendarPostComment(@PathVariable Long commentId) {
+        try {
+            calendarService.deleteCalendarPostComment(commentId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (NotFoundEntityException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (UnauthorizedActionException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+    }
 }

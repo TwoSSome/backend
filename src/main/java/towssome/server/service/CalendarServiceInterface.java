@@ -34,7 +34,7 @@ public interface CalendarServiceInterface {
 
     void deleteCalendarPostComment(long id);
 
-    void updateCalendarPostComment(updateCPCDTO dto);
+    CalendarPostComment updateCalendarPostComment(UpdateCPCDTO dto);
 
     // 작성해야할 API 3-a
     List<SearchPoomPoomLogInfo> searchPoomPoomLogs(SearchPoomPoomLogDTO dto);

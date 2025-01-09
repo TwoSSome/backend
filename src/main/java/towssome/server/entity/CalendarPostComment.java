@@ -33,4 +33,8 @@ public class CalendarPostComment {
         this.author = author;
         this.calendarPost = calendarPost;
     }
+
+    public void update(String body) {
+        this.body = body;
+    }
 }

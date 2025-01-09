@@ -4,14 +4,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import towssome.server.advice.MemberAdvice;
 import towssome.server.advice.PhotoAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.*;
 import towssome.server.exception.NotFoundCalendarException;
 import towssome.server.exception.NotFoundEntityException;
+import towssome.server.exception.UnauthorizedActionException;
 import towssome.server.repository.*;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +29,7 @@ public class CalendarService implements CalendarServiceInterface{
     private final CalendarRepository calendarRepository;
     private final PhotoRepository photoRepository;
     private final PhotoAdvice photoAdvice;
+    private final MemberAdvice memberAdvice;
 
     @Override
     public CalendarTag createCalendarTag(CreateCalendarTagDTO dto) {
@@ -175,17 +177,54 @@ public class CalendarService implements CalendarServiceInterface{
 
     @Override
     public CalendarPostComment createCalendarPostComment(CCPCDTO dto) {
-        return null;
+        CalendarPost calendarPost = calendarPostRepository.findById(dto.postId()).orElseThrow(
+                () -> new NotFoundEntityException("해당 게시글이 없습니다")
+        );
+
+        CalendarPostComment save = calendarPostCommentRepository.save(new CalendarPostComment(
+                dto.body(),
+                dto.author(),
+                calendarPost
+        ));
+        return save;
     }
 
     @Override
+    @Transactional
     public void deleteCalendarPostComment(long id) {
+        Member jwtMember = memberAdvice.findJwtMember();
 
+        CalendarPostComment calendarPostComment = calendarPostCommentRepository.findById(id).orElseThrow(
+                () -> new NotFoundEntityException("해당 코멘트가 없습니다")
+        );
+
+        if (!calendarPostComment.getAuthor().equals(jwtMember)) {
+            throw new UnauthorizedActionException("본인만 수정할 수 있습니다.");
+        }
+
+        calendarPostCommentRepository.deleteById(id);
     }
 
     @Override
-    public void updateCalendarPostComment(updateCPCDTO dto) {
+    @Transactional
+    public CalendarPostComment updateCalendarPostComment(UpdateCPCDTO dto) {
+        Member jwtMember = memberAdvice.findJwtMember();
 
+        CalendarPostComment calendarPostComment = calendarPostCommentRepository.findById(dto.id()).orElseThrow(
+                () -> new NotFoundEntityException("해당 코멘트가 없습니다")
+        );
+
+        if (!calendarPostComment.getAuthor().equals(jwtMember)) {
+            throw new UnauthorizedActionException("본인만 수정할 수 있습니다.");
+        }
+
+        if (dto.body() == null || dto.body().trim().isEmpty()) {
+            throw new IllegalArgumentException("댓글 본문은 비어 있을 수 없습니다.");
+        }
+
+
+        calendarPostComment.update(dto.body());
+        return calendarPostComment;
     }
 
     //=============================================================================================================

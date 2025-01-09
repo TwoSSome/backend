@@ -1,4 +1,11 @@
 package towssome.server.dto;
 
-public record CCPCDTO() {
+import towssome.server.entity.Member;
+
+public record CCPCDTO(
+        String body,
+        Member author,
+        Long postId
+) {
+
 }
