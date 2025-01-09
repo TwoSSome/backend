@@ -41,7 +41,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     }
 
     @Override
-    public Page<Comment> findCommentPageByCursorId(Long reviewId,Long cursorId, String sort, Pageable pageable) {
+    public Page<Comment> findCommentPageByCursorId(Long reviewId, Long cursorId, String sort, Pageable pageable) {
         List<Comment> results;
         results = queryFactory
                 .selectFrom(comment)
