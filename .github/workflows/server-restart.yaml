@@ -1,0 +1,20 @@
+name: Server restart
+on:
+  workflow_dispatch:
+
+jobs:
+  server-restart-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: restart poompoom-api server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 12000
+          script: |
+            docker stop poompoom-api
+            docker start poompoom-api
+
+
