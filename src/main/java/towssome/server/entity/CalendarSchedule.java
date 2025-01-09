@@ -28,10 +28,21 @@ public class CalendarSchedule {
     @JoinColumn(name = "calendar_tag")
     private CalendarTag calendarTag;
 
-    public CalendarSchedule(String name, LocalDate startDate, LocalDate endDate, CalendarTag calendarTag) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id")
+    private Member author;
+
+    public CalendarSchedule(String name, LocalDate startDate, LocalDate endDate, CalendarTag calendarTag, Member author) {
         this.name = name;
         this.startDate = startDate;
         this.endDate = endDate;
         this.calendarTag = calendarTag;
+        this.author = author;
+    }
+
+    public void update(String title, LocalDate startDate, LocalDate endDate) {
+        this.name = title;
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 }

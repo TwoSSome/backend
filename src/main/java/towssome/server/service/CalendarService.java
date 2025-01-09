@@ -11,6 +11,7 @@ import towssome.server.exception.NotFoundCalendarException;
 import towssome.server.exception.NotFoundEntityException;
 import towssome.server.repository.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,13 +78,53 @@ public class CalendarService implements CalendarServiceInterface{
         );
     }
 
-
     @Override
     public List<CalendarTagInfo> getAllCalendarTagInfo(Calendar calendar) {
         return List.of();
     }
 
-    //=============================================================================================================
+//=============================================================================================================
+
+    @Override
+    public CalendarSchedule createCalendarSchedule(CreateCalendarScheduleDTO dto) {
+
+        CalendarTag calendarTag = calendarTagRepository.findById(dto.CalendarTagId()).orElseThrow(
+                () -> new NotFoundEntityException("해당 캘린더 태그가 없습니다")
+        );
+
+        return calendarScheduleRepository.save(new CalendarSchedule(
+                dto.title(),
+                dto.startDate(),
+                dto.endDate(),
+                calendarTag,
+                dto.member()
+        ));
+    }
+
+    @Override
+    @Transactional
+    public CalendarSchedule updateCalendarSchedule(UpdateCalendarScheduleDTO dto) {
+
+        CalendarSchedule calendarSchedule = calendarScheduleRepository.findById(dto.CalendarScheduleId()).orElseThrow(
+                () -> new NotFoundEntityException("해당 스케줄이 없습니다")
+        );
+
+        calendarSchedule.update(dto.title(), dto.startDate(), dto.endDate());
+
+        return calendarSchedule;
+    }
+
+    @Override
+    @Transactional
+    public void deleteCalendarSchedule(Long id) {
+        CalendarSchedule calendarSchedule = calendarScheduleRepository.findById(id).orElseThrow(
+                () -> new NotFoundEntityException("해당 스케줄이 없습니다")
+        );
+
+        calendarScheduleRepository.delete(calendarSchedule);
+    }
+
+//=============================================================================================================
 
     @Override
     public CalendarPost createCalendarPost(CreateCalendarPostDTO dto) {
@@ -190,7 +231,28 @@ public class CalendarService implements CalendarServiceInterface{
 
     @Override
     public CalendarScheduleDetailInfo getCalendarScheduleDetail(long id) {
-        return null;
+
+        CalendarSchedule calendarSchedule = calendarScheduleRepository.findById(id).orElseThrow(
+                () -> new NotFoundEntityException("해당 스케줄이 없습니다")
+        );
+
+        List<CalendarPost> postList = calendarPostRepository.findAllByCalendarSchedule(calendarSchedule);
+        var postInSchedule = new ArrayList<PostInSchedule>();
+
+        for (CalendarPost calendarPost : postList) {
+            List<PhotoInPost> photoS3Path = photoAdvice.getPhotoS3Path(calendarPost);
+            postInSchedule.add(new PostInSchedule(
+                    calendarPost.getId(), // 포스트 아이디
+                    photoS3Path == null ? null : photoS3Path.get(0), //포스트 사진 데이터
+                    calendarPost.getTitle() // 포스트 타이틀
+            ));
+        }
+
+        return new CalendarScheduleDetailInfo(
+                calendarSchedule.getName(),
+                calendarSchedule.getAuthor().getId(),
+                postInSchedule
+        );
     }
 
 }
