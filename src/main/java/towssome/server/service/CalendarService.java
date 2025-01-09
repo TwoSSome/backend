@@ -2,6 +2,8 @@ package towssome.server.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import towssome.server.advice.MemberAdvice;
@@ -12,6 +14,7 @@ import towssome.server.exception.NotFoundCalendarException;
 import towssome.server.exception.NotFoundEntityException;
 import towssome.server.exception.UnauthorizedActionException;
 import towssome.server.repository.*;
+import towssome.server.repository.calendar_post_comment.CalendarPostCommentRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -225,6 +228,29 @@ public class CalendarService implements CalendarServiceInterface{
 
         calendarPostComment.update(dto.body());
         return calendarPostComment;
+    }
+
+    @Override
+    public CursorResult<CPCRes> getCalendarPostComments(Long postId, Long cursorId, String sort, Pageable page) {
+        List<CPCRes> cpcRes = new ArrayList<>();
+        final Page<CalendarPostComment> calendarPostComments = calendarPostCommentRepository.findCPCPageByCursorId(postId, cursorId, sort, page);
+        ProfileSimpleRes profileSimpleRes;
+        for(CalendarPostComment calendarPostComment: calendarPostComments){
+            Member commentedMember = calendarPostComment.getAuthor();
+            profileSimpleRes = new ProfileSimpleRes(
+                    commentedMember.getNickName(),
+                    commentedMember.getProfilePhoto() == null ? null : commentedMember.getProfilePhoto().getS3Path(),
+                    commentedMember.getId()
+            );
+            cpcRes.add(new CPCRes(
+                    calendarPostComment.getId(),
+                    calendarPostComment.getBody(),
+                    profileSimpleRes
+            ));
+        }
+        cursorId = calendarPostComments.isEmpty()?
+                null: calendarPostComments.getContent().get(calendarPostComments.getContent().size()-1).getId();
+        return new CursorResult<>(cpcRes, cursorId, calendarPostComments.hasNext());
     }
 
     //=============================================================================================================

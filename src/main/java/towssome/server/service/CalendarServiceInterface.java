@@ -1,5 +1,6 @@
 package towssome.server.service;
 
+import org.springframework.data.domain.Pageable;
 import towssome.server.dto.*;
 import towssome.server.entity.*;
 
@@ -35,6 +36,8 @@ public interface CalendarServiceInterface {
     void deleteCalendarPostComment(long id);
 
     CalendarPostComment updateCalendarPostComment(UpdateCPCDTO dto);
+
+    CursorResult<CPCRes> getCalendarPostComments(Long postId, Long cursorId, String sort, Pageable page);
 
     // 작성해야할 API 3-a
     List<SearchPoomPoomLogInfo> searchPoomPoomLogs(SearchPoomPoomLogDTO dto);

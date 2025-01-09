@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -307,7 +308,7 @@ public class CalendarController {
     }
 
     @Operation(summary = "캘린더 게시글 코멘트 생성 API",
-            description = "캘린더 게시글 코멘트를 생성합니다. 캘린더 게시글의 ID가 올바르지 않으면 404 에러를 반환합니다",
+            description = "캘린더 게시글 코멘트를 생성합니다. 캘린더 게시글의 ID가 올바르지 않으면 404 에러를 반환합니다.",
             parameters = @Parameter(name = "postId", description = "코멘트가 생성될 게시글 id")
     )
     @ApiResponses(value = {
@@ -332,7 +333,7 @@ public class CalendarController {
     }
 
     @Operation(summary = "캘린더 게시글 코멘트 업데이트 API",
-            description = "캘린더 게시글 코멘트를 수정합니다. 해당 코멘트가 존재하지 않으면 404 에러를 반환합니다",
+            description = "캘린더 게시글 코멘트를 수정합니다. 해당 코멘트가 존재하지 않으면 404 에러를 반환합니다.",
             parameters = @Parameter(name = "commentId", description = "수정될 코멘트 id")
     )
     @ApiResponses(value = {
@@ -364,7 +365,7 @@ public class CalendarController {
     }
 
     @Operation(summary = "캘린더 게시글 코멘트 삭제 API",
-            description = "캘린더 게시글 코멘트을 삭제합니다. 해당 코멘트를 찾지 못하면 404 코드를 반환합니다",
+            description = "캘린더 게시글 코멘트을 삭제합니다. 해당 코멘트를 찾지 못하면 404 코드를 반환합니다.",
             parameters = @Parameter(name = "commentId", description = "삭제될 코멘트 id"))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "코멘트 삭제 성공"),
@@ -383,5 +384,21 @@ public class CalendarController {
         } catch (UnauthorizedActionException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
+    }
+
+    @Operation(summary = "캘린더 게시글 코멘트 조회 API",
+            description = "캘린더 게시글의 코멘트를 조회합니다.",
+            parameters = {
+                    @Parameter(name = "postId", description = "게시글 id"),
+                    @Parameter(name = "cursorId", description = "다음 스크롤의 id, 미입력 시 첫 페이지에 해당되는 코멘트 반환"),
+                    @Parameter(name = "sort", description = "오름차순일 경우 asc, 내림차순일 경우 desc(미입력 시 기본값)"),
+                    @Parameter(name = "size", description = "한 스크롤 당 반환되는 코멘트 수(기본값: 20)")
+            })
+    @GetMapping("/post/{postId}/comments")
+    public CursorResult<CPCRes> getComments(@PathVariable Long postId,
+                                                @RequestParam(value = "cursorId", required = false) Long cursorId,
+                                                @RequestParam(value = "sort", defaultValue = "desc", required = false) String sort,
+                                                @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
+        return calendarService.getCalendarPostComments(postId, cursorId, sort, PageRequest.of(0, size));
     }
 }
