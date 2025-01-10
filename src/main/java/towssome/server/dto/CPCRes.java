@@ -1,10 +1,13 @@
 package towssome.server.dto;
 
-import towssome.server.entity.Member;
+
+import java.time.LocalDateTime;
 
 public record CPCRes(
         Long id,
         String body,
-        ProfileSimpleRes commentedMember
+        ProfileSimpleRes commentedMember,
+        LocalDateTime createDate,
+        LocalDateTime lastModifiedDate
 ) {
 }

@@ -245,7 +245,9 @@ public class CalendarService implements CalendarServiceInterface{
             cpcRes.add(new CPCRes(
                     calendarPostComment.getId(),
                     calendarPostComment.getBody(),
-                    profileSimpleRes
+                    profileSimpleRes,
+                    calendarPostComment.getCreateDate(),
+                    calendarPostComment.getLastModifiedDate()
             ));
         }
         cursorId = calendarPostComments.isEmpty()?
