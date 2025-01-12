@@ -8,6 +8,8 @@ public record CalendarTagInfo(
         String name,
         int color,
         @Schema(description = "기본으로 생성된 태그라면 true, 커스텀 태그라면 false")
-        boolean isDefaultTag
+        boolean isDefaultTag,
+        @Schema(description = "개인 일정 태그라면 true")
+        boolean isPersonalTag
 ) {
 }

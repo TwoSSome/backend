@@ -26,12 +26,14 @@ public class CalendarTag {
     private Calendar calendar;
 
     private Boolean isDefaultTag;
+    private Boolean isPersonalTag;
 
-    public CalendarTag(String name, int color, Calendar calendar, Boolean isDefaultTag) {
+    public CalendarTag(String name, int color, Calendar calendar, Boolean isDefaultTag, Boolean isPersonalTag) {
         this.name = name;
         this.color = color;
         this.calendar = calendar;
         this.isDefaultTag = isDefaultTag;
+        this.isPersonalTag = isPersonalTag;
     }
 
     public void updateTag(String name, int color) {
@@ -44,7 +46,8 @@ public class CalendarTag {
                 this.id,
                 this.name,
                 this.color,
-                false
+                this.isDefaultTag,
+                this.isPersonalTag
         );
     }
 
