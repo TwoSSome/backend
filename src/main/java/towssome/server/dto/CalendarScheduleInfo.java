@@ -8,6 +8,6 @@ public record CalendarScheduleInfo(
         String title,
         LocalDate startDate,
         LocalDate endDate,
-        MemberInfo memberInfo
+        AuthorInfo authorInfo
 ) {
 }

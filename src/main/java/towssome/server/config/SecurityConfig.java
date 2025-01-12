@@ -85,7 +85,8 @@ public class SecurityConfig {
                         .requestMatchers("/auth","/subscribe/*",
                                 "/community/create","/community/delete/*","/community/update/*",
                                 "/profile/*","/hashtag/virtual","/bookmark/*",
-                                "/category/*","/reply/create","reply/adopt", "review/create","review/delete/","review/update/").authenticated() //인증 필요
+                                "/category/*","/reply/create","reply/adopt", "review/create","review/delete/","review/update/",
+                                "/calendar/*").authenticated() //인증 필요
                         .anyRequest().permitAll()); //나머지 모든 요청에 대해서 인가
 
         //LoginFilter 이전에 등록

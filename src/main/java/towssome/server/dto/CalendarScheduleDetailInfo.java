@@ -4,7 +4,7 @@ import java.util.List;
 
 public record CalendarScheduleDetailInfo(
         String title,
-        Long authorId,
+        AuthorInfo authorInfo,
         List<PostInSchedule> postList
 ) {
 }

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import towssome.server.advice.RoleAdvice;
+import towssome.server.dto.AuthorInfo;
 import towssome.server.enumrated.SocialType;
 
 @Entity
@@ -80,5 +81,13 @@ public class Member extends BaseEntity{
 //    public void changeVirtualMateName(String name) {
 //        this.virtualMateName = name;
 //    }
+
+    public AuthorInfo getAuthorInfo() {
+        return new AuthorInfo(
+                this.id,
+                this.nickName,
+                this.profilePhoto == null ? null : this.profilePhoto.getS3Path()
+        );
+    }
 
 }

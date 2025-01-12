@@ -268,6 +268,7 @@ public class CalendarService implements CalendarServiceInterface {
     }
 
     @Override
+    @Transactional
     public List<CalendarScheduleInfo> getCalendarInfoByMonth(CalendarInfoByMonthDTO dto) {
 
         Calendar calendar = calendarRepository.findByAuth(dto.member()).orElseThrow(
@@ -285,11 +286,7 @@ public class CalendarService implements CalendarServiceInterface {
                     schedule.getName(),
                     schedule.getStartDate(),
                     schedule.getEndDate(),
-                    new MemberInfo(
-                            schedule.getAuthor().getId(),
-                            schedule.getAuthor().getNickName(),
-                            schedule.getAuthor().getProfilePhoto() == null ? null : schedule.getAuthor().getProfilePhoto().getS3Path()
-                    )
+                    schedule.getAuthor().getAuthorInfo()
             ));
         }
 
@@ -297,6 +294,7 @@ public class CalendarService implements CalendarServiceInterface {
     }
 
     @Override
+    @Transactional
     public CalendarPostDetailInfo getCalendarPostDetail(long id) {
 
         CalendarPost calendarPost = calendarPostRepository.findById(id).orElseThrow(
@@ -316,11 +314,12 @@ public class CalendarService implements CalendarServiceInterface {
                 photoPathList,
                 calendarPost.getTitle(),
                 calendarPost.getBody(),
-                calendarPost.getAuthor().getId()
+                calendarPost.getAuthor().getAuthorInfo()
         );
     }
 
     @Override
+    @Transactional
     public CalendarScheduleDetailInfo getCalendarScheduleDetail(long id) {
 
         CalendarSchedule calendarSchedule = calendarScheduleRepository.findById(id).orElseThrow(
@@ -341,7 +340,7 @@ public class CalendarService implements CalendarServiceInterface {
 
         return new CalendarScheduleDetailInfo(
                 calendarSchedule.getName(),
-                calendarSchedule.getAuthor().getId(),
+                calendarSchedule.getAuthor().getAuthorInfo(),
                 postInSchedule
         );
     }
