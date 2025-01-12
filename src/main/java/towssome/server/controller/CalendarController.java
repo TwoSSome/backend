@@ -34,10 +34,32 @@ public class CalendarController {
     private final MemberAdvice memberAdvice;
     private final PhotoAdvice photoAdvice;
 
-    @GetMapping("/")
-    public ResponseEntity<?> getCalendarInfo() {
-
-        return null;
+    @Operation(summary = "캘린더 일정 조회 API",
+            description = "해당 월의 일정을 조회합니다. 캘린더를 찾지 못하면 404 에러를 반환합니다, AT가 필요합니다",
+            parameters = {@Parameter(name = "year", description = "조회할 연도"),
+                    @Parameter(name = "month", description = "조회할 달")}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "캘린더 조회 성공",
+                    content = @Content(schema = @Schema(implementation = CalendarScheduleInfo.class))),
+            @ApiResponse(responseCode = "404", description = "캘린더가 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResult.class))
+            )
+    })
+    @GetMapping("")
+    public ResponseEntity<?> getCalendarInfo(
+            @RequestParam int year,
+            @RequestParam int month
+    ) {
+        Member jwtMember = memberAdvice.findJwtMember();
+        List<CalendarScheduleInfo> monthInfoList = calendarService.getCalendarInfoByMonth(new CalendarInfoByMonthDTO(
+                jwtMember,
+                year,
+                month
+        ));
+        return new ResponseEntity<>(
+                new ListResultRes<>(monthInfoList), HttpStatus.OK
+        );
     }
 
     @Operation(summary = "태그 조회 API",
@@ -300,7 +322,7 @@ public class CalendarController {
             )
     })
     @GetMapping("schedule/{id}")
-    public ResponseEntity<?> getCalendarSchedule(@PathVariable Long id){
+    public ResponseEntity<?> getCalendarSchedule(@PathVariable Long id) {
 
         CalendarScheduleDetailInfo calendarScheduleDetail = calendarService.getCalendarScheduleDetail(id);
 
@@ -360,7 +382,7 @@ public class CalendarController {
         } catch (NotFoundEntityException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (UnauthorizedActionException e) {
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -396,9 +418,9 @@ public class CalendarController {
             })
     @GetMapping("/post/{postId}/comments")
     public CursorResult<CPCRes> getComments(@PathVariable Long postId,
-                                                @RequestParam(value = "cursorId", required = false) Long cursorId,
-                                                @RequestParam(value = "sort", defaultValue = "desc", required = false) String sort,
-                                                @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
+                                            @RequestParam(value = "cursorId", required = false) Long cursorId,
+                                            @RequestParam(value = "sort", defaultValue = "desc", required = false) String sort,
+                                            @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
         return calendarService.getCalendarPostComments(postId, cursorId, sort, PageRequest.of(0, size));
     }
 }
