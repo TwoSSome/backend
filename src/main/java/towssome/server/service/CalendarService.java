@@ -24,7 +24,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CalendarService implements CalendarServiceInterface {
 
-    private final CalendarPersonalScheduleRepository calendarPersonalScheduleRepository;
     private final CalendarScheduleRepository calendarScheduleRepository;
     private final CalendarTagRepository calendarTagRepository;
     private final CalendarPostCommentRepository calendarPostCommentRepository;
@@ -46,7 +45,7 @@ public class CalendarService implements CalendarServiceInterface {
         }
 
         return calendarTagRepository.save(new CalendarTag(
-                dto.name(), dto.color(), calendar, false
+                dto.name(), dto.color(), calendar, false, false
         ));
     }
 
@@ -79,13 +78,31 @@ public class CalendarService implements CalendarServiceInterface {
                 calendarTag.getId(),
                 calendarTag.getName(),
                 calendarTag.getColor(),
-                calendarTag.getIsDefaultTag()
+                calendarTag.getIsDefaultTag(),
+                calendarTag.getIsPersonalTag()
         );
     }
 
     @Override
-    public List<CalendarTagInfo> getAllCalendarTagInfo(Calendar calendar) {
-        return List.of();
+    public List<CalendarTagInfo> getAllCalendarTagInfo(Member member) {
+        Calendar calendar = calendarRepository.findByAuth(member).orElseThrow(
+                () -> new NotFoundCalendarException("해당 캘린더가 없습니다")
+        );
+
+        List<CalendarTag> calendarTagList = calendarTagRepository.findAllByCalendar(calendar);
+        var result = new ArrayList<CalendarTagInfo>();
+
+        for (CalendarTag calendarTag : calendarTagList) {
+            result.add(new CalendarTagInfo(
+                    calendarTag.getId(),
+                    calendarTag.getName(),
+                    calendarTag.getColor(),
+                    calendarTag.getIsDefaultTag(),
+                    calendarTag.getIsPersonalTag()
+            ));
+        }
+
+        return result;
     }
 
 //=============================================================================================================
