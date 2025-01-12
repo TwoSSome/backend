@@ -22,7 +22,7 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class CalendarService implements CalendarServiceInterface{
+public class CalendarService implements CalendarServiceInterface {
 
     private final CalendarPersonalScheduleRepository calendarPersonalScheduleRepository;
     private final CalendarScheduleRepository calendarScheduleRepository;
@@ -235,7 +235,7 @@ public class CalendarService implements CalendarServiceInterface{
         List<CPCRes> cpcRes = new ArrayList<>();
         final Page<CalendarPostComment> calendarPostComments = calendarPostCommentRepository.findCPCPageByCursorId(postId, cursorId, sort, page);
         ProfileSimpleRes profileSimpleRes;
-        for(CalendarPostComment calendarPostComment: calendarPostComments){
+        for (CalendarPostComment calendarPostComment : calendarPostComments) {
             Member commentedMember = calendarPostComment.getAuthor();
             profileSimpleRes = new ProfileSimpleRes(
                     commentedMember.getNickName(),
@@ -250,8 +250,8 @@ public class CalendarService implements CalendarServiceInterface{
                     calendarPostComment.getLastModifiedDate()
             ));
         }
-        cursorId = calendarPostComments.isEmpty()?
-                null: calendarPostComments.getContent().get(calendarPostComments.getContent().size()-1).getId();
+        cursorId = calendarPostComments.isEmpty() ?
+                null : calendarPostComments.getContent().get(calendarPostComments.getContent().size() - 1).getId();
         return new CursorResult<>(cpcRes, cursorId, calendarPostComments.hasNext());
     }
 
@@ -269,7 +269,31 @@ public class CalendarService implements CalendarServiceInterface{
 
     @Override
     public List<CalendarScheduleInfo> getCalendarInfoByMonth(CalendarInfoByMonthDTO dto) {
-        return List.of();
+
+        Calendar calendar = calendarRepository.findByAuth(dto.member()).orElseThrow(
+                () -> new NotFoundCalendarException("해당 캘린더가 없습니다")
+        );
+
+        List<CalendarSchedule> scheduleList = calendarScheduleRepository.findByMonthAndYear(dto.month(), dto.year(), calendar);
+
+        var result = new ArrayList<CalendarScheduleInfo>();
+
+        for (CalendarSchedule schedule : scheduleList) {
+            result.add(new CalendarScheduleInfo(
+                    schedule.getCalendarTag().getInfoDTO(),
+                    schedule.getId(),
+                    schedule.getName(),
+                    schedule.getStartDate(),
+                    schedule.getEndDate(),
+                    new MemberInfo(
+                            schedule.getAuthor().getId(),
+                            schedule.getAuthor().getNickName(),
+                            schedule.getAuthor().getProfilePhoto() == null ? null : schedule.getAuthor().getProfilePhoto().getS3Path()
+                    )
+            ));
+        }
+
+        return result;
     }
 
     @Override

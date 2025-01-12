@@ -1,4 +1,13 @@
 package towssome.server.dto;
 
-public record CalendarScheduleInfo() {
+import java.time.LocalDate;
+
+public record CalendarScheduleInfo(
+        CalendarTagInfo calendarTagInfo,
+        Long id,
+        String title,
+        LocalDate startDate,
+        LocalDate endDate,
+        MemberInfo memberInfo
+) {
 }

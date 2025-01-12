@@ -1,4 +1,10 @@
 package towssome.server.dto;
 
-public record CalendarInfoByMonthDTO() {
+import towssome.server.entity.Member;
+
+public record CalendarInfoByMonthDTO(
+        Member member,
+        int year,
+        int month
+) {
 }
