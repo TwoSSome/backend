@@ -58,7 +58,7 @@ public class SecurityConfig {
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 
                         CorsConfiguration configuration = new CorsConfiguration();
-                        configuration.setAllowedOrigins(Arrays.asList(SERVER_IP,"http://localhost:3000"));
+                        configuration.setAllowedOrigins(Arrays.asList(SERVER_IP, "http://localhost:3000"));
                         configuration.setAllowedMethods(Collections.singletonList("*"));
                         configuration.setAllowCredentials(true);
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
@@ -79,29 +79,28 @@ public class SecurityConfig {
         http.httpBasic(AbstractHttpConfigurer::disable);
         //경로별 인가 작업 -> 여기서 인증이 필요한 URL 등록
         http.authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login", "/", "/join","/logout","/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**").permitAll() //모든 요청 인가
-                        .requestMatchers("/admin").hasRole("ADMIN") //role 이 ROLE_ADMIN 인 경우만 인가
-                        .requestMatchers("/reissue").permitAll()
-                        .requestMatchers("/auth","/subscribe/*",
-                                "/community/create","/community/delete/*","/community/update/*",
-                                "/profile/*","/hashtag/virtual","/bookmark/*",
-                                "/category/*","/reply/create","reply/adopt", "review/create","review/delete/","review/update/",
-                                "/calendar/*").authenticated() //인증 필요
-                        .anyRequest().permitAll()); //나머지 모든 요청에 대해서 인가
+                .requestMatchers("/login", "/", "/join", "/logout", "/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**").permitAll() //모든 요청 인가
+                .requestMatchers("/admin").hasRole("ADMIN") //role 이 ROLE_ADMIN 인 경우만 인가
+                .requestMatchers("/reissue").permitAll()
+                .requestMatchers("/auth", "/subscribe/*",
+                        "/community/create", "/community/delete/*", "/community/update/*",
+                        "/profile/*", "/hashtag/virtual", "/bookmark/*",
+                        "/category/*", "/reply/create", "reply/adopt", "review/create", "review/delete/", "review/update/",
+                        "/calendar/*").authenticated() //인증 필요
+                .anyRequest().permitAll()); //나머지 모든 요청에 대해서 인가
 
         //LoginFilter 이전에 등록
         http.addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class);
         //해당 필터를 정확하게 대체
-        http.addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil,refreshTokenRepository, memberRepository), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshTokenRepository, memberRepository), UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshTokenRepository), LogoutFilter.class);
 
         //OAuth2
-        http
-                .oauth2Login((oauth2) -> oauth2
-                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
-                                .userService(customOAuth2UserService))
-                        .successHandler(customSuccessHandler)
-                );
+        http.oauth2Login((oauth2) -> oauth2
+                .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
+                        .userService(customOAuth2UserService))
+                .successHandler(customSuccessHandler)
+        );
 
         //세션 stateless 설정
         http.sessionManagement((session) -> session
