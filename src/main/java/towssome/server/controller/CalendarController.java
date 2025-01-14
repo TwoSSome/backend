@@ -24,7 +24,7 @@ import towssome.server.service.CalendarServiceInterface;
 import java.io.IOException;
 import java.util.List;
 
-@Tag(name = "캘린더")
+@Tag(name = "캘린더", description = "모든 응답에는 AT가 필요합니다!!")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/calendar")
