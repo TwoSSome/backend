@@ -13,6 +13,6 @@ public record CalendarPostDetailInfo(
         @Schema(description = "게시글 본문")
         String body,
         @Schema(description = "작성자 ID")
-        Long authId
+        AuthorInfo authorInfo
 ) {
 }

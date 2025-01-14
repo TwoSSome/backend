@@ -23,7 +23,7 @@ public interface CalendarServiceInterface {
     void deleteCalendarSchedule(Long id);
 
     //작성해야할 API 2번
-    List<CalendarTagInfo> getAllCalendarTagInfo(Calendar calendar);
+    List<CalendarTagInfo> getAllCalendarTagInfo(Member member);
 
     CalendarPost createCalendarPost(CreateCalendarPostDTO dto);
 

@@ -3,7 +3,6 @@ package towssome.server.advice;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import towssome.server.entity.*;
-import towssome.server.repository.CalendarPersonalScheduleRepository;
 import towssome.server.repository.CalendarTagRepository;
 import towssome.server.repository.hashtag.HashTagRepository;
 import towssome.server.repository.ProfileTagRepository;
@@ -18,7 +17,6 @@ public class ServiceAdvice {
     private final HashTagRepository hashTagRepository;
     private final ProfileTagRepository profileTagRepository;
     private final CalendarTagRepository calendarTagRepository;
-    private final CalendarPersonalScheduleRepository calendarPersonalScheduleRepository;
 
     public void storeHashtag(List<String> list, Member member) {
         ArrayList<HashTag> hashTags = new ArrayList<>();
@@ -50,40 +48,47 @@ public class ServiceAdvice {
                 "n주년",
                 1,
                 calendar,
-                true
+                true,
+                false
         );
         CalendarTag birthday = new CalendarTag(
                 "생일",
                 2,
                 calendar,
-                true
+                true,
+                false
         );
         CalendarTag couplesHoliday = new CalendarTag(
                 "연인 기념일",
                 3,
-                calendar,true
+                calendar,true,
+                false
         );
         CalendarTag date = new CalendarTag(
                 "데이트",
                 4,
-                calendar,true
+                calendar,true,
+                false
+        );
+        CalendarTag mans = new CalendarTag(
+                "남자친구 일정",
+                4,
+                calendar,true,
+                true
+        );
+        CalendarTag girls = new CalendarTag(
+                "데이트",
+                4,
+                calendar,true,
+                true
         );
         calendarTagRepository.save(OOthAnniversary);
         calendarTagRepository.save(birthday);
         calendarTagRepository.save(couplesHoliday);
         calendarTagRepository.save(date);
-        CalendarPersonalSchedule personalSchedule1 = new CalendarPersonalSchedule(
-                "남자친구 일정",
-                5,
-                calendar
-        );
-        CalendarPersonalSchedule personalSchedule2 = new CalendarPersonalSchedule(
-                "여자친구 일정",
-                5,
-                calendar
-        );
-        calendarPersonalScheduleRepository.save(personalSchedule1);
-        calendarPersonalScheduleRepository.save(personalSchedule2);
+        calendarTagRepository.save(mans);
+        calendarTagRepository.save(girls);
+
     }
 
 

@@ -24,7 +24,7 @@ import towssome.server.service.CalendarServiceInterface;
 import java.io.IOException;
 import java.util.List;
 
-@Tag(name = "캘린더")
+@Tag(name = "캘린더", description = "모든 응답에는 AT가 필요합니다!!")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/calendar")
@@ -59,6 +59,26 @@ public class CalendarController {
         ));
         return new ResponseEntity<>(
                 new ListResultRes<>(monthInfoList), HttpStatus.OK
+        );
+    }
+
+    @Operation(summary = "모든 태그 조회 API",
+            description = "모든 태그를 조회합니다. 해당 태그를 찾지 못하면 404 에러를 반환합니다")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "태그 조회 성공",
+                    content = @Content(schema = @Schema(implementation = CalendarTagInfo.class))),
+            @ApiResponse(responseCode = "404", description = "아직 캘린더가 생성되지 않음",
+                    content = @Content(schema = @Schema(implementation = ErrorResult.class))
+            )
+    })
+    @GetMapping("/tag")
+    public ResponseEntity<?> getAllTag(){
+
+        Member jwtMember = memberAdvice.findJwtMember();
+        List<CalendarTagInfo> allCalendarTagInfo = calendarService.getAllCalendarTagInfo(jwtMember);
+
+        return new ResponseEntity<>(
+                new ListResultRes<>(allCalendarTagInfo), HttpStatus.OK
         );
     }
 
