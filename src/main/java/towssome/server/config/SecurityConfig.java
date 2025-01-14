@@ -38,6 +38,7 @@ public class SecurityConfig {
     private final MemberRepository memberRepository;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomSuccessHandler customSuccessHandler;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -101,6 +102,9 @@ public class SecurityConfig {
                         .userService(customOAuth2UserService))
                 .successHandler(customSuccessHandler)
         );
+
+//        http.exceptionHandling((handle) -> handle.
+//                accessDeniedHandler(customAccessDeniedHandler));
 
         //세션 stateless 설정
         http.sessionManagement((session) -> session
