@@ -39,6 +39,7 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomSuccessHandler customSuccessHandler;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -102,6 +103,10 @@ public class SecurityConfig {
                         .userService(customOAuth2UserService))
                 .successHandler(customSuccessHandler)
         );
+
+        http.exceptionHandling(exce -> exce.
+                authenticationEntryPoint(customAuthenticationEntryPoint)
+                .accessDeniedHandler(customAccessDeniedHandler));
 
 //        http.exceptionHandling((handle) -> handle.
 //                accessDeniedHandler(customAccessDeniedHandler));
