@@ -10,6 +10,7 @@ import towssome.server.advice.MemberAdvice;
 import towssome.server.advice.PhotoAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.*;
+import towssome.server.enumrated.PostType;
 import towssome.server.exception.NotFoundCalendarException;
 import towssome.server.exception.NotFoundEntityException;
 import towssome.server.exception.UnauthorizedActionException;
@@ -158,7 +159,8 @@ public class CalendarService implements CalendarServiceInterface {
                 dto.title(),
                 dto.body(),
                 dto.author(),
-                calendarSchedule
+                calendarSchedule,
+                PostType.MEMOIR
         ));
 
         return save;
