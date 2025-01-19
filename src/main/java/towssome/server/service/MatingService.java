@@ -38,8 +38,23 @@ public class MatingService {
      */
     public Mating createOffer(Member offerMember, Member obtainMember) {
 
-        if(matingRepository.existsByOfferMember(offerMember))
-            throw new AlreadyExistMatingException("이미 연인이 존재합니다");
+        if (matingRepository.existsByOfferMember(offerMember)) {
+            Mating mating = matingRepository.findMatingByMember(offerMember).get();
+            if (mating.getStatus() == MatingStatus.MATING) {
+                throw new AlreadyExistMatingException("이미 연인이 있습니다");
+            } else if (mating.getStatus() == MatingStatus.OFFER) {
+                throw new AlreadyExistMatingException("이미 연인 신청이 있습니다");
+            }
+        }
+
+        if (matingRepository.existsByObtainMember(obtainMember) || matingRepository.existsByOfferMember(obtainMember)) {
+            Mating mating = matingRepository.findMatingByMember(obtainMember).get();
+            if (mating.getStatus() == MatingStatus.MATING) {
+                throw new AlreadyExistMatingException("이미 상대에게 연인이 있습니다");
+            } else if (mating.getStatus() == MatingStatus.OFFER) {
+                throw new AlreadyExistMatingException("이미 상대에게 연인 신청이 있습니다");
+            }
+        }
 
         return matingRepository.save(new Mating(
                 offerMember,
