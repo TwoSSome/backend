@@ -19,4 +19,6 @@ public interface MatingRepository extends JpaRepository<Mating,Long> {
 
     boolean existsByOfferMember(Member member);
 
+    boolean existsByObtainMember(Member member);
+
 }
