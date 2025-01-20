@@ -109,4 +109,10 @@ public class ExceptionAdvice {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler
+    public ResponseEntity<ErrorResult> invalidMonthException(InvalidMonthException e) {
+        ErrorResult errorResult = new ErrorResult("InvalidMonthException", e.getMessage());
+        return new ResponseEntity<>(errorResult, HttpStatus.BAD_REQUEST);
+    }
+
 }
