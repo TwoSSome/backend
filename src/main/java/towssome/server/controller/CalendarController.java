@@ -17,7 +17,9 @@ import towssome.server.advice.MemberAdvice;
 import towssome.server.advice.PhotoAdvice;
 import towssome.server.dto.*;
 import towssome.server.entity.*;
+import towssome.server.exception.InvalidMonthException;
 import towssome.server.exception.NotFoundEntityException;
+import towssome.server.exception.PageException;
 import towssome.server.exception.UnauthorizedActionException;
 import towssome.server.service.CalendarServiceInterface;
 
@@ -442,5 +444,41 @@ public class CalendarController {
                                             @RequestParam(value = "sort", defaultValue = "desc", required = false) String sort,
                                             @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
         return calendarService.getCalendarPostComments(postId, cursorId, sort, PageRequest.of(0, size));
+    }
+
+    @Operation(summary = "품품로그 조회 API",
+            description = "품품로그를 일정의 내림차순으로 조회합니다. 쿼리스트링을 입력하지 않을 경우, 사이드바의 품품로그에 필요한 만큼 반환됩니다.",
+            parameters = {
+                    @Parameter(name = "cursorId", description = "다음 스크롤의 id, 미입력 시 첫 페이지에 해당되는 품품로그 반환.(0이 아닌 1부터 시작)"),
+                    @Parameter(name = "size", description = "한 스크롤 당 반환되는 품품로그 수(기본값: 6)")
+            })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "404", description = "페이지 번호(cursorId)가 잘못됨.",
+                    content = @Content(schema = @Schema(implementation = ErrorResult.class)))
+    })
+    @GetMapping("/poompoomlog")
+    public CursorResult<PoomPoomLogInfo> getPoomPoomLogs(@RequestParam(value = "cursorId", defaultValue = "1") int cursorId,
+                                                            @RequestParam(value = "size", defaultValue = "6") Integer size){
+        if (cursorId <= 0) {
+            throw new PageException("페이지 번호는 0보다 커야 합니다");
+        }
+        return calendarService.getPoomPoomLogs(cursorId, size);
+    }
+
+    @Operation(summary = "월별 품품로그 조회 API",
+            description = "선택한 월의 품품로그를 일정의 오름차순으로 조회합니다.",
+            parameters = {
+                    @Parameter(name = "month", description = "월별 품품로그를 조회할 월")
+            })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "400", description = "월(month)의 값이 잘못됨.",
+                    content = @Content(schema = @Schema(implementation = ErrorResult.class)))
+    })
+    @GetMapping("/poompoomlog/monthly")
+    public List<PoomPoomLogInfo> getMonthlyPoomPoomLogs(@RequestParam(value = "month") int month){
+        if (month < 1 || month > 12) {
+            throw new InvalidMonthException("월(month)은 1~12의 값만 허용합니다.");
+        }
+        return calendarService.getMonthlyPoomPoomLogs(month);
     }
 }

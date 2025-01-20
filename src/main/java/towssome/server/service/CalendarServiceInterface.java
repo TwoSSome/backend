@@ -40,7 +40,9 @@ public interface CalendarServiceInterface {
     CursorResult<CPCRes> getCalendarPostComments(Long postId, Long cursorId, String sort, Pageable page);
 
     // 작성해야할 API 3-a
-    List<SearchPoomPoomLogInfo> searchPoomPoomLogs(SearchPoomPoomLogDTO dto);
+    CursorResult<PoomPoomLogInfo> getPoomPoomLogs(int page, int size);
+
+    List<PoomPoomLogInfo> getMonthlyPoomPoomLogs(int month);
 
     //작성해야할 API 3-b
     List<CalendarTagInfo> getDateTagInfo(Calendar calendar);

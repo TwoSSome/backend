@@ -3,6 +3,7 @@ package towssome.server.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import towssome.server.exception.NotFoundCalendarException;
 import towssome.server.exception.NotFoundEntityException;
 import towssome.server.exception.UnauthorizedActionException;
 import towssome.server.repository.*;
+import towssome.server.repository.calendar_post.CalendarPostRepository;
 import towssome.server.repository.calendar_post_comment.CalendarPostCommentRepository;
 
 import java.util.ArrayList;
@@ -277,8 +279,15 @@ public class CalendarService implements CalendarServiceInterface {
     //=============================================================================================================
 
     @Override
-    public List<SearchPoomPoomLogInfo> searchPoomPoomLogs(SearchPoomPoomLogDTO dto) {
-        return List.of();
+    public CursorResult<PoomPoomLogInfo> getPoomPoomLogs(int page, int size) {
+        Member jwtMember = memberAdvice.findJwtMember();
+        return calendarPostRepository.findPoomPoomLogs(jwtMember,page-1, size);
+    }
+
+    @Override
+    public List<PoomPoomLogInfo> getMonthlyPoomPoomLogs(int month) {
+        Member jwtMember = memberAdvice.findJwtMember();
+        return  calendarPostRepository.findPoomPoomLogsByMonth(jwtMember, month);
     }
 
     @Override
