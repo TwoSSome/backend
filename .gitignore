@@ -10,6 +10,7 @@ src/test/
 src/test/java/towssome/server/ServerApplicationTests.java
 기능-추가.md
 버그-수정.md
+src/main/java/towssome/server/temp_image/*
 
 ### STS ###
 .apt_generated
