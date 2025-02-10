@@ -22,6 +22,14 @@ public interface CalendarServiceInterface {
 
     void deleteCalendarSchedule(Long id);
 
+    CalendarPlanContentsInfoList getCalendarPlan(Long id);
+
+    CalendarPlan createCalendarPlan(CreateCalendarPlanDTO dto);
+
+    CalendarPlan updateCalendarPlan(UpdateCalendarPlanDTO dto);
+
+    void deleteCalendarPlan(Long id);
+
     //작성해야할 API 2번
     List<CalendarTagInfo> getAllCalendarTagInfo(Member member);
 

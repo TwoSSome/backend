@@ -255,6 +255,46 @@ public class CalendarController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @GetMapping("/plan/{id}")
+    public ResponseEntity<?> getPlan(@PathVariable Long id){
+
+        CalendarPlanContentsInfoList result = calendarService.getCalendarPlan(id);
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping("/plan/create")
+    public ResponseEntity<?> createPlan(@RequestBody createCalendarPlanReq req){
+
+        CalendarPlan calendarPlan = calendarService.createCalendarPlan(new CreateCalendarPlanDTO(
+                req.body(),
+                req.calendarScheduleId(),
+                req.localDate()
+        ));
+
+        return new ResponseEntity<>(new CreateRes(calendarPlan.getId()), HttpStatus.OK);
+    }
+
+    @PostMapping("/plan/{id}/update")
+    public ResponseEntity<?> updatePlan(@PathVariable Long id, @RequestBody UpdateCalendarPlanReq req){
+
+        calendarService.updateCalendarPlan(new UpdateCalendarPlanDTO(
+                id,
+                req.body(),
+                req.localDate()
+        ));
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/plan/{id}/delete")
+    public ResponseEntity<?> deletePlan(@PathVariable Long id){
+
+        calendarService.deleteCalendarPlan(id);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @Operation(summary = "캘린더 일정 생성 API",
             description = "캘린더 일정을 생성합니다. 캘린더 태그의 ID가 올바르지 않으면 404 에러를 반환합니다")
     @ApiResponses(value = {
