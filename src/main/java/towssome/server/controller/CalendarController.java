@@ -255,6 +255,16 @@ public class CalendarController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Operation(summary = "캘린더 플랜 조회 API",
+            description = "캘린더 일정 내의 캘린더 플랜을 조회합니다. 해당 캘린더 일정을 찾지 못하면 404 에러를 반환합니다")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "플랜 조회 성공",
+                    content = @Content(schema = @Schema(implementation = CalendarPlanContentsInfoList.class))),
+            @ApiResponse(responseCode = "404", description = "플랜 아이디가 잘못됨",
+                    content = @Content(schema = @Schema(implementation = ErrorResult.class))
+            )
+    })
+    @Parameter(description = "조회할 캘린더 일정의 id", required = true, name = "id")
     @GetMapping("/plan/{id}")
     public ResponseEntity<?> getPlan(@PathVariable Long id){
 
@@ -263,6 +273,15 @@ public class CalendarController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    @Operation(summary = "캘린더 플랜 생성 API",
+            description = "캘린더 플랜을 생성합니다. 캘린더 일정의 ID가 올바르지 않으면 404 에러를 반환합니다")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "플랜 생성 성공",
+                    content = @Content(schema = @Schema(implementation = CreateRes.class))),
+            @ApiResponse(responseCode = "404", description = "게시글 일정 ID가 잘못됨",
+                    content = @Content(schema = @Schema(implementation = ErrorResult.class))
+            )
+    })
     @PostMapping("/plan/create")
     public ResponseEntity<?> createPlan(@RequestBody createCalendarPlanReq req){
 
@@ -275,6 +294,16 @@ public class CalendarController {
         return new ResponseEntity<>(new CreateRes(calendarPlan.getId()), HttpStatus.OK);
     }
 
+    @Operation(summary = "캘린더 플랜 업데이트 API",
+            description = "캘린더 플랜을 수정합니다. 해당 플랜을 찾지 못하면 404 코드를 반환합니다")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "플랜 수정 성공"
+            ),
+            @ApiResponse(responseCode = "404", description = "플랜 아이디가 잘못됨",
+                    content = @Content(schema = @Schema(implementation = ErrorResult.class))
+            )
+    })
+    @Parameter(name = "id", description = "캘린더 플랜의 id", required = true)
     @PostMapping("/plan/{id}/update")
     public ResponseEntity<?> updatePlan(@PathVariable Long id, @RequestBody UpdateCalendarPlanReq req){
 
@@ -287,6 +316,16 @@ public class CalendarController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Operation(summary = "캘린더 플랜 삭제 API",
+            description = "캘린더 플랜을 삭제합니다. 해당 플랜을 찾지 못하면 404 코드를 반환합니다")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "플랜 수정 성공"
+            ),
+            @ApiResponse(responseCode = "404", description = "플랜 아이디가 잘못됨",
+                    content = @Content(schema = @Schema(implementation = ErrorResult.class))
+            )
+    })
+    @Parameter(name = "id", description = "캘린더 플랜의 id", required = true)
     @PostMapping("/plan/{id}/delete")
     public ResponseEntity<?> deletePlan(@PathVariable Long id){
 
