@@ -3,7 +3,6 @@ package towssome.server.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +32,7 @@ public class CalendarService implements CalendarServiceInterface {
     private final CalendarPostRepository calendarPostRepository;
     private final CalendarRepository calendarRepository;
     private final PhotoRepository photoRepository;
+    private final CalendarPlanRepository calendarPlanRepository;
     private final PhotoAdvice photoAdvice;
     private final MemberAdvice memberAdvice;
 
@@ -109,6 +109,7 @@ public class CalendarService implements CalendarServiceInterface {
     }
 
 //=============================================================================================================
+//=============================================================================================================
 
     @Override
     public CalendarSchedule createCalendarSchedule(CreateCalendarScheduleDTO dto) {
@@ -150,6 +151,65 @@ public class CalendarService implements CalendarServiceInterface {
     }
 
 //=============================================================================================================
+//=============================================================================================================
+
+    @Override
+    public CalendarPlanContentsInfoList getCalendarPlan(Long id) {
+
+        CalendarSchedule schedule = calendarScheduleRepository.findById(id).orElseThrow(
+                () -> new NotFoundCalendarException("해당 캘린더 일정이 없습니다")
+        );
+
+        List<CalendarPlan> plans = calendarPlanRepository.getCalendarPlanByCalendarSchedule(schedule);
+        var infoList = new ArrayList<CalendarPlanContentsInfo>();
+        for (CalendarPlan plan : plans) {
+            infoList.add(new CalendarPlanContentsInfo(
+                    plan.getPlanDate(),
+                    plan.getBody()
+            ));
+        }
+
+        return new CalendarPlanContentsInfoList(infoList);
+    }
+
+    @Override
+    public CalendarPlan createCalendarPlan(CreateCalendarPlanDTO dto) {
+
+        CalendarSchedule schedule = calendarScheduleRepository.findById(dto.calendarScheduleId()).orElseThrow(
+                () -> new NotFoundCalendarException("해당 캘린더 일정이 없습니다")
+        );
+
+        return calendarPlanRepository.save(new CalendarPlan(
+                dto.body(),
+                schedule,
+                dto.localDate()
+        ));
+
+    }
+
+    @Override
+    @Transactional
+    public CalendarPlan updateCalendarPlan(UpdateCalendarPlanDTO dto) {
+
+        CalendarPlan calendarPlan = calendarPlanRepository.findById(dto.id()).orElseThrow(
+                () -> new NotFoundCalendarException("해당 캘린더 플랜이 없습니다")
+        );
+
+        calendarPlan.update(dto.body());
+
+        return calendarPlan;
+    }
+
+    @Override
+    @Transactional
+    public void deleteCalendarPlan(Long id) {
+        if(!calendarPlanRepository.existsById(id))
+            throw new NotFoundEntityException("해당 계획이 없습니다");
+        calendarPlanRepository.deleteById(id);
+    }
+
+    //==========================================================================================================
+    //==========================================================================================================
 
     @Override
     public CalendarPost createCalendarPost(CreateCalendarPostDTO dto) {
