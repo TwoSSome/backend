@@ -13,6 +13,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import towssome.server.advice.RoleAdvice;
+import towssome.server.advice.URLAdvice;
 import towssome.server.entity.Member;
 import towssome.server.entity.RefreshToken;
 import towssome.server.jwt.JwtUtil;
@@ -68,9 +69,9 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String redirectUrl = null;
 
         if (role.equals(RoleAdvice.ROLE_TEMP)) { // 처음 로그인 했을 때
-            redirectUrl = localURL + tempURL; // 초기 설정 페이지로 리다이렉트
+            redirectUrl = URLAdvice.SERVER_IP + "/" + tempURL; // 초기 설정 페이지로 리다이렉트
         } else { // 처음 로그인이 아닐 때
-            redirectUrl = localURL + userURL;
+            redirectUrl = URLAdvice.SERVER_IP + "/" + userURL;
         }
         String redirectUrlWithToken = String.format("%s?token=%s", redirectUrl, token); // jwt 토큰 포함
         response.sendRedirect(redirectUrlWithToken);
